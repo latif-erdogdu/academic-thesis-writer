@@ -108,7 +108,7 @@ class VerificationResult:
         if self.status not in VERIFICATION_STATUSES:
             raise ValueError(
                 f"Bilinmeyen dogrulama durumu: {self.status!r}. "
-                f"Izin bulunanler: {list(VERIFICATION_STATUSES)}"
+                f"Izin verilenler: {list(VERIFICATION_STATUSES)}"
             )
         if not 0.0 <= self.bibliographic_match <= 1.0:
             raise ValueError(
@@ -145,10 +145,10 @@ class EvidenceDraft:
         if self.evidence_type not in EVIDENCE_TYPES:
             raise ValueError(
                 f"Bilinmeyen kanit tipi: {self.evidence_type!r}. "
-                f"izin bulunanlar: {list(EVIDENCE_TYPES)}"
+                f"Izin verilenler: {list(EVIDENCE_TYPES)}"
             )
         if self.strength not in STRENGTHS:
             raise ValueError(
                 f"Bilinmeyen kanit gucu: {self.strength!r}. "
-                f"izin bulunanlar: {list(STRENGTHS)}"
+                f"Izin verilenler: {list(STRENGTHS)}"
             )
