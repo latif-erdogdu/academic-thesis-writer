@@ -10,20 +10,36 @@
 ## 1. Genel Mimarî ve P0 Kapsamı
 
 ### Hedef
-SKILL.md'de tanımlanan V2 mimarisi ile repo arasındaki "drift"i kapatmak. P0'da şunlar **tam çalışır** olacak:
+SKILL.md'de tanımlanan mimari ile repo arasındaki drift'i kapatmak. **Mevcut iskeleti çalışır hale getirmek** — dosyaların büyük kısmı zaten mevcut; eksik olan gerçek uygulama (kod) ve veri modeli derinliği.
 
-| Bileşen | P0 Durumu |
-|---------|-----------|
-| 8 Agent dosyaları | ✅ Fiziksel dosya + SKILL referansı |
-| 8 Workflow dosyaları | ✅ Fiziksel dosya + SKILL referansı |
-| 17 Schema (JSON) | ✅ thesis_state V2 + evidence, claim, citation, paragraph, research_question, research_gap, finding, discussion, conclusion, audit, search_run, dataset, analysis, statistic, table, figure |
-| 7 Referans dosyası | ✅ citation_rules, source_verification, evidence_rules, research_gap, academic_integrity, systematic_review_protocol, methodology_rules |
-| 5 Template dosyası | ✅ thesis_structure, literature_matrix, evidence_matrix, gap_analysis, quality_report |
-| Evidence Engine | ✅ pdf_extract (pymupdf/pdfplumber + passage localization), evidence_extract (claim linking), evidence_verify |
-| Source Verification | ✅ Crossref + OpenAlex real HTTP client (httpx, async), SQLite cache, rate limiting, exponential backoff, DOI + metadata verification, retraction/correction check; Semantic Scholar stub |
-| Institutional Guidelines | ✅ style_profile.json schema + validator + formatter (APA 7/MLA 9/Chicago/IEEE/Harvard + university override) |
-| Human Approval Gates | ✅ Skill-içi basit onay (question tool), state'de `human_approvals` tracking, P1'de external hook |
-| Test Altyapısı | ✅ tests/fixtures/ + pytest tabanlı source/evidence/citation/methodology/consistency/integrity testleri |
+| Bileşen | Mevcut Durum (doğrulandı) | P0 Hedefi |
+|---------|---------------------------|-----------|
+| `agents/` | 8 dosya var, SKILL.md 8'ini referanslıyor | 10 dosya → `contradiction-analyzer.md` + `integrity-auditor.md` **yeni** |
+| `workflows/` | 8 dosya var, hepsi SKILL.md'de referanslı | Değişiklik yok (8/8 tam) |
+| `schemas/` | 7 dosya var, `thesis_state.json` yalın (registry alanları yok) | 18 dosya → 11 şema **yeni**, `thesis_state.json` genişletilir |
+| `references/` | 5 dosya var | 7 dosya → `systematic_review_protocol.md` + `methodology_rules.md` **yeni** |
+| `templates/` | 5 dosya var | Değişiklik yok (5/5 tam) |
+| `tools/` | 4 klasör, **yalnızca README.md** — kod yok | 4 aracın gerçek Python/CLI uygulaması |
+| `tests/` | 4 klasör, **yalnızca .md senaryo metni** — çalıştırılamaz | pytest altyapısı + `fixtures/` + 6 test paketi |
+| Evidence Engine | Tanımlı, uygulanmamış | `pdf_extract` (pymupdf/pdfplumber + passage localization), `evidence_extract` (claim linking), `evidence_verify` |
+| Source Verification | Tanımlı, uygulanmamış | Crossref + OpenAlex gerçek HTTP client (httpx, async), SQLite cache, rate limiting, exponential backoff, DOI + metadata doğrulama, retraction/correction kontrolü; Semantic Scholar stub |
+| Institutional Guidelines | Yok | `style_profile.json` şema + validator + formatter (APA 7 / MLA 9 / Chicago / IEEE / Harvard + üniversite override) |
+| Human Approval Gates | Yok | Skill içi onay akışı, state'de `human_approvals` takibi; P1'de harici hook |
+| Test Altyapısı | Yok (yalnızca senaryo metni) | `tests/fixtures/` + pytest tabanlı source/evidence/citation/methodology/consistency/integrity testleri |
+
+### P0'da Yazılacak Yeni Dosyalar — Özet
+
+| Kategori | Yeni dosya sayısı | Dosyalar |
+|----------|------------------|----------|
+| Agent | 2 | `agents/contradiction-analyzer.md`, `agents/integrity-auditor.md` |
+| Şema | 11 | `citation`, `research_gap`, `finding`, `discussion`, `conclusion`, `search_run`, `dataset`, `analysis`, `statistic`, `table`, `figure` |
+| Şema (güncelleme) | 1 | `schemas/thesis_state.json` genişletilir (registry + `human_approvals` + `schema_version`) |
+| Referans | 2 | `references/systematic_review_protocol.md`, `references/methodology_rules.md` |
+| Araç kodu | ~20 Python | `tools/source_search/`, `tools/source_verify/`, `tools/pdf_extract/`, `tools/citation_check/` |
+| Test | 1 config + 6 paket + 10 fixture | `pytest.ini`, `tests/fixtures/`, 6 test klasörü |
+
+### P0'da Değişiklik Yapılmayacak Dosyalar
+`SKILL.md` (referanslar zaten doğru), 8 mevcut agent dosyasının içeriği, 8 workflow, 5 template, `.opencode/skill/` kopyası.
 
 ### P0 Dışı (P1/P2'ye Bırakılanlar)
 - Semantic Scholar gerçek entegrasyonu
@@ -43,130 +59,145 @@ SKILL.md'de tanımlanan V2 mimarisi ile repo arasındaki "drift"i kapatmak. P0'd
 ```
 academic-thesis-writer/
 ├── SKILL.md
-├── AGENTS.md
-├── opencode.json
 ├── README.md
+├── AGENTS.md                          # graft MCP + repo talimatı (.gitignore'da)
+├── opencode.json                      # graft MCP yapılandırması (.gitignore'da)
+├── pytest.ini                         # [YENİ] pytest yapılandırması
+├── requirements.txt                   # [YENİ] Python bağımlılıkları
 ├── .opencode/
 │   └── skill/
 │       └── academic-thesis-writer/
-│           ├── SKILL.md
-│           └── agents/ (8 agent)
+│           ├── SKILL.md               # kök SKILL.md'nin senkron kopyası
+│           └── agents/                # 10 agent kopyası
 │
-├── agents/                          # 8 agent (SKILL referansı)
-│   ├── researcher.md
-│   ├── source-verifier.md
-│   ├── evidence-extractor.md
-│   ├── gap-analyzer.md
-│   ├── contradiction-analyzer.md
-│   ├── writer.md
-│   ├── citation-auditor.md
-│   ├── methodology-auditor.md
-│   ├── consistency-auditor.md
-│   └── integrity-auditor.md
+├── agents/                          # 10 agent — 8 mevcut + 2 yeni
+│   ├── researcher.md                 # mevcut
+│   ├── source-verifier.md            # mevcut
+│   ├── evidence-extractor.md         # mevcut
+│   ├── gap-analyzer.md               # mevcut
+│   ├── writer.md                     # mevcut
+│   ├── citation-auditor.md           # mevcut
+│   ├── methodology-auditor.md        # mevcut
+│   ├── consistency-auditor.md        # mevcut
+│   ├── contradiction-analyzer.md     # [YENİ] P0
+│   └── integrity-auditor.md          # [YENİ] P0
 │
-├── workflows/                       # 8 workflow
+├── workflows/                       # 8 workflow — TAM (değişiklik yok)
 │   ├── thesis_creation.md
 │   ├── literature_review.md
 │   ├── systematic_review.md
+│   ├── methodology.md
 │   ├── chapter_writing.md
 │   ├── findings.md
 │   ├── discussion.md
 │   └── thesis_audit.md
 │
-├── references/                      # 7 referans
-│   ├── citation_rules.md
-│   ├── source_verification.md
-│   ├── evidence_rules.md
-│   ├── research_gap.md
-│   ├── academic_integrity.md
-│   ├── systematic_review_protocol.md
-│   └── methodology_rules.md
+├── references/                      # 7 referans — 5 mevcut + 2 yeni
+│   ├── citation_rules.md             # mevcut
+│   ├── source_verification.md        # mevcut
+│   ├── evidence_rules.md             # mevcut
+│   ├── research_gap.md               # mevcut
+│   ├── academic_integrity.md         # mevcut
+│   ├── systematic_review_protocol.md # [YENİ] P0
+│   └── methodology_rules.md          # [YENİ] P0
 │
-├── schemas/                         # 17 schema (JSON)
-│   ├── thesis_state.json
-│   ├── source.json
-│   ├── evidence.json
-│   ├── claim.json
-│   ├── citation.json
-│   ├── paragraph.json
-│   ├── research_question.json
-│   ├── research_gap.json
-│   ├── finding.json
-│   ├── discussion.json
-│   ├── conclusion.json
-│   ├── audit.json
-│   ├── search_run.json
-│   ├── dataset.json
-│   ├── analysis.json
-│   ├── statistic.json
-│   ├── table.json
-│   └── figure.json
+├── schemas/                         # 18 şema — 7 mevcut + 11 yeni
+│   ├── thesis_state.json             # [GÜNCELLEME] registry alanları eklenir
+│   ├── source.json                   # mevcut — [GÜNCELLEME] retraction_status
+│   ├── evidence.json                 # mevcut — [GÜNCELLEME] evidence_type
+│   ├── claim.json                    # mevcut
+│   ├── paragraph.json                # mevcut
+│   ├── research_question.json        # mevcut
+│   ├── audit.json                    # mevcut
+│   ├── citation.json                 # [YENİ] P0
+│   ├── research_gap.json             # [YENİ] P0
+│   ├── finding.json                  # [YENİ] P0
+│   ├── discussion.json               # [YENİ] P0
+│   ├── conclusion.json               # [YENİ] P0
+│   ├── search_run.json               # [YENİ] P0 (PRISMA provenance)
+│   ├── dataset.json                  # [YENİ] P0
+│   ├── analysis.json                 # [YENİ] P0
+│   ├── statistic.json                # [YENİ] P0
+│   ├── table.json                    # [YENİ] P0
+│   └── figure.json                   # [YENİ] P0
 │
-├── templates/                       # 5 template
+├── templates/                       # 5 template — TAM (değişiklik yok)
 │   ├── thesis_structure.md
 │   ├── literature_matrix.md
 │   ├── evidence_matrix.md
 │   ├── gap_analysis.md
 │   └── quality_report.md
 │
-├── tools/                           # 4 tool (CLI + Python)
-│   ├── source_search/
+├── tools/                           # 4 araç — 4 README var, kod 0
+│   ├── source_search/                # [YENİ] gerçek kod
 │   │   ├── __init__.py
 │   │   ├── cli.py
 │   │   ├── providers/
 │   │   │   ├── __init__.py
-│   │   │   ├── base.py
-│   │   │   ├── crossref.py
-│   │   │   ├── openalex.py
-│   │   │   └── semantic_scholar.py (stub)
-│   │   ├── cache.py (SQLite)
-│   │   ├── rate_limiter.py (token bucket)
-│   │   └── retry.py (exponential backoff)
-│   ├── source_verify/
+│   │   │   ├── base.py               # Provider arayüzü (3 provider için)
+│   │   │   ├── crossref.py           # gerçek HTTP client
+│   │   │   ├── openalex.py           # gerçek HTTP client
+│   │   │   └── semantic_scholar.py   # stub (P1'de gerçek)
+│   │   ├── cache.py                  # SQLite cache (gerçek)
+│   │   ├── rate_limiter.py           # token bucket (gerçek)
+│   │   └── retry.py                  # exponential backoff (gerçek)
+│   ├── source_verify/                # [YENİ] gerçek kod
 │   │   ├── __init__.py
 │   │   ├── cli.py
-│   │   ├── verifier.py
-│   │   └── retraction_checker.py
-│   ├── pdf_extract/
+│   │   ├── verifier.py               # DOI + metadata doğrulama
+│   │   └── retraction_checker.py     # retraction/correction kontrolü
+│   ├── pdf_extract/                  # [YENİ] gerçek kod
 │   │   ├── __init__.py
 │   │   ├── cli.py
-│   │   ├── extractor.py (pymupdf/pdfplumber)
-│   │   ├── ocr.py (tesseract)
-│   │   ├── passage_localizer.py (regex + heuristic)
-│   │   └── evidence_builder.py
-│   └── citation_check/
+│   │   ├── extractor.py              # pymupdf/pdfplumber
+│   │   ├── ocr.py                    # tesseract
+│   │   ├── passage_localizer.py      # regex + heuristic
+│   │   └── evidence_builder.py       # evidence + claim linking
+│   ├── citation_check/               # [YENİ] gerçek kod
+│   │   ├── __init__.py
+│   │   ├── cli.py
+│   │   ├── formatter.py              # style_profile.json güdümlü
+│   │   ├── validator.py
+│   │   └── style_profile.json
+│   └── atw/                          # [YENİ] ortak çekirdek
 │       ├── __init__.py
-│       ├── cli.py
-│       ├── formatter.py (style_profile.json driven)
-│       ├── validator.py
-│       └── style_profile.json
+│       ├── state.py                  # thesis_state yükle/kaydet/geçerlilik
+│       ├── ids.py                    # SRC-/EVD-/CLM-... kimlik üretimi
+│       ├── approval.py               # human approval gate akışı
+│       └── models.py                 # pydantic modelleri (şemaların karşılığı)
 │
-├── tests/                           # Pytest + fixtures
-│   ├── fixtures/
+├── tests/                           # 4 senaryo .md var, çalıştırılabilir test 0
+│   ├── fixtures/                     # [YENİ]
 │   │   ├── valid_source.json
 │   │   ├── fabricated_source.json
+│   │   ├── retracted_paper.json
+│   │   ├── corrected_paper.json
 │   │   ├── unsupported_claim.json
 │   │   ├── contradictory_claim.json
 │   │   ├── inconsistent_method.json
-│   │   ├── retracted_paper.json
-│   │   ├── sample_pdf.pdf
+│   │   ├── sample_pdf.pdf            # 5 sayfa, bölüm başlıkları + tablo
 │   │   └── style_profiles/
-│   ├── source_tests/
-│   ├── evidence_tests/
-│   ├── citation_tests/
-│   ├── methodology_tests/
-│   ├── consistency_tests/
-│   └── integrity_tests/
+│   │       ├── apa7.json
+│   │       ├── mla9.json
+│   │       └── university-x-department-y-apa7.json
+│   ├── conftest.py                   # [YENİ] ortak fixture yükleyici
+│   ├── source_tests/                 # mevcut .md + [YENİ] pytest
+│   ├── evidence_tests/               # [YENİ]
+│   ├── citation_tests/               # mevcut .md + [YENİ] pytest
+│   ├── methodology_tests/            # mevcut .md + [YENİ] pytest
+│   ├── consistency_tests/            # mevcut .md + [YENİ] pytest
+│   └── integrity_tests/              # [YENİ]
 │
 └── docs/
     └── superpowers/
-        └── specs/
-            └── 2026-09-26-academic-thesis-writer-p0-design.md
+        ├── specs/
+        │   └── 2026-09-26-academic-thesis-writer-p0-design.md
+        └── plans/                    # [YENİ] writing-plans çıktısı
 ```
 
 ---
 
-## 3. Thesis State V2 — Kritik Alanlar
+## 3. Thesis State — Genişletilmiş Yapı
 
 ```json
 {
@@ -403,13 +434,18 @@ async def request_approval(gate_name: str, context: dict):
     return False
 ```
 
-### Gate Konumları
-- `thesis_creation.md` → research_question gate
-- `systematic_review.md` → search_strategy, source_set gates  
-- `gap_analysis.md` → research_gap gate
-- `methodology.md` → methodology gate
-- `findings.md` → findings gate
-- `thesis_audit.md` → final_thesis gate
+### Gate Konumları (Workflow dosyalarına bağlanır)
+- `workflows/thesis_creation.md` → `research_question` gate
+- `workflows/systematic_review.md` → `search_strategy`, `source_set` gate'leri
+- `workflows/literature_review.md` → `research_gap` gate
+- `workflows/methodology.md` → `methodology` gate
+- `workflows/findings.md` → `findings` gate
+- `workflows/thesis_audit.md` → `final_thesis` gate
+
+> Not: `templates/gap_analysis.md` bir şablondur, gate tanımı içermez. `research_gap` gate'i ilgili workflow'a bağlanır.
+
+### Uygulama Konumu
+Gate mantığı `tools/atw/approval.py` içinde yaşar. Agent'lar (insan onayı soran taraf) `workflows/*.md` talimatlarıdır; `approval.py` onay durumunu `thesis_state.human_approvals` içinde okur/yazar ve `question` aracını çağırır.
 
 ---
 
@@ -445,21 +481,40 @@ tests/fixtures/
 
 ## 9. Implementation Sequence (P0)
 
-| Phase | Tasks | Deliverable |
-|-------|-------|-------------|
-| 1 | Repo drift fix: agent/workflow/reference/template/schema dosyalarını oluştur | Tüm SKILL referansları fiziksel dosya olarak mevcut |
-| 2 | Schema'lar: thesis_state V2 + 16 yeni schema | JSON schema dosyaları + validation |
-| 3 | Tools: source_search (Crossref/OpenAlex real + cache/rate-limit) + source_verify + pdf_extract + citation_check | Çalışan CLI tool'ları |
-| 4 | Evidence Engine: pdf_extract + evidence_extract + claim linking | PDF → Evidence → Claim zinciri |
-| 5 | Institutional Guidelines: style_profile schema + formatter + validator | APA/MLA/Chicago/IEEE/Harvard + university override |
-| 6 | Human Approval Gates: question-tool tabanlı onay akışı | 7 gate state machine |
-| 7 | Test altyapısı: fixtures + pytest testleri | Self-testing repo |
-| 8 | Integration test: uçtan uca bir tez akışı | Demo çalıştırılabilir |
+Sıralama ilkesi: **önce veri modeli, sonra kod, en son test.** Çünkü araçlar şemaları okur; şema değişmeden yazılan araç kodu yeniden yazılır.
+
+| Faz | İçerik | Bağımlılık | Teslim Edilebilir Kanıt |
+|-----|--------|------------|------------------------|
+| 0 | Ortak çekirdek: `requirements.txt`, `pytest.ini`, `tools/atw/` (ids, models, state, approval çekirdeği) | — | `pytest` çalışır (0 test, hatasız), `atw.ids.next_id("SRC")` → `SRC-001` |
+| 1 | Şemalar: 11 yeni şema + `thesis_state.json` genişletme + `source.json`/`evidence.json` güncelleme | Faz 0 | Her şema `jsonschema` ile doğrulanır; `thesis_state` şeması registry alanlarını zorunlu kılar |
+| 2 | Test altyapısı: `tests/fixtures/` (10 fixture) + `conftest.py` + şema doğrulama testleri | Faz 1 | `pytest tests/` yeşil; `valid_source.json` geçer, `fabricated_source.json` şemayı geçer ama integrity testinde reddedilir |
+| 3 | Source Search: provider arayüzü + Crossref + OpenAlex + SQLite cache + rate limiter + retry | Faz 0 | CLI: `python -m tools.source_search --doi 10.xxxx/yyy` gerçek metadata döner; ikinci çağrı cache'ten; 429'da retry eder |
+| 4 | Source Verify: metadata eşleştirme + retraction/correction kontrolü | Faz 3 | `python -m tools.source_verify` DOI + başlık + yazar + yıl + dergi + DOI + retraction durumunu raporlar |
+| 5 | Evidence Engine: `pdf_extract` (extractor + ocr + passage_localizer + evidence_builder) | Faz 0 | `sample_pdf.pdf` → sayfa/bölüm/alıntı → `EVD-XXX`; claim linking `CLM.evidence_ids`'e yazar |
+| 6 | Citation Check: `style_profile.json` + formatter (5 stil) + validator + üniversite override | Faz 0 | APA/MLA/Chicago/IEEE/Harvard çıktısı; aynı kaynak farklı profilde farklı biçimlenir |
+| 7 | Human Approval Gates: `atw/approval.py` 7 gate durum makinesi | Faz 0 | Gate reddi akışı durdurur; onay `thesis_state.human_approvals`'e yazılır ve kalıcıdır |
+| 8 | 2 yeni ajan: `contradiction-analyzer.md`, `integrity-auditor.md` + SKILL.md yönlendirme tablosu | Faz 1,4,5 | SKILL.md 10 ajanı da adlandırır; iki ajan dosyası mevcut |
+| 9 | 2 yeni referans: `systematic_review_protocol.md`, `methodology_rules.md` | Faz 1 | SKILL.md 7 referansı da adlandırır |
+| 10 | Bütünleşik test: uçtan uca akış (arama → doğrulama → PDF → kanıt → iddia → atıf → denetim) | Faz 2-9 | `pytest tests/integration/` yeşil; tek komutla tam zincir çalışır |
+| 11 | README + SKILL.md son güncelleme; `.opencode/skill/` kopyası senkronizasyonu | Faz 10 | Push edilen commit'te `.opencode/skill/` kök ile birebir aynı |
+
+### Kritik Uyarılar
+
+- **Faz sırası ihlal edilmemeli.** Faz 3 (source_search) Faz 1 (şemalar) tamamlanmadan yazılırsa, provider'lar geçici dict şemasına göre kodlanır ve Faz 1'de elden geçer.
+- **Faz 10 ağ erişimi gerektirir.** Crossref/OpenAlex canlı çağrı yapar. Testler `--live` bayrağı olmadan fixture tabanlı çalışmalı; canlı testler ayrı marker ile işaretlenip CI'da varsayılan kapalı olmalı.
+- **`tools/atw/` çekirdeği yeni.** Dört araç da state okuma/yazma, kimlik üretimi ve şema doğrulama ihtiyacı duyuyor. Bu ortak katman Faz 0'da kurulmazsa her araç kendi kopyasını yazar.
 
 ---
 
-**Spec Self-Review:** ✅ Placeholder yok, iç tutarlılık var, kapsam P0 ile sınırlı, ambiguite yok.
+**Spec Self-Review:** ✅
 
-**User Review:** ✅ Approved (brainstorming session output).
+1. *Placeholder taraması* — "TBD"/"TODO" yok; tüm ID formatları, enum değerleri ve dosya yolları tanımlı.
+2. *İç tutarlılık* — Durum tablosu (mevcut → hedef), dizin ağacı (`[YENİ]`/`[GÜNCELLEME]` işaretleri) ve faz sırası birbirini tutuyor. Ağaçtaki 18 şema ile "11 yeni + 2 güncelleme + 5 mevcut" eşleşiyor. Ağaçtaki 10 ajan ile "8 mevcut + 2 yeni" eşleşiyor.
+3. *Kapsam denetimi* — P0 tek bir plan için uygun; 12 faz sıralı bağımlılık zinciriyle ayrılabilir durumda. Semantic Scholar, meta-analiz, bibliometrik analiz P1/P2'ye itildi.
+4. *Belirsizlik denetimi* — "2 bağımsız kaynak" kuralı Faz 4'te somut olarak "crossref + openalex" provider adlarına bağlandı. `quality_score` tek puan yerine ayrık alanlara (`retraction_status`, `correction_status`, `strength`) bağlandı. Uydurma kaynak riski `integrity-auditor` ajanı ve `tests/fixtures/fabricated_source.json` ile karşılanıyor.
 
-**Next Step:** `writing-plans` skill invoke → detailed implementation plan.
+**Düzeltme kaydı (2026-09-26):** İlk yazımda durum tablosu `agents/`, `workflows/`, `templates/`, `references/` klasörlerinin "mevcut" olduğunu doğru yansıtmıyordu. Repo doğrulaması yapıldı: 8 agent, 8 workflow, 5 template, 5 referans ve 7 şema zaten mevcut. Tablo "Mevcut Durum → P0 Hedefi" formatına çevrildi; dizin ağacına `[YENİ]` / `[GÜNCELLEME]` işaretleri eklendi; `workflows/methodology.md` ağaca geri alındı; şema sayısı 17 → 18 düzeltildi; ortak çekirdek `tools/atw/` eklendi.
+
+**Kullanıcı Onayı:** ✅ Tasarım bölümleri onaylandı. Kapsam kararı: 10 ajanın tamamı P0'da. Spec düzeltmesi talep edildi ve uygulandı.
+
+**Sonraki Adım:** `writing-plans` → ayrıntılı implementation planı.
