@@ -1,4 +1,4 @@
-# Academic Thesis Writer
+# Akademik Tez Yazarı V2
 
 Akademik tezlerin planlanması, literatür araştırması, kaynak doğrulama, bölüm yazımı, metodoloji oluşturma, akademik atıf yönetimi ve tez kalite denetimi için kapsamlı akademik araştırma ve yazım sistemi.
 
@@ -10,110 +10,197 @@ Bu proje, akademik tez yazımında **doğruluk** ve **kaynak güvenilirliği** �
 
 - **Kaynak uydurma YOK**: Makale, kitap, tez, DOI, yazar, yıl, dergi, cilt, sayı, sayfa veya istatistik asla uydurulmaz
 - **Her iddia kaynaklı olmalı**: Önemli akademik iddialar mümkün olduğunda doğrulanabilir kaynağa dayanmalı
-- **İzlenebilirlik**: CLAIM → SOURCE → EVIDENCE → CHAPTER → CITATION zinciri korunmalı
+- **İzlenebilirlik**: ARAŞTIRMA SORUSU → İDDİA → KANIT → KAYNAK → BÖLÜM → PARAGRAF → ATIF → KAYNAKÇA zinciri korunmalı
 - **Metodolojik tutarlılık**: Araştırma soruları, hipotezler, yöntem ve bulgular arasında uyum sağlanmalı
+- **Kanıt Kapısı**: Bir iddia kanıt, doğrulanmış veri veya teorik önerme olmadan final metne alınmaz
+- **Yazım Kapısı**: KEŞİF → DOĞRULAMA → KANIT → İDDİA → YAZIM (Yazım → kaynak arama DEĞİL)
 
-## 📁 Repo Yapısı
+## 📁 Repo Yapısı (V2)
 
 ```
 academic-thesis-writer/
 │
-├── SKILL.md                          # Agent mimarisi ve kuralları
+├── SKILL.md                          # Orchestrator: Agent mimarisi ve kuralları
+├── agents/                           # Alt ajanlar (modüler yapı)
+│   ├── researcher.md                 # Araştırmacı Ajanı
+│   ├── source-verifier.md            # Kaynak Doğrulayıcı Ajanı
+│   ├── evidence-extractor.md         # Kanıt Çıkarıcı Ajanı
+│   ├── gap-analyzer.md               # Boşluk Analizci Ajanı
+│   ├── writer.md                     # Yazar Ajanı
+│   ├── citation-auditor.md           # Atıf Denetçisi Ajanı
+│   ├── methodology-auditor.md        # Yöntem Denetçisi Ajanı
+│   └── consistency-auditor.md        # Tutarlılık Denetçisi Ajanı
+│
 ├── references/                       # Akademik bütünlük referansları
-│   ├── citation_rules.md            # Atıf kuralları (APA, MLA, Chicago, IEEE)
-│   ├── source_verification.md       # Kaynak doğrulama süreçleri
-│   └── academic_integrity.md        # Akademik dürüstlük prensipleri
+│   ├── citation_rules.md             # Atıf kuralları (APA, MLA, Chicago, IEEE, Harvard)
+│   ├── source_verification.md        # Kaynak doğrulama süreçleri
+│   ├── evidence_rules.md             # Kanıt kuralları (Evidence Gate, Writing Gate)
+│   ├── academic_integrity.md         # Akademik dürüstlük prensipleri
+│   └── research_gap.md               # Araştırma boşluğu kuralları
 │
 ├── workflows/                        # Çalışma akışları
-│   ├── thesis_creation.md           # Tez oluşturma akışı
-│   ├── literature_review.md         # Literatür taraması
-│   ├── methodology.md               # Metodoloji geliştirme
-│   ├── chapter_writing.md           # Bölüm yazımı
-│   └── thesis_audit.md              # Tez denetimi
+│   ├── thesis_creation.md            # Tez oluşturma akışı
+│   ├── literature_review.md          # Literatür taraması
+│   ├── systematic_review.md          # Sistematik inceleme protokolü
+│   ├── methodology.md                # Metodoloji geliştirme
+│   ├── chapter_writing.md            # Bölüm yazımı
+│   ├── findings.md                   # Bulgular yazımı
+│   ├── discussion.md                 # Tartışma yazımı
+│   └── thesis_audit.md               # Tez denetimi
 │
-├── schemas/                          # Veri şemaları
-│   ├── thesis_state.json            # Tez durumu takibi
-│   ├── source.json                  # Kaynak şeması
-│   └── claim.json                   # İddia şeması
+├── schemas/                          # Veri şemaları (JSON)
+│   ├── thesis_state.json             # Tez durumu takibi
+│   ├── source.json                   # Kaynak şeması
+│   ├── claim.json                    # İddia şeması
+│   ├── evidence.json                 # Kanıt şeması
+│   ├── paragraph.json                # Paragraf şeması
+│   ├── research_question.json        # Araştırma sorusu şeması
+│   └── audit.json                    # Denetim şeması
 │
-└── templates/                        # Şablonlar
-    ├── thesis_structure.md          # Tez bölüm yapısı
-    ├── literature_matrix.md         # Literatür matrisi
-    └── quality_report.md            # Kalite denetim raporu
+├── templates/                        # Şablonlar
+│   ├── thesis_structure.md           # Tez bölüm yapısı
+│   ├── literature_matrix.md          # Genişletilmiş literatür matrisi
+│   ├── evidence_matrix.md            # Kanıt matrisi
+│   ├── gap_analysis.md               # Boşluk analizi
+│   └── quality_report.md             # Kalite denetim raporu
+│
+├── tools/                            # Araç arayüzleri (README)
+│   ├── source_search/                # Kaynak arama (Crossref, OpenAlex, Semantic Scholar, PubMed, Google Scholar)
+│   ├── source_verify/                # Kaynak doğrulama (DOI, bibliyografik karşılaştırma)
+│   ├── pdf_extract/                  # PDF'ten kanıt çıkarma (sayfa/bölüm düzeyinde)
+│   └── citation_check/               # Atıf-kaynakça bütünlük denetimi
+│
+└── tests/                            # Test senaryoları
+    ├── source_tests/                 # Kaynak doğrulama testleri
+    ├── citation_tests/               # Atıf bütünlüğü testleri
+    ├── consistency_tests/            # Tutarlılık testleri
+    └── methodology_tests/            # Metodoloji testleri
 ```
 
-## 🏗️ Mimarisi
+## 🏗️ Mimarisi (V2)
 
-### 6 Katmanlı Sistem
+### Orchestrator + 8 Alt Ajan
 
 ```
-                    THESIS AGENT
-                         │
-          ┌──────────────┼──────────────┐
-          │              │              │
-     RESEARCHER       WRITER        AUDITOR
-          │              │              │
-     kaynak bulma    metin üretme   hata bulma
-          │              │              │
-          └──────────────┼──────────────┘
-                         │
-                    THESIS STATE
-                         │
-                  SOURCE / CLAIM DB
+                    ┌──────────────────────┐
+                    │     TEZ AJANI        │
+                    └──────────┬───────────┘
+                               │
+              ┌────────────────┼────────────────┐
+              │                │                │
+              ▼                ▼                ▼
+        ARAŞTIRMACI         YAZAR          DENETÇİ
+              │                │                │
+       ┌──────┴──────┐         │        ┌───────┼────────┐
+       │             │         │        │       │        │
+   Literatür      Kaynak       │    Atıf    Yöntem   Tutarlılık
+   Arama          Doğrula      │    Denetimi Denetimi  Denetimi
+       │             │         │        │       │        │
+       └──────┬──────┘         │        └───────┼────────┘
+              │                │                │
+              ▼                ▼                ▼
+       KANIT VERİTABANI ──── TEZ DURUMU ──── DENETİM RAPORU
+              │                │
+              └────────┬───────┘
+                       ▼
+                  NİHAİ TEZ
 ```
 
-- **Researcher**: Kaynak bulma ve doğrulama
-- **Writer**: Metin üretimi (Thesis State'e dayanır)
-- **Auditor**: Hata bulma ve tutarlılık denetimi
+### Görev Yönlendirme
+
+```
+Kullanıcı İsteği
+     ↓
+SKILL (Orchestrator)
+     ↓
+Görev Belirle
+     ↓
+Araştırma?
+ ├── EVET → Araştırmacı
+ └── HAYIR
+     ↓
+Yazım?
+ ├── EVET → Yazar
+ └── HAYIR
+     ↓
+Denetim?
+ └── EVET → Denetçi
+```
+
+### Alt Ajan Görevleri
+
+| Ajan | Görev |
+|------|-------|
+| **Araştırmacı** | Kaynak keşfi, doğrulama, kanıt çıkarma, boşluk analizi |
+| **Kaynak Doğrulayıcı** | Crossref, OpenAlex, Semantic Scholar ile DOI/bibliyografik doğrulama |
+| **Kanıt Çıkarıcı** | Doğrulanmış PDF'lerden sayfa/bölüm düzeyinde kanıt çıkarma |
+| **Boşluk Analizci** | Literatür matrisinden araştırma boşluklarını çıkarma (yöntemsel, popülasyon, coğrafi, teorik) |
+| **Yazar** | Sadece doğrulanmış girdilerle (kaynak+kanıt+iddia) tez bölümlerini yazma |
+| **Atıf Denetçisi** | Metin-kaynakça bütünlüğü, format, kaynak varlığı kontrolü |
+| **Yöntem Denetçisi** | Araştırma sorusu ↔ yöntem uyumu (RQ2 nitel ama yöntem nicel → hata) |
+| **Tutarlılık Denetçisi** | 20 madde: terminoloji, sayılar, tarihler, örneklem, yöntem, bulgular, sonuçlar, atıflar, bölümler arası referanslar, araştırma boşluğu |
 
 ## 📋 Kullanım
 
 ### Yeni Tez Başlatma
 
-1. `schemas/thesis_state.json` dosyasını doldurun
+1. `schemas/thesis_state.json` dosyasını kopyalayın ve doldurun
 2. Araştırma problemini ve sorularını tanımlayın
 3. `workflows/thesis_creation.md` akışını takip edin
 
-### Literatür Taraması
+### Literatür Taraması (Sistematik İnceleme)
 
-```bash
-workflows/literature_review.md
+`workflows/systematic_review.md` protokolünü izleyin:
+
+```
+Araştırma Sorusu
+  ↓
+Arama Stratejisi → Veritabanları (Crossref, OpenAlex, Semantic Scholar, PubMed, Google Scholar)
+  ↓
+Dahil/Hariç Tutma Kriterleri → Tekrar Giderme
+  ↓
+Başlık/Özet Tarama → Tam Metin İnceleme
+  ↓
+Kalite Değerlendirme → Veri Çıkarımı → Sentez
 ```
 
-Kaynaklar tematik olarak gruplanır, her kaynak için:
-- Yazar, yıl, başlık
-- Araştırma amacı ve yöntem
-- Temel bulgular ve sınırlılıklar
-- Tezle ilişkisi
+Çıktılar: Literatür Matrisi, Kanıt Matrisi, Boşluk Analizi, Kalite Değerlendirme Raporu
 
 ### Bölüm Yazımı
 
-Her bölüm için:
-1. Thesis State kontrolü
+Her bölüm için (`workflows/chapter_writing.md`):
+1. Tez Durumu kontrolü
 2. Kaynak/iddia denetimi
 3. Paragraf metadata etiketleme (P-XXX)
-4. Kalite kontrolü
+4. Kalite kontrolü (akademik dil, mantıksal akış, kavramsal tutarlılık, RQ uyumu)
+
+**Paragraf Yapısı:** İDDİA → KANIT → ANALİZ → BAĞLANTI
 
 ### Tez Denetimi
 
-```bash
-workflows/thesis_audit.md
-```
+`workflows/thesis_audit.md` - 5 aşamalı denetim:
+1. Yapısal Denetim (bölümler, RQ, hipotezler, metodoloji, sonuçlar)
+2. Atıf Denetimi (eksik/fazla atıflar, doğrulanmamış kaynaklar, tutarsızlıklar)
+3. Metodoloji Denetimi (tasarım, örneklem, veri toplama, analiz, geçerlik/güvenirlik)
+4. Tutarlılık Denetimi (kavramlar, sayılar, tarihler, örneklem, yöntem-bulgular, bulgular-RQ, sonuçlar-bulgular)
+5. Akademik Yazım Denetimi (dil, tekrar, mantık, üslup)
 
-4 bileşenli denetim:
-- Terminology (Kavramsal tutarlılık)
-- Numbers (Veri tutarlılığı)
-- Sample/Population (Örneklem tutarlılığı)
-- Method vs. Results (Yöntem-bulgu uyumu)
+Çıktı: `templates/quality_report.md` formatında kapsamlı rapor
 
-## 🔍 Özellikler
+## 🔍 Özellikler (V2)
 
-- ✅ **Kaynak doğrulama sistemi**: Her iddia izlenebilir
-- ✅ **Paragraf metadata**: P-XXX etiketleme ile iddia-kaynak eşleşmesi
+- ✅ **Kaynak doğrulama motoru**: Crossref + OpenAlex + Semantic Scholar (en az 2 bağımsız kaynak)
+- ✅ **PDF → Kanıt sistemi**: Sayfa/bölüm/alıntı/yorum zinciri (İddia → Makale → Sayfa → Bölüm → Kanıt)
+- ✅ **Araştırma Boşluğu Motoru**: Tema → Benzer/Çelişen → Eksiklikler → Boşluk (kanıtla)
+- ✅ **Bilgi Grafiği**: RQ → İddia → Kanıt → Kaynak → Bölüm → Paragraf → Atıf → Kaynakça + RQ → Yöntem → Analiz → Bulgular → Tartışma → Sonuç
+- ✅ **Sistematik İnceleme Protokolü**: PRISMA uyumlu 11 aşamalı akış
+- ✅ **Genişletilmiş Literatür Matrisi**: 19 sütun (Ülke, Tasarım, Bağımsız/Bağımlı Değişkenler, Alet, Analiz, Teorik Çerçeve, Kanıt Konumu)
+- ✅ **Paragraf metadata**: P-XXX etiketleme ile iddia-kanıt-kaynak-RQ eşleşmesi
 - ✅ **Çoklu atıf stili**: APA, MLA, Chicago, IEEE, Harvard
-- ✅ **Tez State persistence**: Oturumlar arası tutarlılık
-- ✅ **6 katmanlı mimari**: Researcher/Writer/Auditor ayrımı
-- ✅ **Kalite denetim raporu**: Yapısal, atıf, metodoloji ve tutarlılık denetimleri
+- ✅ **Tez Durumu persistence**: Oturumlar arası tutarlılık (JSON)
+- ✅ **Orchestrator mimarisi**: SKILL koordinatör, 8 modüler ajan
+- ✅ **4 bileşenli denetim**: Terminoloji, Sayılar, Örneklem, Yöntem-Bulgular
+- ✅ **Kalite denetim raporu**: Yapısal, atıf, metodoloji, tutarlılık, akademik yazım
 
 ## 🚀 Başlangıç
 
@@ -130,19 +217,24 @@ cp schemas/thesis_state.json thesis_state.json
 
 ## 📖 Dokümantasyon
 
-- [SKILL.md](./SKILL.md) - Agent mimarisi ve detaylı kurallar
-- [workflows/](./workflows/) - Tüm çalışma akışları
-- [templates/](./templates/) - Kullanıma hazır şablonlar
-- [schemas/](./schemas/) - Veri şemaları
-- [references/](./references/) - Akademik bütünlük referansları
+- [SKILL.md](./SKILL.md) - Orchestrator: Agent mimarisi, mimari, bilgi grafiği, kurallar
+- [agents/](./agents/) - 8 alt ajan tanımı
+- [workflows/](./workflows/) - 8 çalışma akışı
+- [templates/](./templates/) - 5 kullanıma hazır şablon
+- [schemas/](./schemas/) - 7 veri şeması (JSON)
+- [references/](./references/) - 5 akademik bütünlük referansı
+- [tools/](./tools/) - 4 araç arayüzü
+- [tests/](./tests/) - 4 test kategorisi
 
 ## 🤝 Katkı
 
 Bu proje akademik dürüstlük ve kaynak doğrulanabilirliği ilkelerine bağlıdır. Katkı yapmadan önce:
 
 1. Kaynak uydurma yapmayın
-2. Mevcut mimariyi koruyun
+2. Mevcut mimariyi koruyun (Orchestrator + 8 ajan)
 3. Thesis State tutarlılığını gözetin
+4. Evidence Gate ve Writing Gate prensiplerine uyun
+5. Testleri güncelleyin/ekleyin
 
 ## 📄 Lisans
 
@@ -150,4 +242,4 @@ Akademik kullanım için. Kaynak doğrulama ve akademik bütünlük kurallarına
 
 ---
 
-**Not**: Bu sistem metin üretimi hızından ziyade akademik kalite ve doğruluk odaklı tasarlanmıştır. Her önemli iddia mümkün olduğunda doğrulanabilir bir kaynağa dayanmalıdır.
+**Not**: Bu sistem metin üretimi hızından ziyade akademik kalite ve doğruluk odaklı tasarlanmıştır. Her önemli iddia mümkün olduğunda doğrulanabilir bir kaynağa dayanmalıdır. **AI detection/humanizer** odaklı değil; **akademik doğruluk + kaynak doğrulanabilirliği + metodolojik tutarlılık + şeffaflık** odaklıdır.
