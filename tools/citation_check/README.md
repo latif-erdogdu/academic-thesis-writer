@@ -1,4 +1,4 @@
-# Citation Check Tool
+# Atıf Kontrol Aracı
 
 ## Görev
 Atıf-kaynakça bütünlüğünü denetle.

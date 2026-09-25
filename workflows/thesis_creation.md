@@ -1,85 +1,85 @@
-# Thesis Creation Workflow
+# Tez Oluşturma Çalışma Akışı
 
-## Overview
-This workflow orchestrates the end-to-end creation of a comprehensive academic thesis, integrating literature review, methodology, and writing phases.
+## Genel Bakış
+Bu çalışma akışı literatür incelemesi, metodoloji ve yazım aşamalarını entegre ederek kapsamlı bir akademik tezin uçtan uca oluşturulmasını koordine eder.
 
-## Prerequisites
-Before running this workflow:
-- ✓ Complete literature review (`workflows/literature_review.md`)
-- ✓ Finalize research methodology (`workflows/methodology.md`)
-- ✓ Define chapter structure
+## Ön Koşullar
+Bu çalışma akışını çalıştırmadan önce:
+- ✓ Literatür taraması tamamlandı (`workflows/literature_review.md`)
+- ✓ Araştırma metodolojisi sonlandırıldı (`workflows/methodology.md`)
+- ✓ Bölüm yapısı tanımlandı
 
-## Execution Order
-1. Literature Review Analysis → `literature_matrix.md` output
-2. Methodology Planning → `methodology_state.json` updates
-3. Thesis Structure Generation → Using `templates/thesis_structure.md`
-4. Chapter-by-Chapter Writing → Via `workflows/chapter_writing.md`
-5. Integration and Synthesis → Combine all chapters with introduction/conclusion
-6. Quality Review → Run `workflows/thesis_audit.md`
+## Yürütme Sırası
+1. Literatür Sentez Analizi → `literature_matrix.md` çıktısı
+2. Metodoloji Planlaması → `methodology_state.json` güncellemeleri
+3. Tez Yapısı Oluşturma → `templates/thesis_structure.md` kullanarak
+4. Bölüm Bazlı Yazım → `workflows/chapter_writing.md` üzerinden
+5. Entegrasyon ve Sentez → Tüm bölümleri giriş/sonuç ile birleştir
+6. Kalite İncelemesi → `workflows/thesis_audit.md` çalıştır
 
-## State Management
-State is tracked in:
-- `schemas/thesis_state.json` - Overall progress and metadata
-- `references/source_verification.md` - Source quality tracking
+## Durum Yönetimi
+Durum şurada takip edilir:
+- `schemas/thesis_state.json` - Genel ilerleme ve metadata
+- `references/source_verification.md` - Kaynak kalite takibi
 
-## Workflow Steps
+## Çalışma Akışı Adımları
 
-### Step 1: Literature Synthesis
+### Adım 1: Literatür Sentezi
 ```markdown
-## Chapter 1: Introduction
-- Research background
-- Problem statement
-- Research questions/objectives
-- Significance of study
-- Thesis structure overview
+## Bölüm 1: Giriş
+- Araştırma arka planı
+- Problem durumu
+- Araştırma soruları/amaçları
+- Çalışmanın önemi
+- Tez yapısına genel bakış
 
-See: templates/thesis_structure.md for outline
+Bkz: tasarım için templates/thesis_structure.md
 ```
 
-### Step 2: Methodology Integration
-- Review methodology chapter output
-- Ensure consistency with research design
-- Verify alignment with research questions
+### Adım 2: Metodoloji Entegrasyonu
+- Metodoloji bölümü çıktısını gözden geçirin
+- Araştırma tasarımıyla tutarlılığı sağlayın
+- Araştırma sorularıyla uyumu doğrulayın
 
-### Step 3: Results & Discussion Generation
-- Integrate literature insights with findings
-- Ensure proper citation of all claims
-- Cross-reference verified sources
+### Adım 3: Bulgular ve Tartışma Üretimi
+- Literatür içgörülerini bulgularla entegre edin
+- Tüm iddiaların düzgün atıflandığından emin olun
+- Doğrulanmış kaynakları çapraz referanslayın
 
-### Step 4: Conclusion Synthesis
-- Summarize key contributions
-- Address each research question
-- Discuss implications and limitations
-- Suggest future research directions
+### Adım 4: Sonuç Sentezi
+- Ana katkıları özetleyin
+- Her araştırma sorusunu adresleyin
+- Etkileri ve sınırlılıkları tartışın
+- Gelecek araştırma yönlerini önerin
 
-## Output Structure
+## Çıktı Yapısı
 ```
-Thesis/
-├── 01_Introduction.md
-├── 02_Literature_Review.md
-├── 03_Methodology.md
-├── 04_Results.md
-├── 05_Discussion.md
-├── 06_Conclusion.md
-├── References.bib
-└── Quality_Report.md
+Tez/
+├── 01_Giris.md
+├── 02_Literatur_Taramasi.md
+├── 03_Yontem.md
+├── 04_Bulgular.md
+├── 05_Tartisma.md
+├── 06_Sonuc_Oneri.md
+├── Kaynarca.bib
+└── Kalite_Raporu.md
 ```
 
-## Citation Integration
-- All claims must be attributed (see `references/citation_rules.md`)
-- Verify all sources through source verification checklist
-- Maintain consistent citation style throughout
+## Atıf Entegrasyonu
+- Tüm iddialar atıflanmalı (bkz `references/citation_rules.md`)
+- Tüm kaynakları kaynak doğrulama kontrol listesiyle doğrulayın
+- Tutarlı atıf stilini tez boyunca koruyun
 
-## Quality Gates
-Before moving between chapters:
-1. Review previous chapter for completeness
-2. Check citation accuracy
-3. Verify state file is updated (`schemas/thesis_state.json`)
-4. Ensure smooth transitions between sections
+## Kalite Kapıları
+Bölümler arası geçişten önce:
+1. Önceki bölümü tamamlanma açısından gözden geçirin
+2. Atıf doğruluğunu kontrol edin
+3. Durum dosyasının güncellendiğini doğrulayın (`schemas/thesis_state.json`)
+4. Bölümler arası sorunsuz geçişleri sağlayın
 
-## Next Step
-After thesis creation completes, run the audit workflow:
+## Sonraki Adım
+Tez oluşturma tamamlandıktan sonra denetim çalışma akışını çalıştırın:
 ```bash
-# Run thesis audit
+# Tez denetimini çalıştır
 workflows/thesis_audit.md
 ```

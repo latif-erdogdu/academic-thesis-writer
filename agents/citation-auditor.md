@@ -1,4 +1,4 @@
-# Citation Auditor Agent
+# Atıf Denetçisi Ajanı
 
 ## Görev
 Atıf-kaynakça bütünlüğünü denetle.
@@ -12,10 +12,10 @@ Atıf-kaynakça bütünlüğünü denetle.
 6. Atıf formatı doğru mu?
 
 ## Çıktı
-CITATION AUDIT
-Total claims: 147
-Verified: 121
-Needs evidence: 18
-Unsupported: 5
-Unverified sources: 3
-Reference mismatches: 2
+ATIF DENETİMİ
+Toplam iddialar: 147
+Doğrulanmış: 121
+Kanıt bekleyen: 18
+Desteksiz: 5
+Doğrulanmamış kaynaklar: 3
+Kaynakça uyumsuzlukları: 2

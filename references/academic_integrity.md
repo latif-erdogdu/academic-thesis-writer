@@ -1,37 +1,37 @@
-# Academic Integrity Guidelines
+# Akademik Dürüstlük Yönergeleri
 
-## Core Commitments
-This thesis must uphold the highest standards of academic honesty and intellectual responsibility.
+## Temel Taahhütler
+Bu tez akademik dürüstlük ve entelektüel sorumluluk standartlarını en üst düzeyde tutmalıdır.
 
-## Plagiarism Prevention
+## İntihal Önleme
 
-### What Constitutes Plagiarism
-- Using someone else's words without quotation marks or citation
-- Paraphrasing ideas without attribution
-- Translating text and presenting as original work
-- Borrowing structure/organization from another work
-- Submitting someone else's work as your own
-- Self-plagiarism: Reusing substantial portions of prior work without disclosure
+### İntihal Nedir
+- Başkalarının kelimelerini tırnak işareti veya atıf olmadan kullanma
+- Fikirleri atıf olmadan parafraz etme
+- Metni çevirip özgün çalışma gibi sunma
+- Başka bir çalışmanın yapısını/organizasyonunu ödünç alma
+- Başkalarının çalışmasını kendi çalışmanız gibi sunma
+- Kendi intihalı: Önceki çalışmanın önemli kısımlarını açıklama olmadan yeniden kullanma
 
-### Proper Attribution Requirements
-- **Direct quotes**: Enclose in quotation marks, include page number, cite source
-- **Paraphrases**: Reword completely, capture meaning accurately, cite source
-- **Summaries**: Condense ideas faithfully, maintain original intent, cite source
-- **Figures/tables**: Use only with permission or public domain/open license
+### Düzgün Atıf Gereksinimleri
+- **Doğrudan alıntılar**: Tırnak işareti içine alın, sayfa numarası ekleyin, kaynağı atıflayın
+- **Parafrazlar**: Tamamen yeniden yazın, anlamı doğru yakalayın, kaynağı atıflayın
+- **Özetler**: Fikirleri sadık bir şekilde kısaltın, özgün niyeti koruyun, kaynağı atıflayın
+- **Şekiller/tablolar**: Sadece izinle veya kamu malı/açık lisanslıysa kullanın
 
-### Quote Integration Template
+### Alıntı Entegrasyon Şablonu
 ```markdown
-"Direct quote from source" (Author, Year, p. X)
+"Kaynaktan doğrudan alıntı" (Yazar, Yıl, s. X)
 
-As Author (Year) states, "direct quote" (p. X).
+Yazar (Yıl) şöyle belirtir: "doğrudan alıntı" (s. X).
 
-According to Author's research (Year), "direct quote".
+Yazar'ın araştırmasına göre (Yıl), "doğrudan alıntı".
 
-## Example: Direct Quote
-> This is a block quotation that spans multiple lines or is particularly significant. It should be properly attributed and formatted according to the citation style guide. (Author, Year)
+## Örnek: Doğrudan Alıntı
+> Bu, birden fazla satırı kapsayan veya özellikle önemli olan bir blok alıntısıdır. Atıf stil rehberine göre düzgün atıflanmış ve formatlanmalıdır. (Yazar, Yıl)
 
-## Paraphrased Content
-The researcher demonstrated exceptional skills in the methodology employed (Smith, 2020). The original text described the complex statistical approach used to analyze the data patterns (Johnson, 2019, p. 45-47).
+## Parafraz Edilmiş İçerik
+Araştırmacı, kullanılan metodolojide üstün beceriler sergilemiştir (Smith, 2020). Orijinal metin, veri desenlerini analiz etmek için kullanılan karmaşık istatistiksel yaklaşımları betimlemiştir (Johnson, 2019, s. 45-47).
 
-## Summary with Attribution
-Several studies have examined this phenomenon extensively. Research indicates that X correlates with Y across multiple contexts (Author A, 2020; Author B, 2021; Author C, 2022).
+## Atıflı Özet
+Bu olguyu kapsamlı inceleyen birkaç çalışma vardır. Araştırmalar X'in Y ile birden fazla bağlamda ilişkilendirildiğini göstermektedir (Yazar A, 2020; Yazar B, 2021; Yazar C, 2022).

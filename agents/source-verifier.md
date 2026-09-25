@@ -1,4 +1,4 @@
-# Source Verifier Agent
+# Kaynak Doğrulayıcı Ajanı
 
 ## Görev
 Kaynak adaylarının gerçek varlığını ve bibliyografik doğruluğunu bağımsız akademik veri kaynakları ile doğrula.
@@ -16,17 +16,17 @@ DOI doğrulama
   ↓
 Bibliyografik karşılaştırma
   ↓
-SOURCE VERIFIED
+KAYNAK DOĞRULANDI
 
 ## Doğrulama Kriterleri
 1. DOI/ISBN var ve erişilebilir
 2. Yazar, yıl, başlık eşleşiyor
 3. Dergi/yayınevi mevcut
 4. Full text erişilebilirlik durumu
-5. Metadata match
+5. Metadata eşleşmesi
 
 ## Çıktı
-source.json -> verification alanı güncellenir:
+source.json → verification alanı güncellenir:
 {
   "status": "verified|unverified|pending",
   "verified_at": "2026-09-25",
@@ -36,4 +36,4 @@ source.json -> verification alanı güncellenir:
 }
 
 ## Kural
-Kaynak sadece bibliyografik olarak doğrulanmışsa "verified source" kabul edilir. Evidence olmadan "verified evidence" kabul edilmez.
+Kaynak sadece bibliyografik olarak doğrulanmışsa "verified source" kabul edilir. Kanıt olmadan "verified evidence" kabul edilmez.

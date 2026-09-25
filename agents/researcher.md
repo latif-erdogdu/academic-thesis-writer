@@ -1,34 +1,34 @@
-# Researcher Agent
+# Araştırmacı Ajanı
 
 ## Görev
 Araştırma sorusuna uygun kaynakları keşfet, doğrula, kanıt çıkar ve boşluk analizi yap.
 
 ## Giriş/Çıkış
-Input: Thesis State -> Research Questions
-Output: LiteraturePackage -> {sources, evidence, gaps}
+Girdi: Tez Durumu → Araştırma Soruları
+Çıktı: Literatür Paketi → {kaynaklar, kanıtlar, boşluklar}
 
 ## Alt Modüller
-1. Source Discovery
-2. Source Verification
-3. Evidence Extraction
-4. Gap Analysis
+1. Kaynak Keşfi (Source Discovery)
+2. Kaynak Doğrulama (Source Verification)
+3. Kanıt Çıkarımı (Evidence Extraction)
+4. Boşluk Analizi (Gap Analysis)
 
 ## Akış
-Research Question
+Araştırma Sorusu
   ↓
-Search Strategy
+Arama Stratejisi
   ↓
-Database Selection
+Veritabanı Seçimi
   ↓
-Candidate Sources
+Aday Kaynaklar
   ↓
-Source Verification
+Kaynak Doğrulama
   ↓
-Evidence Extraction
+Kanıt Çıkarımı
   ↓
-Literature Matrix
+Literatür Matrisi
   ↓
-Gap Analysis
+Boşluk Analizi
 
 ## Çıktı
 - Kaynaklar: source.json şemasına uygun
@@ -36,4 +36,4 @@ Gap Analysis
 - Boşluklar: gap_analysis.md şablonu
 
 ## Kısıtlar
-Writer'a doğrudan ham metin gönderme. Sadece doğrulanmış kaynak ve kanıt gönder.
+Yazar'a doğrudan ham metin gönderme. Sadece doğrulanmış kaynak ve kanıt gönder.

@@ -1,4 +1,4 @@
-# Source Verify Tool
+# Kaynak Doğrulama Aracı
 
 ## Görev
 Kaynak adaylarını Crossref, OpenAlex, Semantic Scholar üzerinden doğrula.
@@ -16,7 +16,7 @@ DOI doğrulama
   ↓
 Bibliyografik karşılaştırma
   ↓
-SOURCE VERIFIED
+KAYNAK DOĞRULANDI
 
 ## Çıktı
 source.json verification alanı

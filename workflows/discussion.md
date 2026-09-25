@@ -1,4 +1,4 @@
-# Discussion Workflow
+# Tartışma Çalışma Akışı
 
 ## Amaç
 Bulguları mevcut literatürle ilişkilendir ve teorik çerçeve ile bağla.

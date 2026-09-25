@@ -1,4 +1,4 @@
-# Research Gap Analysis
+# Araştırma Boşluğu Analizi
 
 ## 1. Literatür Özeti
 
@@ -14,12 +14,12 @@
 
 ## 7. Teorik Eksiklikler
 
-## 8. Research Gap
+## 8. Araştırma Boşluğu
 
 ### GAP-001
 **Açıklama:**
 **Kanıt:** SRC-001, SRC-004, SRC-009
-**Gap Tipi:** methodological
+**Boşluk Tipi:** methodological
 **Güven:** high
 
 ## 9. Araştırma Soruları

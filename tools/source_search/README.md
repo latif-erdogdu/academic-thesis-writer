@@ -1,4 +1,4 @@
-# Source Search Tool
+# Kaynak Arama Aracı
 
 ## Görev
 Araştırma sorusuna uygun kaynakları keşfet.

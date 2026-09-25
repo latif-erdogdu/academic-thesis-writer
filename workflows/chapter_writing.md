@@ -1,7 +1,7 @@
 # Bölüm Yazımı Çalışma Akışı
 
-## Overview
-Bu çalışma akışı tez bölümlerinin sistematik ve tutarlı şekilde yazılmasını sağlar. Her bölüm Thesis State ile uyumlu olmalı ve kaynak/iddia takibi gerektirir.
+## Genel Bakış
+Bu çalışma akışı tez bölümlerinin sistematik ve tutarlı şekilde yazılmasını sağlar. Her bölüm Tez Durumu ile uyumlu olmalı ve kaynak/iddia takibi gerektirir.
 
 ## Ön Koşullar
 - `schemas/thesis_state.json` başlatılmış ve temel bilgiler doldurulmuş olmalı
@@ -39,11 +39,11 @@ Bu çalışma akışı tez bölümlerinin sistematik ve tutarlı şekilde yazıl
 Her paragraf için içsel olarak etiketle:
 ```
 P-XXX
-Type: CLAIM/ EVIDENCE/ ANALYSIS/ CONNECTION
+Type: İDDİA / KANIT / ANALİZ / BAĞLANTI
 Claim: ...
 Evidence: SRC-XXX
 Citation: APA
-Confidence: VERIFIED/PENDING/UNVERIFIED
+Confidence: DOĞRULANDI / BEKLEYEN / DOĞRULANAMADI
 Chapter: X
 Section: X.Y
 ```
@@ -68,7 +68,7 @@ Her paragraf tek ana düşünce etrafında kurulmalı.
 
 **Kullanılacak yapı:**
 ```
-CLAIM → EVIDENCE → ANALYSIS → CONNECTION
+İDDİA → KANIT → ANALİZ → BAĞLANTI
 ```
 
 ### Yazım Stili
@@ -101,6 +101,6 @@ Kaynaklandırma
 ## Sonraki Adım
 Bölüm yazımı tamamlandıktan sonra:
 1. Bölüm arası tutarlılık denetimi yap
-2. Thesis State'i güncelle
+2. Tez Durumu'nu güncelle
 3. Gerekirse düzeltme yap
 4. Sonraki bölüme geç

@@ -1,35 +1,35 @@
-# Systematic Review Workflow
+# Sistematik İnceleme Çalışma Akışı
 
 ## Akış
-Research Question
+Araştırma Sorusu
   ↓
-Search Strategy
+Arama Stratejisi
   ↓
-Database Selection
+Veritabanı Seçimi
   ↓
-Search Query
+Arama Sorgusu
   ↓
-Inclusion Criteria
+Dahil Etme Kriterleri
   ↓
-Exclusion Criteria
+Hariç Tutma Kriterleri
   ↓
-Duplicate Removal
+Tekrar Giderme
   ↓
-Title/Abstract Screening
+Başlık/Özet Tarama
   ↓
-Full Text Screening
+Tam Metin İnceleme
   ↓
-Quality Assessment
+Kalite Değerlendirme
   ↓
-Data Extraction
+Veri Çıkarımı
   ↓
-Synthesis
+Sentez
 
 ## Veritabanları
 Crossref, OpenAlex, Semantic Scholar, PubMed, Google Scholar
 
 ## Çıktı
-- Literature Matrix
-- Evidence Matrix
-- Gap Analysis
-- Quality Assessment Report
+- Literatür Matrisi
+- Kanıt Matrisi
+- Boşluk Analizi
+- Kalite Değerlendirme Raporu

@@ -1,100 +1,100 @@
-# Literature Review Workflow
+# Literatür Taraması Çalışma Akışı
 
-## Overview
-This workflow guides the systematic review and synthesis of existing research on your thesis topic.
+## Genel Bakış
+Bu çalışma akışı tez konunuzdaki mevcut araştırmaların sistematik incelemesini ve sentezlenmesini sağlar.
 
-## Phase 1: Topic Definition
-### Define Scope
-- **Research area**: Clearly articulate the field/domain
-- **Key concepts**: Identify core terminology
-- **Boundaries**: Specify inclusion/exclusion criteria
+## Aşama 1: Konu Tanımı
+### Kapsam Belirleme
+- **Araştırma alanı**: Alan/etki alanını netleştirin
+- **Temel kavramlar**: Çekirdek terminolojiyi belirleyin
+- **Sınırlar**: Dahil etme/hariç tutma kriterlerini belirtin
 
-### Search Strategy
-1. Academic databases (Google Scholar, Scopus, Web of Science)
-2. Conference proceedings
-3. Grey literature as appropriate
-4. Key authors and seminal works in field
+### Arama Stratejisi
+1. Akademik veritabanları (Google Scholar, Scopus, Web of Science)
+2. Konferans bildirileri
+3. Uygun olduğunda gri literatür
+4. Alandaki anahtar yazarlar ve temel eserler
 
-## Phase 2: Source Collection
-### Minimum Requirements
-- **Seminal papers**: Foundational works (prioritize these)
-- **Recent publications**: Last 5 years where possible
-- **Methodological diversity**: Multiple approaches if applicable
-- **Geographic/temporal scope**: Clear boundaries if relevant
+## Aşama 2: Kaynak Toplama
+### Minimum Gereksinimler
+- **Temel makaleler**: Temel eserler (öncelik verin)
+- **Yayınlar**: Mümkünse son 5 yıl
+- **Yöntemsel çeşitlilik**: Uygunsa birden fazla yaklaşım
+- **Coğrafi/zamansal kapsam**: İlgiliyse net sınırlar
 
-### Collection Template
+### Toplama Şablonu
 ```markdown
-## Source Entry
-### Citation: [Full citation]
-### Relevance score: High/Medium/Low
-### Key contribution: [1-2 sentences]
-### Methodology type: [Quantitative/Qualitative/Mixed]
-### Date: YYYY
-### Status: ✓ Verified / ⚠ Needs review / ✗ Discard
+## Kaynak Girişi
+### Atıf: [Tam atıf]
+### İlgililik puanı: Yüksek/Orta/Düşük
+### Temel katkı: [1-2 cümle]
+### Metodoloji türü: [Nicel/Nitel/Karma]
+### Tarih: YYYY
+### Durum: ✓ Doğrulandı / ⚠ İnceleme gerekli / ✗ Atıldı
 ```
 
-## Phase 3: Synthesis Matrix
-Generate the literature matrix using `templates/literature_matrix.md`:
+## Aşama 3: Sentez Matrisi
+`templates/literature_matrix.md` kullanarak literatür matrisi oluşturun:
 
-### Structure
+### Yapı
 ```markdown
-# Literature Review Matrix
-## Topic Area
-| Author (Year) | Key Finding | Methodology | Limitations | Relevance Score |
+# Literatür İnceleme Matrisi
+## Konu Alanı
+| Yazar (Yıl) | Temel Bulgular | Metodoloji | Sınırlılıklar | İlgililik Puanı |
 |---------------|-------------|--------------|-------------|-----------------|
 |               |             |              |             |                 |
 
-## Themes Identified
-1. Theme 1: [Summary]
-2. Theme 2: [Summary]
-3. Theme 3: [Summary]
+## Belirlenen Temalar
+1. Tema 1: [Özet]
+2. Tema 2: [Özet]
+3. Tema 3: [Özet]
 
-## Gaps Identified
-- Gap 1: [What's missing in current research]
-- Gap 2: [What needs further investigation]
-- Gap 3: [Opportunities for contribution]
+## Belirlenen Boşluklar
+- Boşluk 1: [Mevcut araştırmada eksik olan]
+- Boşluk 2: [Daha fazla araştırma gerektiren]
+- Boşluk 3: [Katkı fırsatları]
 ```
 
-## Phase 4: Writing the Review Chapter
-### Section 1: Introduction to Literature Review
-- Purpose of review
-- Scope and organization
-- Selection criteria
+## Aşama 4: İnceleme Bölümü Yazımı
+### Bölüm 1: Literatür Taramasına Giriş
+- İnceleme amacı
+- Kapsam ve organizasyon
+- Seçim kriterleri
 
-### Section 2: Thematic Organization
-- Group sources by themes rather than chronologically
-- Within each theme: synthesize, don't just list
-- Identify patterns, contradictions, gaps
+### Bölüm 2: Tematik Organizasyon
+- Kaynakları kronolojik olarak değil, tematik olarak gruplayın
+- Her tema içinde: sadece listelemeyin, sentezleyin
+- Desenleri, çelişkileri, boşlukları belirleyin
 
-### Section 3: Critical Analysis
-- Compare methodological approaches
-- Evaluate strength of evidence
-- Note limitations in existing work
-- Position your research within the landscape
+### Bölüm 3: Eleştirel Analiz
+- Metodolojik yaklaşımları karşılaştırın
+- Kanıt gücünü değerlendirin
+- Mevcut çalışma sınırlılıklarını belirtin
+- Araştırmanızı manzarada konumlandırın
 
-### Section 4: Gap Identification
-- Clearly articulate research gaps
-- Connect gaps to research questions
-- Justify how this thesis addresses them
+### Bölüm 4: Boşluk Belirleme
+- Araştırma boşluklarını netleştirin
+- Boşlukları araştırma sorularıyla bağlayın
+- Bu tezin nasıl adreslediğini gerekçelendirin
 
-## Phase 5: Integration with Thesis State
-Update `schemas/thesis_state.json` with:
-- Literature review completion status
-- Key themes identified
-- Gaps documented
-- Sources verified count
+## Aşama 5: Tez Durumu ile Entegrasyon
+`schemas/thesis_state.json` şunu güncelleyin:
+- Literatür tarama tamamlanma durumu
+- Belirlenen temel temalar
+- Belgelendiği boşluklar
+- Doğrulanmış kaynak sayısı
 
-## Quality Checklist
-- [ ] All sources properly cited
-- [ ] No gaps in literature coverage
-- [ ] Themes are clearly articulated
-- [ ] Critical analysis (not just summary) present
-- [ ] Gaps clearly connected to research questions
-- [ ] Literature matrix completed and accurate
-- [ ] All sources verified per `references/source_verification.md`
+## Kalite Kontrol Listesi
+- [ ] Tüm kaynaklar düzgün atıflanmış
+- [ ] Literatür kapsamında boşluk yok
+- [ ] Temalar netleştirilmiş
+- [ ] Eleştirel analiz var (sadece özet değil)
+- [ ] Boşluklar araştırma sorularıyla net bağlantılı
+- [ ] Literatür matrisi tamamlanmış ve doğru
+- [ ] Tüm kaynaklar `references/source_verification.md` doğrulanmış
 
-## Next Steps
-After completing literature review:
-1. Update thesis state file
-2. Define methodology based on literature findings
-3. Proceed to `workflows/methodology.md`
+## Sonraki Adımlar
+Literatür taraması tamamlandıktan sonra:
+1. Tez durum dosyasını güncelleyin
+2. Literatür bulgularına dayanarak metodolojiyi tanımlayın
+3. `workflows/methodology.md` akışına geçin

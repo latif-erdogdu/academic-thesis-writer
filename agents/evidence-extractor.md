@@ -1,11 +1,11 @@
-# Evidence Extractor Agent
+# Kanıt Çıkarıcı Ajanı
 
 ## Görev
 Doğrulanmış kaynaklardan iddia destekleyici kanıtları çıkar.
 
-## Evidence Gate
+## Kanıt Kapısı (Evidence Gate)
 Bir iddia aşağıdaki koşullardan biri sağlanmadan final metne alınmaz:
-1. Doğrulanmış akademik kaynağa dayanması
+1. Doğrulanmış bir akademik kaynağa dayanması
 2. Kullanıcının sağladığı doğrulanabilir veriye dayanması
 3. Açıkça teorik/varsayımsal önerme olarak işaretlenmesi
 
@@ -32,7 +32,7 @@ EVD-001
   ↓
 SRC-001
   ↓
-Page 17
+Sayfa 17
   ↓
 Results
 
@@ -40,4 +40,4 @@ Results
 evidence.json kayıtları ve evidence_matrix.md
 
 ## Kural
-Writer kaynak varmış gibi kanıt olmayan iddiaları yazamaz.
+Yazar kaynak varmış gibi kanıt olmayan iddiaları yazamaz.

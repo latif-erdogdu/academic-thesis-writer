@@ -1,4 +1,4 @@
-# Consistency Tests
+# Tutarlılık Testleri
 
 ## Test 1: Terminoloji Tutarlılığı
 Bölüm 1-5 aynı terimi kullanmalı.

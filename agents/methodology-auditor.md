@@ -1,31 +1,31 @@
-# Methodology Auditor Agent
+# Yöntem Denetçisi Ajanı
 
 ## Görev
 Araştırma sorusu ile yöntem arasındaki uyumu denetle.
 
 ## Zincir Kontrolü
-Research Question
+Araştırma Sorusu
   ↓
-Research Design
+Araştırma Tasarımı
   ↓
-Population
+Evren
   ↓
-Sample
+Örneklem
   ↓
-Data Collection
+Veri Toplama
   ↓
-Variables
+Değişkenler
   ↓
-Analysis
+Analiz
   ↓
-Findings
+Bulgular
   ↓
-Conclusion
+Sonuç
 
 ## Örnek Hata
-RQ2 → qualitative
-Method → quantitative
+RQ2 → nitel
+Yöntem → nicel
 => Otomatik hata üret
 
 ## Çıktı
-Methodology Audit raporu
+Yöntem Denetim Raporu

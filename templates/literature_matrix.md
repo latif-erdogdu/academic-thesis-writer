@@ -1,5 +1,11 @@
 # Literatür Matrisi Şablonu
 
+## Genişletilmiş Şablon (v2)
+
+| Kaynak ID | Yazar | Yıl | Ülke | Araştırma Tasarımı | Evren | Örneklem | Değişkenler | Bağımsız Değişkenler | Bağımlı Değişkenler | Yöntem | Alet | Analiz | Ana Bulgular | Sınırlılıklar | Teorik Çerçeve | Araştırma Boşluğu | İlgililik | Kanıt Konumu |
+|-----------|-------|-----|------|-------------------|-------|----------|-------------|---------------------|---------------------|--------|------|--------|--------------|---------------|----------------|------------------|-----------|-------------|
+| SRC-001   |       |     |      |                   |       |          |             |                     |                     |        |      |        |              |               |                |                  |           |             |
+
 ## Tema 1: [Tema Adı]
 
 | Kaynak | Yazar(Yıl) | Ana Bulgular | Metodoloji | Örneklem | Sınırlılıklar | Tez İlişkisi |
@@ -53,5 +59,12 @@ Literatür taraması sırasında her kaynak için şunları belirleyin:
 9. Temel bulgular
 10. Sınırlılıklar
 11. Tezle ilişkisi
+12. **Ülke**
+13. **Araştırma tasarımı**
+14. **Bağımsız/bağımlı değişkenler**
+15. **Kullanılan alet/ölçek**
+16. **Analiz yöntemi**
+17. **Teorik çerçeve**
+18. **Kanıt konumu (sayfa/bölüm)**
 
 Kaynakları tematik olarak gruplayın ve karşılaştırmalı analiz yapın.

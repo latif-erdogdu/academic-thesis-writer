@@ -1,4 +1,4 @@
-# PDF Extract Tool
+# PDF Çıkarma Aracı
 
 ## Görev
 Doğrulanmış makalelerden sayfa/bölüm düzeyinde kanıt çıkar.

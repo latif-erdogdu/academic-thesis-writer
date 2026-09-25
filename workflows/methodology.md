@@ -1,182 +1,177 @@
-# Methodology Workflow
+# Metodoloji Çalışma Akışı
 
-## Overview
-This workflow guides the development of your research methodology chapter, ensuring rigorous and defensible methodological choices.
+## Genel Bakış
+Bu çalışma akışı araştırma metodoloji bölümünüzün geliştirilmesini, katı ve savunulabilir metodolojik seçimler sağlayarak rehberlik eder.
 
-## Phase 1: Research Design Selection
+## Aşama 1: Araştırma Tasarımı Seçimi
 
-### Quantitative Approaches
-- **Experimental design**: Control groups, randomization
-- **Survey research**: Sampling strategy, measurement tools
-- **Data analysis**: Statistical methods, software packages
-- **Validity measures**: Internal/external validity strategies
+### Nicel Yaklaşımlar
+- **Deneysel tasarım**: Kontrol grupları, randomizasyon
+- **Anket araştırması**: Örnekleme stratejisi, ölçüm araçları
+- **Veri analizi**: İstatistiksel yöntemler, yazılım paketleri
+- **Geçerlilik ölçümleri**: İç/dış geçerlilik stratejileri
 
-### Qualitative Approaches
-- **Phenomenology**: In-depth understanding of experiences
-- **Ethnography**: Cultural context and immersion
-- **Case study**: Detailed examination of specific case(s)
-- **Grounded theory**: Theory development from data
-- **Validity measures**: Trustworthiness, transferability
+### Nitel Yaklaşımlar
+- **Fenomenoloji**: Deneyimlerin derinlemesine anlaşılması
+- **Etnografi**: Kültürel bağlam ve dalış
+- **Olgu çalışması**: Belirli olgu(lar)ın ayrıntılı incelemesi
+- **Yerel teori**: Veriden teori geliştirme
+- **Geçerlilik ölçümleri**: Güvenilirlik, transfer edilebilirlik
 
-### Mixed Methods
-- **Convergent parallel**: Collect both, analyze separately, merge results
-- **Explanatory sequential**: Quant → Qual for explanation
-- **Exploratory sequential**: Qual → Quant for generalization
+### Karma Yöntemler
+- **Eşzamanlı paralel**: Her ikisi toplanır, ayrı analiz edilir, sonuçlar birleştirilir
+- **Açıklayıcı sıralı**: Nicel → Nitel açıklama için
+- **Keşifsel sıralı**: Nitel → Nicel genelleme için
 
-## Phase 2: Data Collection Planning
+## Aşama 2: Veri Toplama Planlaması
 
-### Sampling Strategy
+### Örnekleme Stratejisi
 ```markdown
-## Sampling Plan
-### Population
-- Target population definition
-- Accessibility considerations
+## Örnekleme Planı
+### Evren
+- Hedef evren tanımı
+- Erişilebilirlik değerlendirmeleri
 
-### Sampling Method
-- Probability sampling: Simple random, stratified, cluster
-- Non-probability: Purposive, snowball, convenience (justify)
+### Örnekleme Yöntemi
+- Olasılıksal örnekleme: Basit tesadüfi, tabakalı, küme
+- Olasılıksal olmayan: Amaçlı, kartopu, kolaylık (gerekçelendirin)
 
-### Sample Size
-- Justification (power analysis for quantitative)
-- Saturation point (for qualitative)
-- Inclusion/exclusion criteria
+### Örneklem Büyüklüğü
+- Gerekçe (nicel için güç analizi)
+- Doyma noktası (nitel için)
+- Dahil/hariç tutma kriterleri
 
-### Data Collection Period
-- Start date: YYYY-MM-DD
-- End date: YYYY-MM-DD
-- Rationale for timeframe
+### Veri Toplama Dönemi
+- Başlangıç tarihi: YYYY-AA-GG
+- Bitiş tarihi: YYYY-AA-GG
+- Zaman aralığı gerekçesi
 ```
 
-## Phase 3: Measurement Instruments
+## Aşama 3: Ölçüm Araçları
 
-### Quantitative Measures
+### Nicel Ölçümler
 ```markdown
-## Instrument Description
-### Construct Operationalization
-- [Construct]: How it's measured, why this measure
+## Alet Tanımı
+### Kavramsal Operasyonelleştirme
+- [Kavram]: Nasıl ölçülür, neden bu ölçüm
 
-### Scale/Tool Properties
-- Name: [Instrument name]
-- Developer: [Who developed]
-- Items: Number of questions
-- Response format: Likert range, multiple choice, etc.
-- Reliability (α): Previously established or pilot-tested
-- Validity evidence: Content, construct, criterion
-
-### Data Collection Procedure
-- Step-by-step data collection process
-- Training provided to collectors
-- Quality control measures
+### Ölçek/Alet Özellikleri
+- Adı: [Alet adı]
+- Geliştirici: [Kim geliştirdi]
+- Madde sayısı: Soru sayısı
+- Yanıt formatı: Likert aralığı, çoktan seçmeli, vb.
+- Güvenirlik (α): Daha önce belirlenmiş veya pilot test edilmiş
+- Geçerlilik kanıtı: İçerik, yapısal, kriter
 ```
 
-### Qualitative Instruments
+### Nitel Ölçümler
 ```markdown
-## Interview Guide/Focus Group Protocol
-### Research Questions (for interview)
-1. [Question 1]
-2. [Question 2]
-3. [Question 3]
+## Görüşme Rehberi / Odak Grup Protokolü
+### Araştırma Soruları (görüşme için)
+1. [Soru 1]
+2. [Soru 2]
+3. [Soru 3]
 
-### Question Development
-- Derived from literature review findings
-- Tested in pilot interviews if possible
-- Open-ended vs. specific questions
+### Soru Geliştirme
+- Literatür incelemesi bulgularından türetilmiş
+- Mümkünse pilot görüşmelerde test edilmiş
+- Açık uçlu vs. spesifik sorular
 
-### Interview Logistics
-- Expected duration: X minutes
-- Format: In-person, virtual, hybrid
-- Recording permissions obtained
+### Görüşme Lojistiği
+- Beklenen süre: X dakika
+- Format: Yüz yüze, sanal, hibrit
+- Kayıt izinleri alındı
 ```
 
-## Phase 4: Data Analysis Plan
+## Aşama 4: Veri Analiz Planı
 
-### Quantitative Analysis
+### Nicel Analiz
 ```markdown
-## Statistical Analysis Plan
-### Software
-- Primary: [SPSS/R/Python/Stata/etc.]
-- Secondary: [If applicable]
+## İstatistiksel Analiz Planı
+### Yazılım
+- Birincil: [SPSS/R/Python/Stata/vb.]
+- İkincil: [Uygunsa]
 
-### Procedures
-1. Descriptive statistics
-2. Assumption checks (normality, homoscedasticity)
-3. Inferential tests (t-tests, ANOVA, regression, etc.)
-4. Effect size calculations
-5. Sensitivity analyses where appropriate
+### Prosedürler
+1. Betimsel istatistikler
+2. Varsayım kontrolleri (normalite, homoskedastisite)
+3. Çıkarımsal testler (t-test, ANOVA, regresyon, vb.)
+4. Etki büyüklüğü hesaplamaları
+5. Uygunsa duyarlılık analizleri
 ```
 
-### Qualitative Analysis
+### Nitel Analiz
 ```markdown
-## Qualitative Analysis Approach
-### Software (if applicable)
-- NVivo, MAXQDA, Dedoose, or manual coding
+## Nitel Analiz Yaklaşımı
+### Yazılım (uygunsa)
+- NVivo, MAXQDA, Dedoose, veya manuel kodlama
 
-### Coding Process
-1. Familiarization with data
-2. Initial/open coding
-3. Developing themes/categories
-4. Theme refinement and validation
-5. Quote selection for illustration
+### Kodlama Süreci
+1. Veriyle tanışma
+2. Başlangıç/açık kodlama
+3. Tema/kategori geliştirme
+4. Tema iyileştirme ve doğrulama
+5. İllüstrasyon için alıntı seçimi
 
-### Rigour Measures
-- Member checking
-- Peer debriefing
-- Thick description
-- Audit trail
+### Katılık Ölçümleri
+- Üye kontrolü
+- Akran danışmanlığı
+- Kalıntı betimleme
+- Denetim izi
 ```
 
-## Phase 5: Ethical Considerations
+## Aşama 5: Etik Hususlar
 
-### Required Documentation
-- IRB/Ethics approval status
-- Informed consent procedures
-- Data privacy and security measures
-- Handling of sensitive information
-- Conflict of interest disclosure
+### Gerekli Belgeler
+- ETK/Etik kurul onay durumu
+- Aydınlatılmış onay prosedürleri
+- Veri gizliliği ve güvenliği önlemleri
+- Hassas bilgi işleme
+- Çıkar çatışması açıklaması
 
-## Phase 6: Validity and Reliability Strategies
+## Aşama 6: Geçerlilik ve Güvenirlik Stratejileri
 
-### Quantitative
-- Internal validity controls
-- External validity strategies (generalizability)
-- Measurement reliability documentation
-- Response bias mitigation
+### Nicel
+- İç geçerlilik kontrolleri
+- Dış geçerlilik stratejileri (genelleme)
+- Ölçüm güvenirlik belgelenmesi
+- Yanıt önyargısı azaltma
 
-### Qualitative
-- Credibility strategies (triangulation, member checking)
-- Transferability (thick description)
-- Dependability (audit trail)
-- Confirmability (reflexivity statement)
+### Nitel
+- Güvenilirlik stratejileri (triangülasyon, üye kontrolü)
+- Transfer edilebilirlik (kalıntı betimleme)
+- Bağlanılabilirlik (denetim izi)
+- Onaylanabilirlik (refleksivite bildirimi)
 
-## Phase 7: Timeline and Milestones
+## Aşama 7: Zaman Çizelgesi ve Kilometre Taşları
 
 ```markdown
-## Methodology Implementation Timeline
-| Task | Duration | Start Date | End Date |
+## Metodoloji Uygulama Zaman Çizelgesi
+| Görev | Süre | Başlangıç Tarihi | Bitiş Tarihi |
 |------|----------|------------|----------|
-| [Task 1] | X weeks | YYYY-MM-DD | YYYY-MM-DD |
-| [Task 2] | X weeks | | |
+| [Görev 1] | X hafta | YYYY-AA-GG | YYYY-AA-GG |
+| [Görev 2] | X hafta | | |
 ```
 
-## Output Deliverables
-This workflow should produce:
-1. Complete methodology chapter draft
-2. Updated `schemas/thesis_state.json` with method details
-3. Data collection instruments (surveys, interview guides)
-4. Ethics approval documentation reference
+## Çıktı Ürünleri
+Bu çalışma akışı şunu üretmelidir:
+1. Tam metodoloji bölümü taslağı
+2. Yöntem detaylarıyla güncellenmiş `schemas/thesis_state.json`
+3. Veri toplama araçları (anketler, görüşme rehberleri)
+4. Etik onay belgeleri referansı
 
-## Quality Checklist
-- [ ] Research design justified and appropriate
-- [ ] Sampling strategy clearly defined
-- [ ] Measurement instruments validated
-- [ ] Analysis plan detailed
-- [ ] Ethical considerations addressed
-- [ ] Validity/reliability strategies specified
-- [ ] Timeline realistic and achievable
-- [ ] All sources cited per `references/citation_rules.md`
+## Kalite Kontrol Listesi
+- [ ] Araştırma tasarımı gerekçelendirilmiş ve uygun
+- [ ] Örnekleme stratejisi net tanımlanmış
+- [ ] Ölçüm araçları doğrulanmış
+- [ ] Analiz planı ayrıntılı
+- [ ] Etik hususlar adreslenmiş
+- [ ] Geçerlilik/güvenirlik stratejileri belirtilmiş
+- [ ] Zaman çizelgesi gerçekçi ve ulaşılabilir
+- [ ] Tüm kaynaklar `references/citation_rules.md` per atıflanmış
 
-## Next Steps
-After completing methodology:
-1. Review and finalize methodology chapter
-2. Begin data collection (if applicable)
-3. Proceed to chapter writing with `workflows/chapter_writing.md`
+## Sonraki Adımlar
+Metodoloji tamamlandıktan sonra:
+1. Metodoloji bölümünü gözden geçirin ve sonlandırın
+2. Veri toplama başlatın (uygunsa)
+3. Bölüm yazımı için `workflows/chapter_writing.md` akışına geçin

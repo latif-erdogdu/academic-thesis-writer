@@ -1,6 +1,6 @@
 # Tez Denetim Çalışma Akışı
 
-## Overview
+## Genel Bakış
 Bu çalışma akışı tez tamamlandıktan sonra kapsamlı akademik kalite kontrolü sağlar. Doğruluk, tutarlılık ve akademik bütünlük kontrol edilir.
 
 ## Denetim Aşamaları
@@ -26,8 +26,8 @@ Bu çalışma akışı tez tamamlandıktan sonra kapsamlı akademik kalite kontr
 - [ ] Hipotezler bulgularla destekleniyor mu?
 
 #### Metodoloji
-- [ ] Desen açıklandı mı?
-- [ ] Evren ve örneklem tanımlı mı?
+- [ ] Tasarım açıklandı mı?
+- [ ] Evren ve örneklem tanımlandı mı?
 - [ ] Veri toplama süreci anlatıldı mı?
 - [ ] Analiz yöntemi belirtildi mi?
 - [ ] Geçerlik/güvenirlik değerlendirildi mi?
@@ -59,9 +59,9 @@ Bu çalışma akışı tez tamamlandıktan sonra kapsamlı akademik kalite kontr
 
 ### 3. Metodoloji Denetimi
 
-#### Araştırma Deseni
-- Desen açık ve uygun mu?
-- Desen araştırma sorularına uygun mu?
+#### Araştırma Tasarımı
+- Tasarım açık ve uygun mu?
+- Tasarım araştırma sorularına uygun mu?
 
 #### Örneklem
 - Örneklem büyüklüğü belirlendi mi?
@@ -106,27 +106,27 @@ Bu çalışma akışı tez tamamlandıktan sonra kapsamlı akademik kalite kontr
 ### 5. Akademik Yazım Denetimi
 
 #### Dil
-- Akademik üslup korunuyor mu?
-- Gereksiz süslü ifadeler yok mu?
-- Açık ve net mi?
+- [ ] Akademik üslup korunuyor mu?
+- [ ] Gereksiz süslü ifadeler yok mu?
+- [ ] Açık ve net mi?
 
 #### Tekrar
-- Gereksiz tekrarlar var mı?
-- Terminolojik tutarlılık sağlandı mı?
+- [ ] Gereksiz tekrarlar var mı?
+- [ ] Terminolojik tutarlılık sağlandı mı?
 
 #### Mantık
-- Paragraf yapısı mantıklı mı?
-- Bölüm geçişleri akıcı mı?
-- CLAIM → EVIDENCE → ANALYSIS → CONNECTION yapısı kullanıldı mı?
+- [ ] Paragraf yapısı mantıklı mı?
+- [ ] Bölüm geçişleri akıcı mı?
+- [ ] İDDİA → KANIT → ANALİZ → BAĞLANTI yapısı kullanıldı mı?
 
 #### Akademik Üslup
-- Nesnel ton mu?
-- Kanıta dayalı mı?
-- Kaynaklı iddialar var mı?
+- [ ] Nesnel ton mu?
+- [ ] Kanıta dayalı mı?
+- [ ] Kaynaklı iddialar var mı?
 
 ## 4 Bileşenli İç Denetim
 
-### Terminology (Kavramsal Tutarlılık)
+### Terminoloji (Kavramsal Tutarlılık)
 Aynı kavram farklı isimlerle kullanılıyor mu?
 
 ### Numbers (Veri ve İstatistiksel Tutarlılık)

@@ -1,27 +1,27 @@
-# Research Gap Rules
+# Araştırma Boşluğu Kuralları
 
-## Gap Analysis Flow
-Literature Matrix
+## Boşluk Analizi Akışı
+Literatür Matrisi
   ↓
-Themes
+Temalar
   ↓
-Agreements
+Benzerlikler
   ↓
-Contradictions
+Çelişkiler
   ↓
-Methodological Differences
+Yöntemsel Farklılıklar
   ↓
-Population Differences
+Popülasyon Farklılıkları
   ↓
-Geographical Differences
+Coğrafi Farklılıklar
   ↓
-Theoretical Differences
+Teorik Farklılıklar
   ↓
-Unanswered Questions
+Cevapsız Sorular
   ↓
-Research Gap
+Araştırma Boşluğu
 
-## Gap Model
+## Boşluk Modeli
 {
   "gap_id": "GAP-001",
   "description": "",
@@ -31,4 +31,4 @@ Research Gap
 }
 
 ## Kural
-"Bu konuda araştırma yok" ifadesi sadece kapsamlı tarama bunu destekliyorsa kullanılmalı. Gap'in hangi kaynaklardan çıkarıldığı gösterilmeli.
+"Bu konuda araştırma yok" ifadesi sadece kapsamlı tarama bunu destekliyorsa kullanılmalı. Boşluğun hangi kaynaklardan çıkarıldığı gösterilmeli.

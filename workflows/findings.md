@@ -1,4 +1,4 @@
-# Findings Workflow
+# Bulgular Çalışma Akışı
 
 ## Amaç
 Araştırma sorularına göre bulguları toplar ve yorumdan ayırır.

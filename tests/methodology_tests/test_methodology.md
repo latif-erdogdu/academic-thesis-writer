@@ -1,7 +1,7 @@
-# Methodology Tests
+# Metodoloji Testleri
 
-## Test 1: RQ-Method Uyumu
-Nitel RQ → nitel method
+## Test 1: RQ-Yöntem Uyumu
+Nitel RQ → nitel yöntem
 
 ## Test 2: Değişken Uyumu
-IV/DV tanımları tutarlı olmalı.
+Bağımsız/Bağımlı değişken tanımları tutarlı olmalı.

@@ -1,12 +1,12 @@
-# Evidence Rules
+# Kanıt Kuralları
 
-## Evidence Gate
+## Kanıt Kapısı (Evidence Gate)
 Bir akademik iddia aşağıdaki koşullardan biri sağlanmadan final metne alınmamalıdır:
 1. Doğrulanmış bir akademik kaynağa dayanması
 2. Kullanıcının sağladığı doğrulanabilir veriye dayanması
 3. Açıkça teorik/varsayımsal bir önerme olarak işaretlenmesi
 
-## Evidence Model
+## Kanıt Modeli
 {
   "id": "EVD-001",
   "source_id": "SRC-001",
@@ -18,16 +18,16 @@ Bir akademik iddia aşağıdaki koşullardan biri sağlanmadan final metne alın
 }
 
 ## Zincir
-CLM-001
+İDDİA (CLM-001)
   ↓
-EVD-001
+KANIT (EVD-001)
   ↓
-SRC-001
+KAYNAK (SRC-001)
   ↓
-Page 17
+Sayfa 17
   ↓
 Results
 
-## Writing Gate
-DISCOVERY → VERIFICATION → EVIDENCE → CLAIM → WRITING
-Writing → source search değil.
+## Yazım Kapısı (Writing Gate)
+KEŞİF → DOĞRULAMA → KANIT → İDDİA → YAZIM
+Yazım → kaynak arama DEĞİL.

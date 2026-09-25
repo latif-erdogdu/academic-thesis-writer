@@ -1,28 +1,28 @@
-# Gap Analyzer Agent
+# Boşluk Analizci Ajanı
 
 ## Görev
 Literatür matrisi üzerinden araştırma boşluklarını çıkar.
 
 ## Akış
-Literature Matrix
+Literatür Matrisi
   ↓
-Themes
+Temalar
   ↓
-Agreements
+Benzerlikler
   ↓
-Contradictions
+Çelişkiler
   ↓
-Methodological Differences
+Yöntemsel Farklılıklar
   ↓
-Population Differences
+Popülasyon Farklılıkları
   ↓
-Geographical Differences
+Coğrafi Farklılıklar
   ↓
-Theoretical Differences
+Teorik Farklılıklar
   ↓
-Unanswered Questions
+Cevapsız Sorular
   ↓
-Research Gap
+Araştırma Boşluğu
 
 ## Çıktı
 {
@@ -34,4 +34,4 @@ Research Gap
 }
 
 ## Kural
-"Bu konuda araştırma yok" ifadesi sadece kapsamlı tarama bunu destekliyorsa kullanılmalı. Gap'in hangi kaynaklardan çıkarıldığı gösterilmeli.
+"Bu konuda araştırma yok" ifadesi sadece kapsamlı tarama bunu destekliyorsa kullanılmalı. Boşluğun hangi kaynaklardan çıkarıldığı gösterilmeli.
