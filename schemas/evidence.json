@@ -1,0 +1,15 @@
+{
+  "id": "EVD-XXX",
+  "source_id": "SRC-XXX",
+  "location": {
+    "page": null,
+    "section": "",
+    "paragraph": null
+  },
+  "text": "",
+  "evidence_type": "finding|method|theory|data",
+  "supports_claim": "CLM-XXX",
+  "strength": "direct|indirect",
+  "verified": false,
+  "notes": ""
+}
