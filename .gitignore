@@ -14,3 +14,5 @@ opencode.json
 thesis_state_backup.json
 
 # geliştirici dosyaları
+__pycache__/
+*.pyc

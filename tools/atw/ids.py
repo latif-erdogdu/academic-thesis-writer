@@ -42,7 +42,7 @@ def format_id(prefix: str, number: int) -> str:
 
     Args:
         prefix: ``ID_PREFIXES`` icindeki bir prefiks.
-        number: Sifirdan buyuk tam sayi.
+        number: Sifirdan kucuk olmayan tam sayi.
 
     Returns:
         ``SRC-001`` biciminde kimlik.
@@ -63,7 +63,7 @@ def parse_id(value: str) -> tuple[str, int]:
     """Kimlik metnini ``(prefiks, sayi)`` ciftine ayristirir.
 
     Raises:
-        IdError: Bicim hataliysa veya prefeks bilinmiyorsa.
+        IdError: Bicim hataliysa veya prefiks bilinmiyorsa.
     """
     if not isinstance(value, str):
         raise IdError(f"Kimlik metin olmali: {value!r}")
@@ -77,7 +77,7 @@ def parse_id(value: str) -> tuple[str, int]:
 
 
 def is_valid_id(value: str) -> bool:
-    """Kimligin bicim ve prefeks kurallarina uyup uymadigini bildirir."""
+    """Kimligin bicim ve prefiks kurallarina uyup uymadigini bildirir."""
     try:
         parse_id(value)
     except IdError:
@@ -97,7 +97,7 @@ def next_id(existing: Iterable[str], prefix: str) -> str:
         Bir sonraki kullanilabilir kimlik, orn. ``"SRC-004"``.
 
     Raises:
-        IdError: Prefeks bilinmiyorsa.
+        IdError: Prefiks bilinmiyorsa.
 
     Examples:
         >>> next_id(["SRC-001", "SRC-002", "SRC-009"], "SRC")
