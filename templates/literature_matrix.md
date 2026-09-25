@@ -1,6 +1,6 @@
 # Literatür Matrisi Şablonu
 
-## Genişletilmiş Şablon (v2)
+## Genişletilmiş Şablon
 
 | Kaynak ID | Yazar | Yıl | Ülke | Araştırma Tasarımı | Evren | Örneklem | Değişkenler | Bağımsız Değişkenler | Bağımlı Değişkenler | Yöntem | Alet | Analiz | Ana Bulgular | Sınırlılıklar | Teorik Çerçeve | Araştırma Boşluğu | İlgililik | Kanıt Konumu |
 |-----------|-------|-----|------|-------------------|-------|----------|-------------|---------------------|---------------------|--------|------|--------|--------------|---------------|----------------|------------------|-----------|-------------|

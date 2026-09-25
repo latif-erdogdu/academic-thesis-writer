@@ -1,4 +1,4 @@
-# Akademik Tez Yazarı V2
+# Akademik Tez Yazarı
 
 Akademik tezlerin planlanması, literatür araştırması, kaynak doğrulama, bölüm yazımı, metodoloji oluşturma, akademik atıf yönetimi ve tez kalite denetimi için kapsamlı akademik araştırma ve yazım sistemi.
 
@@ -15,7 +15,7 @@ Bu proje, akademik tez yazımında **doğruluk** ve **kaynak güvenilirliği** �
 - **Kanıt Kapısı**: Bir iddia kanıt, doğrulanmış veri veya teorik önerme olmadan final metne alınmaz
 - **Yazım Kapısı**: KEŞİF → DOĞRULAMA → KANIT → İDDİA → YAZIM (Yazım → kaynak arama DEĞİL)
 
-## 📁 Repo Yapısı (V2)
+## 📁 Repo Yapısı
 
 ```
 academic-thesis-writer/
@@ -77,7 +77,7 @@ academic-thesis-writer/
     └── methodology_tests/            # Metodoloji testleri
 ```
 
-## 🏗️ Mimarisi (V2)
+## 🏗️ Mimarisi
 
 ### Orchestrator + 8 Alt Ajan
 
@@ -187,7 +187,7 @@ Her bölüm için (`workflows/chapter_writing.md`):
 
 Çıktı: `templates/quality_report.md` formatında kapsamlı rapor
 
-## 🔍 Özellikler (V2)
+## 🔍 Özellikler
 
 - ✅ **Kaynak doğrulama motoru**: Crossref + OpenAlex + Semantic Scholar (en az 2 bağımsız kaynak)
 - ✅ **PDF → Kanıt sistemi**: Sayfa/bölüm/alıntı/yorum zinciri (İddia → Makale → Sayfa → Bölüm → Kanıt)
