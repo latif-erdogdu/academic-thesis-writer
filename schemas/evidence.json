@@ -1,15 +1,1 @@
-{
-  "id": "EVD-XXX",
-  "source_id": "SRC-XXX",
-  "location": {
-    "page": null,
-    "section": "",
-    "paragraph": null
-  },
-  "text": "",
-  "evidence_type": "finding|method|theory|data",
-  "supports_claim": "CLM-XXX",
-  "strength": "direct|indirect",
-  "verified": false,
-  "notes": ""
-}
+{"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/evidence.json", "type": "object", "required": ["id", "source_id", "location", "text", "evidence_type", "strength", "verified"], "additionalProperties": false, "properties": {"id": {"type": "string", "pattern": "^[A-Z]+-\\d{3,}$"}, "source_id": {"type": "string", "pattern": "^[A-Z]+-\\d{3,}$"}, "location": {"type": "object", "properties": {"page": {"type": ["integer", "null"]}, "section": {"type": "string"}, "paragraph": {"type": ["integer", "null"]}}}, "text": {"type": "string", "minLength": 1}, "evidence_type": {"type": "string"}, "supports_claim": {"type": ["string", "null"]}, "strength": {"type": "string"}, "verified": {"type": "boolean"}, "notes": {"type": "string"}}}

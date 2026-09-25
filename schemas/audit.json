@@ -1,15 +1,1 @@
-{
-  "audit_id": "AUD-XXX",
-  "thesis_id": "",
-  "audit_type": "citation|methodology|consistency",
-  "date": "",
-  "findings": [],
-  "total_claims": 0,
-  "verified": 0,
-  "needs_evidence": 0,
-  "unsupported": 0,
-  "unverified_sources": 0,
-  "mismatches": 0,
-  "critical_issues": [],
-  "deferred_minors": []
-}
+{"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/audit.json", "audit_id": "AUD-XXX", "thesis_id": "", "audit_type": "citation|methodology|consistency", "date": "", "findings": [], "total_claims": 0, "verified": 0, "needs_evidence": 0, "unsupported": 0, "unverified_sources": 0, "mismatches": 0, "critical_issues": [], "deferred_minors": []}

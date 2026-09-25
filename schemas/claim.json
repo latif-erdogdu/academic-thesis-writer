@@ -1,18 +1,1 @@
-{
-  "id": "CLM-XXX",
-  "text": "",
-  "importance": "high|medium|low",
-  "sources": [],
-  "verification_status": "verified|pending|unverified|refuted",
-  "confidence_level": null,
-  "evidence_type": "direct|indirect|theoretical|empirical",
-  "notes": "",
-  "chapter_id": null,
-  "section_id": null,
-  "created_at": null,
-  "last_verified_at": null,
-  "verified_by": null,
-  "related_claims": [],
-  "counter_claims": [],
-  "requires_followup": false
-}
+{"$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/claim.json", "id": "CLM-XXX", "text": "", "importance": "high|medium|low", "sources": [], "verification_status": "verified|pending|unverified|refuted", "confidence_level": null, "evidence_type": "direct|indirect|theoretical|empirical", "notes": "", "chapter_id": null, "section_id": null, "created_at": null, "last_verified_at": null, "verified_by": null, "related_claims": [], "counter_claims": [], "requires_followup": false}

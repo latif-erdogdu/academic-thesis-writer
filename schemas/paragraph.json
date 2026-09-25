@@ -1,10 +1,12 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/paragraph.json",
   "id": "P-XXX",
   "chapter": "",
   "section": "",
-  "type": "literature_synthesis|methodology|finding|discussion|conclusion",
   "claims": [],
   "evidence": [],
   "sources": [],
-  "research_questions": []
+  "research_questions": [],
+  "type_values": "literature_synthesis|methodology|finding|discussion|conclusion"
 }
