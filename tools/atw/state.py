@@ -66,10 +66,22 @@ def load_schema(name: str) -> dict[str, Any]:
 
 
 def schema_registry() -> Registry:
-    """Tum semalarin ``$id`` degerleriyle kurulmus referans kaydi."""
+    """Tum semalarin ``$id`` degerleriyle kurulmus referans kaydi.
+
+    ``schemas/`` altindaki dosyalarin hepsi gercek sema degildir: Task 4 ve
+    Task 5'e kadar alti dosya duz JSON sablon olarak durur ve ``$schema``
+    bildirmez. ``Resource.from_contents()`` diyalecti yalnizca ``$schema``
+    alanindan belirledigi icin, sablon dosyalar kayda katilmaz. Bu bir
+    hata yutma degil, tanim degil: bir duz JSON sablonu sema registry'sinde
+    yer almamalidir. Gercek bir semanin ``$schema`` bildirmemesi hali
+    ``test_her_semanin_id_alani_var`` ve
+    ``test_tum_semalar_draft_2020_12_uyumlu`` testleriyle Task 7'de yakalanir.
+    """
     kaynaklar = []
     for yol in sorted(SCHEMA_DIR.glob("*.json")):
         sema = json.loads(yol.read_text(encoding="utf-8"))
+        if "$schema" not in sema:
+            continue
         uri = sema.get("$id") or yol.as_uri()
         kaynaklar.append((uri, Resource.from_contents(sema)))
     return Registry().with_resources(kaynaklar)

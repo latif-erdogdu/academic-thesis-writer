@@ -1,12 +1,10 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/research_question.json",
   "id": "RQ-XXX",
   "text": "",
+  "type": "main|sub",
   "chapter": "",
   "method": "",
   "status": "answered|pending",
   "related_claims": [],
-  "related_findings": [],
-  "type_values": "main|sub"
+  "related_findings": []
 }
