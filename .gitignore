@@ -1,0 +1,13 @@
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+# Tez yazıcı için ek ignore kuralları:
+*.log
+.DS_Store
+.idea/
+.vscode/
+.env
+node_modules/
+AGENTS.md
+# thesis state geçici dosyaları
+thesis_state_backup.json

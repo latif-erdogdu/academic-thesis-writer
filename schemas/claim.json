@@ -1,0 +1,18 @@
+{
+  "id": "CLM-XXX",
+  "text": "",
+  "importance": "high|medium|low",
+  "sources": [],
+  "verification_status": "verified|pending|unverified|refuted",
+  "confidence_level": null,
+  "evidence_type": "direct|indirect|theoretical|empirical",
+  "notes": "",
+  "chapter_id": null,
+  "section_id": null,
+  "created_at": null,
+  "last_verified_at": null,
+  "verified_by": null,
+  "related_claims": [],
+  "counter_claims": [],
+  "requires_followup": false
+}
