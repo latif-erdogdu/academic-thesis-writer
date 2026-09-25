@@ -6,7 +6,7 @@ description: >
   kalite denetimi için kullanılan kapsamlı akademik araştırma ve yazım skill'i.
 ---
 
-# Akademik Tez Yazarı V2
+# Akademik Tez Yazarı
 
 ## 1. ROL
 
