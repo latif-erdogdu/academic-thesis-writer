@@ -361,7 +361,7 @@ def format_id(prefix: str, number: int) -> str:
 
     Args:
         prefix: ``ID_PREFIXES`` icindeki bir prefiks.
-        number: Sifirdan buyuk tam sayi.
+        number: Sifirdan kucuk olmayan tam sayi.
 
     Returns:
         ``SRC-001`` biciminde kimlik.
@@ -440,10 +440,21 @@ def next_id(existing: Iterable[str], prefix: str) -> str:
 Run: `python -m pytest tests/schema_tests/test_ids.py -v`
 Expected: PASS — 12 test
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Python önbelleğini ignore et**
+
+`git status` her pytest koşusunda `__pycache__/` dizinlerini göstermelidir;
+aksi hâlde sonraki dokuz görevin her biri kirli bir çalışma ağacıyla başlar.
+`.gitignore`'a ekle:
+
+```
+__pycache__/
+*.pyc
+```
+
+- [ ] **Step 7: Commit**
 
 ```bash
-git add requirements.txt pytest.ini tools/__init__.py tools/atw/__init__.py tools/atw/ids.py tests/conftest.py tests/schema_tests/
+git add requirements.txt pytest.ini .gitignore tools/__init__.py tools/atw/__init__.py tools/atw/ids.py tests/conftest.py tests/schema_tests/
 git commit -m "feat: kimlik uretimi cekirdegi, pytest altyapisi ve ortak test yardimcilari"
 ```
 
