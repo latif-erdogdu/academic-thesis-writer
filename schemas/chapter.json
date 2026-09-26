@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/chapter.json",
+  "title": "Bölüm",
+  "description": "Tez bölümü (chapter) kaydı. Paragrafları içeren konteynerdir.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "number", "title"],
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": {
+      "type": "string",
+      "pattern": "^CH-\\d{3,}$",
+      "description": "Bölüm kimliği: CH-001, CH-002, ..."
+    },
+    "number": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Bölüm sırası (1, 2, 3...)"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Bölüm başlığı"
+    },
+    "goal": {
+      "type": ["string", "null"],
+      "description": "Bölümün hedefi/amacı (isteğe bağlı)"
+    },
+    "paragraphs": {
+      "type": "array",
+      "description": "Bu bölüme ait paragraflar",
+      "items": {
+        "$ref": "paragraph.json"
+      }
+    }
+  },
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Bu kayit gercek bir bolumu temsil etmez; sadece sema dogrulamak icin kullanilir.",
+      "id": "CH-001",
+      "number": 1,
+      "title": "Giris",
+      "goal": "Arastirma sorusunu ve kapsami tanimlamak",
+      "paragraphs": [
+        {
+          "id": "P-001",
+          "chapter": "CH-001",
+          "section": "1.1",
+          "type": "introduction",
+          "text": "Kurgusal giris paragrafi.",
+          "claims": [],
+          "evidence": [],
+          "sources": [],
+          "citations": [],
+          "research_questions": ["RQ-001"]
+        }
+      ]
+    }
+  ]
+}

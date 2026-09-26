@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/variable.json",
+  "title": "Değişken",
+  "description": "Araştırma değişkeni tanımı ve operasyonalleştirmesi.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "operationalization"],
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": {
+      "type": "string",
+      "pattern": "^VAR-\\d{3,}$",
+      "description": "Değişken kimliği: VAR-001, VAR-002, ..."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Değişken adı"
+    },
+    "definition": {
+      "type": ["string", "null"],
+      "description": "Değişkenin teorik tanımı (isteğe bağlı)"
+    },
+    "operationalization": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Değişkenin nasıl ölçüleceği/operasyonalleştirileceği"
+    },
+    "measurement_scale": {
+      "type": ["string", "null"],
+      "description": "Ölçek türü: nominal, ordinal, interval, ratio (isteğe bağlı)"
+    },
+    "value_type": {
+      "type": ["string", "null"],
+      "description": "Değer türü: continuous, categorical, binary (isteğe bağlı)"
+    },
+    "dataset_ids": {
+      "type": "array",
+      "description": "Bu değişkeni içeren veri kümeleri",
+      "items": {
+        "type": "string",
+        "pattern": "^DS-\\d{3,}$"
+      }
+    },
+    "claim_ids": {
+      "type": "array",
+      "description": "Bu değişkene atıfta bulunan iddialar",
+      "items": {
+        "type": "string",
+        "pattern": "^CLM-\\d{3,}$"
+      }
+    }
+  },
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Bu kayit gercek bir degiskeni temsil etmez; sadece sema dogrulamak icin kullanilir.",
+      "id": "VAR-001",
+      "name": "motivasyon_puani",
+      "definition": "Ogretmen motivasyonunun olculmesi icin kullanilan olcek puani",
+      "operationalization": "5-noktalik Likert olcegi ile olculen motivasyon puani (1=Cok Dusuk, 5=Cok Yuksek)",
+      "measurement_scale": "interval",
+      "value_type": "continuous",
+      "dataset_ids": ["DS-001"],
+      "claim_ids": ["CLM-001"]
+    }
+  ]
+}

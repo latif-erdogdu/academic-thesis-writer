@@ -27,6 +27,8 @@ ID_PREFIXES: Final[dict[str, str]] = {
     "STAT": "statistic",
     "TBL": "table",
     "FIG": "figure",
+    "CH": "chapter",
+    "VAR": "variable",
 }
 
 _ID_PATTERN: Final = re.compile(r"^(?P<prefix>[A-Z]+)-(?P<number>\d{3,})$")

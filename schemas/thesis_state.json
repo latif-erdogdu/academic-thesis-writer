@@ -58,10 +58,12 @@
       "type": "string"
     },
     "created_at": {
-      "type": "string"
+      "type": "string",
+      "format": "date-time"
     },
     "updated_at": {
-      "type": "string"
+      "type": "string",
+      "format": "date-time"
     },
     "version": {
       "type": "integer",
@@ -77,43 +79,7 @@
     "hypotheses": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": [
-          "id",
-          "text",
-          "status"
-        ],
-        "properties": {
-          "id": {
-            "$ref": "#/$defs/id",
-            "pattern": "^HYP-\\d{3,}$"
-          },
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "related_research_questions": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "pattern": "^RQ-\\d{3,}$"
-            }
-          },
-          "status": {
-            "enum": [
-              "supported",
-              "rejected",
-              "pending"
-            ]
-          },
-          "finding_ids": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "pattern": "^FND-\\d{3,}$"
-            }
-          }
-        }
+        "$ref": "hypothesis.json"
       }
     },
     "conceptual_framework": {
@@ -149,7 +115,7 @@
     "chapters": {
       "type": "array",
       "items": {
-        "type": "object"
+        "$ref": "chapter.json"
       }
     },
     "evidence_registry": {
@@ -251,7 +217,7 @@
     "variables": {
       "type": "array",
       "items": {
-        "type": "object"
+        "$ref": "variable.json"
       }
     },
     "open_questions": {

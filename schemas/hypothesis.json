@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/hypothesis.json",
+  "title": "Hipotez",
+  "description": "Araştırma hipotezi ve ilişkili bulgular/araştırma soruları.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "text", "status"],
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": {
+      "type": "string",
+      "pattern": "^HYP-\\d{3,}$",
+      "description": "Hipotez kimliği: HYP-001, HYP-002, ..."
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Hipotez metni"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "supported", "rejected", "inconclusive", "not_tested"],
+      "description": "Hipotez durumu"
+    },
+    "related_research_questions": {
+      "type": "array",
+      "description": "Bu hipotezi test eden araştırma soruları",
+      "items": {
+        "type": "string",
+        "pattern": "^RQ-\\d{3,}$"
+      }
+    },
+    "finding_ids": {
+      "type": "array",
+      "description": "Bu hipotezi destekleyen/çürüten bulgular",
+      "items": {
+        "type": "string",
+        "pattern": "^FND-\\d{3,}$"
+      }
+    }
+  },
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Bu kayit gercek bir hipotezi temsil etmez; sadece sema dogrulamak icin kullanilir.",
+      "id": "HYP-001",
+      "text": "Yeni ogretim yontemi ogrenci basarisini artirir.",
+      "status": "pending",
+      "related_research_questions": ["RQ-001"],
+      "finding_ids": ["FND-001"]
+    }
+  ]
+}

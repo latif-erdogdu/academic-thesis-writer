@@ -12,7 +12,7 @@
       "id": "RQ-001",
       "text": "Kurgusal ornek arastirma sorusu: yontemin etkisi nedir?",
       "type": "main",
-      "chapter": "1",
+      "chapter": "CH-001",
       "method": "Kurgusal yontem",
       "status": "pending",
       "hypothesis_ids": ["HYP-001"],
@@ -28,7 +28,7 @@
     "id": { "type": "string", "pattern": "^RQ-\\d{3,}$" },
     "text": { "type": "string", "minLength": 1 },
     "type": { "enum": ["main", "sub"] },
-    "chapter": { "type": "string" },
+    "chapter": { "type": "string", "pattern": "^CH-\\d{3,}$" },
     "method": { "type": "string" },
     "status": {
       "enum": ["answered", "pending", "partially_answered", "dropped"]

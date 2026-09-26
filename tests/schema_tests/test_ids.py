@@ -46,11 +46,11 @@ def test_is_valid_id_alan_ayirt_edici_degil():
     assert is_valid_id("") is False
 
 
-def test_id_prefixes_onsekiz_ogeyi_kapsar():
-    assert len(ID_PREFIXES) == 18
+def test_id_prefixes_yirmi_ogeyi_kapsar():
+    assert len(ID_PREFIXES) == 20
     for beklenen in ["SRC", "EVD", "CLM", "CIT", "P", "RQ", "HYP", "FND",
                       "DSC", "CON", "GAP", "AUD", "SEARCH", "DS", "ANL",
-                      "STAT", "TBL", "FIG"]:
+                      "STAT", "TBL", "FIG", "CH", "VAR"]:
         assert beklenen in ID_PREFIXES
 
 

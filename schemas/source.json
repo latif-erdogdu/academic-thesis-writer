@@ -97,7 +97,7 @@
         "title_match": { "type": ["boolean", "null"] },
         "year_match": { "type": ["boolean", "null"] },
         "journal_match": { "type": ["boolean", "null"] },
-        "verified_at": { "type": "string" },
+        "verified_at": { "type": "string", "format": "date-time" },
         "verification_sources": {
           "type": "array",
           "items": { "enum": ["crossref", "openalex", "semantic_scholar", "manual"] }
@@ -118,7 +118,8 @@
     "edition": { "type": "string" },
     "isbn": { "type": "string" },
     "location_verified": { "type": "boolean", "default": false },
-    "access_date": { "type": ["string", "null"] },
+    "fulltext_available": { "type": ["boolean", "null"] },
+    "access_date": { "type": ["string", "null"], "format": "date" },
     "language": { "type": "string" },
     "peer_reviewed": { "type": ["boolean", "null"] }
   }
