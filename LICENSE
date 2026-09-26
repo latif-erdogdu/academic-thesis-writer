@@ -1,0 +1,62 @@
+Academic Thesis Writer — License
+=================================
+
+Copyright (c) 2026 latif-erdogdu
+
+Bu yazılım ("Academic Thesis Writer") akademik araştırma ve tez yazımı
+amaçlı olarak geliştirilmiştir.
+
+İzinler
+-------
+
+Aşağıdaki koşullar altında kullanım, kopyalama, değiştirme, birleştirme,
+yayınlama, dağıtma, alt lisanslama ve/veya kopyalarını satma serbesttir:
+
+1. **Akademik Kullanım**: Bu yazılım akademik araştırma, tez, disertasyon,
+   makale ve benzeri bilimsel çalışmalar için serbestçe kullanılabilir.
+
+2. **Ticari Kullanım**: Ticari amaçlı kullanım (danışmanlık, hizmet satışı,
+   ürün entegrasyonu vb.) için yazılı izin gerekir.
+
+3. **Kaynak Gösterimi**: Herhangi bir kopyada veya önemli bölümde bu lisans
+   metni ve telif hakkı bildirimi yer almalıdır.
+
+Koşullar
+--------
+
+- **Kaynak Doğrulama Zorunluluğu**: Bu sistemle üretilen her akademik çalışmada
+  kullanılan kaynakların doğrulanabilir olması (DOI, ISBN, PMID vb.),
+  en az iki bağımsız veritabanıyla teyit edilmesi şarttır.
+
+- **Atıf Bütünlüğü**: APA 7 (veya seçilen stil) kurallarına uygun atıf
+  yapılması, sahte/uygurma atıf yapılmaması zorunludur.
+
+- **Etik Uyum**: Akademik dürüstlük prensipleri (intihal yapmamak,
+  veri uydurmamak, yazarlık sıralaması için katkı sağlamamak) gözetilmelidir.
+
+- **Veri Bütünlüğü**: Kanıt zincirleri (RQ → İddia → Kanıt → Kaynak)
+  kopuk bırakılmamalı, her önemli iddia en az bir doğrulanmış kanıtla
+  desteklenmelidir.
+
+Sorumluluk Reddi
+----------------
+
+BU YAZILIM "OLDUĞU GİBİ" SAĞLANIR, HERHANGİ BİR AÇIK VEYA KAPALI GARANTİSİ
+YOKTUR. YAZARLAR VE TELİF HAKKI SAHİPLERİ, YAZILIMIN KULLANIMINDAN
+DOĞAN HERHANGİ BİR İDDİA, ZARAR VEYA DİĞER SORUMLULUKTAN MUAFTIR.
+
+Akademik Kullanım Özel Şartı
+----------------------------
+
+Bu yazılımla üretilen her tez, makale veya akademik çalışma:
+- Kaynakça ve atıfların doğruluğu yazar sorumluluğundadır
+- Kaynak doğrulama motoru (Crossref, OpenAlex, PubMed vb.) bir araçtır,
+  nihai doğrulama yazarına aittir
+- "AI detection/humanizer" amaçlı KULLANILMAZ; akademik kalite ve
+  doğruluk odaklıdır
+
+İletişim
+--------
+
+Sorular ve izin talepleri için: GitHub Issues
+https://github.com/latif-erdogdu/academic-thesis-writer
