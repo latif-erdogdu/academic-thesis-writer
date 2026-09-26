@@ -3,6 +3,20 @@
 ## Görev
 Tez boyunca tutarlılık denetimi yap.
 
+## Girdi
+
+| Alan | Kaynak |
+|------|--------|
+| Tanımlar | `thesis_state.definitions` — terminoloji denetimi |
+| Değişkenler | `thesis_state.variables` |
+| Araştırma soruları | `thesis_state.research_questions` |
+| Hipotezler | `thesis_state.hypotheses` |
+| Yöntem ve analiz | `thesis_state.methodology`, `thesis_state.analyses` |
+| Kanıt zinciri | `thesis_state.evidence_registry`, `claims_registry`, `findings_registry`, `discussion_registry`, `conclusion_registry` |
+| Tablo, şekil, istatistik | `thesis_state.tables`, `thesis_state.figures`, `thesis_state.statistics` |
+| Atıf ve kaynakça | `thesis_state.citations`, `thesis_state.sources` |
+| Araştırma boşluğu | `thesis_state.gap_registry` |
+
 ## Denetim Listesi
 [01] Terminoloji
 [02] Araştırma Soruları

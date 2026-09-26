@@ -3844,7 +3844,7 @@ git commit -m "test: kurgusal fixture seti ve sema dogrulama testleri eklendi, x
 - Consumes: şema alan adları (Tasks 4-6), `schemas/claim.json` ve `schemas/source.json` alanları
 - Produces: 2 ajan dosyası + `SKILL.md`'de 10 ajanın tamamını adlandıran tablo
 
-- [ ] **Step 1: Testleri yaz**
+- [x] **Step 1: Testleri yaz**
 
 `tests/schema_tests/test_agent_files.py`:
 ```python
@@ -3993,7 +3993,7 @@ def test_skill_md_yeni_sema_dosyalarini_adlandirir():
         assert sema in metin, f"SKILL.md '{sema}' semasini adlandirmiyor"
 ```
 
-- [ ] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
+- [x] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_agent_files.py -v`
 Expected: FAIL — 20 hata. Bunlar:
@@ -4003,7 +4003,7 @@ Expected: FAIL — 20 hata. Bunlar:
 - `test_celiski_ajani_kimlikleri_kullanir`, `test_butunluk_ajani_retraksiyonu_denetler`, `test_butunluk_ajani_kanitsiz_iddiyi_reddeder` — dosya yok
 - `test_skill_md_*` (3 adet) — `SKILL.md` yeni ajan, referans ve şemaları adlandırmıyor
 
-- [ ] **Step 3: `contradiction-analyzer.md` dosyasını yaz**
+- [x] **Step 3: `contradiction-analyzer.md` dosyasını yaz**
 
 `agents/contradiction-analyzer.md`:
 ```markdown
@@ -4123,7 +4123,7 @@ her birini tek tek karşılaştır. Farklı olan boyut çelişkinin kaynağıdı
 - `schemas/research_gap.json` — çelişkiden boşluk üretimi
 ```
 
-- [ ] **Step 4: `integrity-auditor.md` dosyasını yaz**
+- [x] **Step 4: `integrity-auditor.md` dosyasını yaz**
 
 `agents/integrity-auditor.md`:
 ```markdown
@@ -4273,7 +4273,7 @@ Denetim kaydı `audit.json` şemasına uygun olmalıdır:
 - `schemas/source.json` — doğrulama ve retraksiyon alanları
 ```
 
-- [ ] **Step 5: Altı mevcut ajana `## Girdi` bölümü ekle**
+- [x] **Step 5: Altı mevcut ajana `## Girdi` bölümü ekle**
 
 Altı ajan (`source-verifier`, `evidence-extractor`, `gap-analyzer`,
 `citation-auditor`, `methodology-auditor`, `consistency-auditor`) çıktılarını
@@ -4378,7 +4378,7 @@ python -m pytest tests/schema_tests/test_agent_files.py -v -k "girdi_bolumu"
 Yalnızca `test_skill_md_*` ve iki yeni ajanın `var` testleri kalmalıdır;
 `girdi_bolumu` testleri 10 ajanın tamamı için geçmelidir.
 
-- [ ] **Step 6: `SKILL.md`'yi yeni ajan ve referanslarla güncelle**
+- [x] **Step 6: `SKILL.md`'yi yeni ajan ve referanslarla güncelle**
 
 `SKILL.md` dosyasındaki ajan listesini şu hâle getir (mevcut liste 8 ajan içeriyor; iki yeni ajan ekleniyor):
 
@@ -4416,7 +4416,7 @@ Yalnızca `test_skill_md_*` ve iki yeni ajanın `var` testleri kalmalıdır;
 - `schemas/figure.json` - Şekil
 ```
 
-- [ ] **Step 7: Testleri çalıştır, geçtiğini doğrula**
+- [x] **Step 7: Testleri çalıştır, geçtiğini doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_agent_files.py -v`
 Expected: PASS — 46 test (4 parametrik × 10 ajan = 40, + 3 ajan içerik, + 3 SKILL.md)
@@ -4430,7 +4430,7 @@ Expected: PASS — 46 test (4 parametrik × 10 ajan = 40, + 3 ajan içerik, + 3 
 > deseni genişletmeden önce **o eşleşmeyi oku**; sürüm ibaresi
 > değilse deseni düzelt, ibare ise dosyayı düzelt.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add agents/ SKILL.md tests/schema_tests/test_agent_files.py

@@ -3,6 +3,16 @@
 ## Görev
 Literatür matrisi üzerinden araştırma boşluklarını çıkar.
 
+## Girdi
+
+| Alan | Kaynak |
+|------|--------|
+| Literatür matrisi | `literature_matrix.md` — tema, örneklem, yöntem ve sonuç sütunları |
+| Kaynaklar | `thesis_state.sources` |
+| Kanıtlar | `thesis_state.evidence_registry` |
+| İddialar | `thesis_state.claims_registry` |
+| Var olan boşluklar | `thesis_state.gap_registry` — yinelenen boşluk üretmemek için |
+
 ## Akış
 Literatür Matrisi
   ↓

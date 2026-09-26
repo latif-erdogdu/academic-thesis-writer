@@ -17,10 +17,12 @@ Bu skill orchestrator (koordinatör) görevi görür. Alt ajanlar:
 - agents/source-verifier.md
 - agents/evidence-extractor.md
 - agents/gap-analyzer.md
+- agents/contradiction-analyzer.md
 - agents/writer.md
 - agents/citation-auditor.md
 - agents/methodology-auditor.md
 - agents/consistency-auditor.md
+- agents/integrity-auditor.md
 
 Temel görevin yalnızca akademik görünümlü metin üretmek değildir.
 
@@ -311,6 +313,17 @@ Minimum veri:
 - `schemas/paragraph.json` - Paragraf şeması
 - `schemas/research_question.json` - Araştırma sorusu şeması
 - `schemas/audit.json` - Denetim şeması
+- `schemas/citation.json` - Atıf kaydı
+- `schemas/research_gap.json` - Araştırma boşluğu
+- `schemas/finding.json` - Bulgu
+- `schemas/discussion.json` - Tartışma
+- `schemas/conclusion.json` - Sonuç
+- `schemas/search_run.json` - PRISMA arama kaydı
+- `schemas/statistic.json` - İstatistik
+- `schemas/dataset.json` - Veri kümesi
+- `schemas/analysis.json` - Analiz
+- `schemas/table.json` - Tablo
+- `schemas/figure.json` - Şekil
 
 ---
 
@@ -321,6 +334,8 @@ Minimum veri:
 - `references/evidence_rules.md` - Kanıt kuralları
 - `references/academic_integrity.md` - Akademik dürüstlük prensipleri
 - `references/research_gap.md` - Araştırma boşluğu kuralları
+- `references/systematic_review_protocol.md` - Sistematik derleme protokolü
+- `references/methodology_rules.md` - Yöntem denetim kuralları
 
 ---
 

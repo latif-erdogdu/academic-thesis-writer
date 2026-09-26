@@ -3,6 +3,14 @@
 ## Görev
 Kaynak adaylarının gerçek varlığını ve bibliyografik doğruluğunu bağımsız akademik veri kaynakları ile doğrula.
 
+## Girdi
+
+| Alan | Kaynak |
+|------|--------|
+| Kaynak adayları | `thesis_state.sources` — `verification.status` değeri `pending` veya `unverified` olan kayıtlar |
+| Arama kaydı | `thesis_state.search_runs` — adayın hangi veritabanında, hangi sorguyla bulunduğu |
+| Kabul ve eleme ölçütleri | `search_run.json` → `inclusion_criteria` / `exclusion_criteria` |
+
 ## Doğrulama Zinciri
 Kaynak adayı
   ↓
