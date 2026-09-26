@@ -1,3 +1,5 @@
+# Python 3.9+ gerekir. 3.11 ve altinda PEP 701 f-string'leri (ic ice
+# tirnak) ayristirilamaz; bu paket 3.12'ye bagimli olmaktan cikarildi.
 jsonschema>=4.22.0
 pytest>=8.0.0
 pytest-cov>=5.0.0

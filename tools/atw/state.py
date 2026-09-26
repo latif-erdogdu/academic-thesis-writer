@@ -8,11 +8,12 @@ tutar. Semalarin Python karsiliklari burada tanimlanmaz.
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
 SCHEMA_DIR: Path = Path(__file__).resolve().parents[2] / "schemas"
@@ -47,6 +48,24 @@ _REGISTRY_FIELDS: dict[str, str] = {
     "tables": "table",
     "figures": "figure",
 }
+
+
+# `format` kisitlarini gercekten zorlayan denetleyici. Baglanmazsa
+# jsonschema "date-time" gibi anahtarlari tanimaz ve sessizce gecer.
+_FORMAT_CHECKER = FormatChecker()
+
+# jsonschema default FormatChecker 'date-time' icermez (sadece 'date' ve 'time').
+# RFC 3339 date-time: YYYY-MM-DDTHH:MM:SS(Z|+/-HH:MM)
+_RFC3339_DATETIME = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$"
+)
+
+
+@_FORMAT_CHECKER.checks("date-time")
+def _rfc3339_datetime_checker(value: str) -> bool:
+    if not isinstance(value, str):
+        return False
+    return bool(_RFC3339_DATETIME.match(value))
 
 
 def _utc_now() -> str:
@@ -89,7 +108,11 @@ def schema_registry() -> Registry:
 
 
 def _state_validator() -> Draft202012Validator:
-    return Draft202012Validator(load_schema("thesis_state.json"), registry=schema_registry())
+    return Draft202012Validator(
+        load_schema("thesis_state.json"),
+        registry=schema_registry(),
+        format_checker=_FORMAT_CHECKER,
+    )
 
 
 def empty_state(thesis_id: str, title: str = "") -> dict[str, Any]:
@@ -246,27 +269,27 @@ def validate_prisma_flow(flow: dict[str, Any]) -> list[str]:
     sol = sayi("records_identified", 0) - sayi("duplicates_removed", 0)
     if sol != sayi("records_screened", 0):
         hatalar.append(
-            f"records_identified({sayi("records_identified", 0)}) - "
-            f"duplicates_removed({sayi("duplicates_removed", 0)}) = {sol}, "
-            f"ancak records_screened = {sayi("records_screened", 0)}"
+            f"records_identified({sayi('records_identified', 0)}) - "
+            f"duplicates_removed({sayi('duplicates_removed', 0)}) = {sol}, "
+            f"ancak records_screened = {sayi('records_screened', 0)}"
         )
 
     sol = sayi("records_screened", 0) - sayi("records_excluded", 0)
     if sol != sayi("reports_sought", 0):
         hatalar.append(
-            f"records_screened({sayi("records_screened", 0)}) - "
-            f"records_excluded({sayi("records_excluded", 0)}) = {sol}, "
-            f"ancak reports_sought = {sayi("reports_sought", 0)}"
+            f"records_screened({sayi('records_screened', 0)}) - "
+            f"records_excluded({sayi('records_excluded', 0)}) = {sol}, "
+            f"ancak reports_sought = {sayi('reports_sought', 0)}"
         )
 
     sol = sayi("reports_sought", 0) - sayi("reports_not_retrieved", 0)
     sag = sayi("reports_excluded", 0) + sayi("studies_included", 0)
     if sol != sag:
         hatalar.append(
-            f"reports_sought({sayi("reports_sought", 0)}) - "
-            f"reports_not_retrieved({sayi("reports_not_retrieved", 0)}) = {sol}, "
-            f"ancak reports_excluded({sayi("reports_excluded", 0)}) + "
-            f"studies_included({sayi("studies_included", 0)}) = {sag}"
+            f"reports_sought({sayi('reports_sought', 0)}) - "
+            f"reports_not_retrieved({sayi('reports_not_retrieved', 0)}) = {sol}, "
+            f"ancak reports_excluded({sayi('reports_excluded', 0)}) + "
+            f"studies_included({sayi('studies_included', 0)}) = {sag}"
         )
 
     return hatalar
