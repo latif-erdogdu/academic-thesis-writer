@@ -50,8 +50,9 @@ Her atıf için şunları dahil edin:
 
 ## Özel Durumlar
 ### Çoklu Yazarlar
-- 2 yazara kadar: Tümünü listeleyin (Yazar, A. A., & Yazar, B. B.)
-- 3+ yazar: APA'da ikinci yazardan sonra et al. kullanın
+- 2 yazar: Her ikisini listeleyin (Yazar, A. A., & Yazar, B. B.)
+- 3–20 yazar: İlk atıfta tümü; sonraki atıflarda 1. yazar + et al.; kaynakça listede tümü
+- 21+ yazar: İlk 19 yazar + ... + son yazar; atıflarda 1. yazar + et al.
 
 ### Tarih Mevcut Değilse
 - "n.d." tarih bilgisi yoksa kullanın

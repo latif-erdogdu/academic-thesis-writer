@@ -70,7 +70,10 @@ academic-thesis-writer/
 │   ├── dataset.json                  # Veri kümesi
 │   ├── analysis.json                 # Analiz
 │   ├── table.json                    # Tablo
-│   └── figure.json                   # Şekil
+│   ├── figure.json                   # Şekil
+│   ├── chapter.json                  # Bölüm
+│   ├── variable.json                 # Değişken
+│   └── hypothesis.json               # Hipotez
 │
 ├── templates/                        # Şablonlar
 │   ├── thesis_structure.md           # Tez bölüm yapısı
@@ -88,6 +91,8 @@ academic-thesis-writer/
 └── tests/                            # Test senaryoları
     ├── fixtures/                     # Kurgusal örnek kayıtlar
     ├── schema_tests/                 # Şema ve durum testleri
+    ├── contract_tests/               # Sözleşme testleri (ajan blokları)
+    ├── unit_tests/                   # Birim testleri (graph, ids, state)
     └── integration_tests/            # Uçtan uca bütünlük testleri
 ```
 
@@ -155,6 +160,8 @@ Denetim?
 | **Yöntem Denetçisi** | Araştırma sorusu ↔ yöntem uyumu (RQ2 nitel ama yöntem nicel → hata) |
 | **Tutarlılık Denetçisi** | 20 madde: terminoloji, sayılar, tarihler, örneklem, yöntem, bulgular, sonuçlar, atıflar, bölümler arası referanslar, araştırma boşluğu |
 | **Bütünlük Denetçisi** | Uydurma kaynak, kanıtsız iddia, geri çekilmiş kaynak kullanımı, kopuk atıf |
+
+**Toplam: 10 ajan**
 
 ## P0-1: Çekirdek ve Veri Modeli
 
@@ -248,13 +255,14 @@ Her bölüm için (`workflows/chapter_writing.md`):
 - ✅ **Kaynak doğrulama motoru**: Crossref + OpenAlex + Semantic Scholar (en az 2 bağımsız kaynak)
 - ✅ **PDF → Kanıt sistemi**: Sayfa/bölüm/alıntı/yorum zinciri (İddia → Makale → Sayfa → Bölüm → Kanıt)
 - ✅ **Araştırma Boşluğu Motoru**: Tema → Benzer/Çelişen → Eksiklikler → Boşluk (kanıtla)
-- ✅ **Bilgi Grafiği**: RQ → İddia → Kanıt → Kaynak → Bölüm → Paragraf → Atıf → Kaynakça + RQ → Yöntem → Analiz → Bulgular → Tartışma → Sonuç
+- ✅ **Bilgi Grafiği**: 59 referans kenarı, 19 registry alanı; RQ → İddia → Kanıt → Kaynak → Bölüm → Paragraf → Atıf → Kaynakça + RQ → Yöntem → Analiz → Bulgular → Tartışma → Sonuç
 - ✅ **Sistematik İnceleme Protokolü**: PRISMA uyumlu 11 aşamalı akış
 - ✅ **Genişletilmiş Literatür Matrisi**: 19 sütun (Ülke, Tasarım, Bağımsız/Bağımlı Değişkenler, Alet, Analiz, Teorik Çerçeve, Kanıt Konumu)
 - ✅ **Paragraf metadata**: P-XXX etiketleme ile iddia-kanıt-kaynak-RQ eşleşmesi
 - ✅ **Çoklu atıf stili**: APA, MLA, Chicago, IEEE, Harvard
 - ✅ **Tez Durumu persistence**: Oturumlar arası tutarlılık (JSON)
-- ✅ **Orchestrator mimarisi**: SKILL koordinatör, 8 modüler ajan
+- ✅ **Orchestrator mimarisi**: SKILL koordinatör, 10 modüler ajan
+- ✅ **4 araç arayüzü**: source_search, source_verify, pdf_extract, citation_check
 - ✅ **4 bileşenli denetim**: Terminoloji, Sayılar, Örneklem, Yöntem-Bulgular
 - ✅ **Kalite denetim raporu**: Yapısal, atıf, metodoloji, tutarlılık, akademik yazım
 
@@ -264,8 +272,8 @@ Her bölüm için (`workflows/chapter_writing.md`):
 # Repo'yu klonla
 git clone https://github.com/latif-erdogdu/academic-thesis-writer.git
 
-# Thesis State'i başlat
-cp schemas/thesis_state.json thesis_state.json
+# Thesis State'i başlat (cross-platform)
+python -c "import shutil; shutil.copy('schemas/thesis_state.json', 'thesis_state.json')"
 
 # İlk tez için bilgileri doldur
 # workflows/thesis_creation.md akışını takip et
@@ -274,20 +282,20 @@ cp schemas/thesis_state.json thesis_state.json
 ## 📖 Dokümantasyon
 
 - [SKILL.md](./SKILL.md) - Orchestrator: Agent mimarisi, mimari, bilgi grafiği, kurallar
-- [agents/](./agents/) - 8 alt ajan tanımı
+- [agents/](./agents/) - 10 alt ajan tanımı
 - [workflows/](./workflows/) - 8 çalışma akışı
 - [templates/](./templates/) - 5 kullanıma hazır şablon
-- [schemas/](./schemas/) - 7 veri şeması (JSON)
-- [references/](./references/) - 5 akademik bütünlük referansı
+- [schemas/](./schemas/) - 21 veri şeması (JSON)
+- [references/](./references/) - 7 akademik bütünlük referansı
 - [tools/](./tools/) - 4 araç arayüzü
-- [tests/](./tests/) - 4 test kategorisi
+- [tests/](./tests/) - 5 test kategorisi
 
 ## 🤝 Katkı
 
 Bu proje akademik dürüstlük ve kaynak doğrulanabilirliği ilkelerine bağlıdır. Katkı yapmadan önce:
 
 1. Kaynak uydurma yapmayın
-2. Mevcut mimariyi koruyun (Orchestrator + 8 ajan)
+2. Mevcut mimariyi koruyun (Orchestrator + 10 ajan)
 3. Thesis State tutarlılığını gözetin
 4. Evidence Gate ve Writing Gate prensiplerine uyun
 5. Testleri güncelleyin/ekleyin
