@@ -1,53 +1,69 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/research_gap.json",
-  "title": "Ara Aralik",
-  "description": "Tezin aralik tanimi olarak kabul edilir bir research gap kaydi.",
+  "title": "Arastirma Boslugu",
+  "description": "Mevcut calismalarin cevaplamadigi belirli bir soru. 'Bu konuda az calisma var' bir bosluk degildir.",
   "type": "object",
-  "required": [
-    "id",
-    "text",
-    "gap_type"
-  ],
+  "additionalProperties": false,
+  "required": ["id", "statement", "gap_type", "evidence_ids", "confidence"],
   "examples": [
     {
-      "$comment": "KURGUSAL ORNEK. Gercek bir aralik tanimi temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "$comment": "KURGUSAL ORNEK. Metin uydurmadir.",
       "id": "GAP-001",
-      "text": "Orijinal bir aralik tanimi metni.",
-      "gap_type": "methodological",
-      "related_claim": "CLM-001",
-      "context": "Tezin metodolojik kısımlarinda eksik gozuken bir alandir.",
-      "priority": "high",
-      "title": "Orikal Aralik"
+      "statement": "Kurgusal ornek: mevcut calismalar belirli bir parcayi birlikte incelememistir.",
+      "gap_type": "unanswered_question",
+      "dimension": "population",
+      "evidence_ids": ["EVD-001"],
+      "supporting_source_ids": ["SRC-001"],
+      "contradicting_source_ids": [],
+      "conflicting_claim_ids": [],
+      "related_research_questions": ["RQ-001"],
+      "confidence": "moderate",
+      "notes": ""
     }
   ],
   "properties": {
-    "id": {
-      "type": "string",
-      "pattern": "^GAP-\\d{3,}$"
-    },
-    "text": {
-      "type": "string",
-      "minLength": 1
-    },
+    "$comment": { "type": "string" },
+    "id": { "type": "string", "pattern": "^GAP-\\d{3,}$" },
+    "statement": { "type": "string", "minLength": 1 },
     "gap_type": {
       "enum": [
+        "unanswered_question",
         "methodological",
+        "population",
+        "geographical",
+        "temporal",
         "theoretical",
-        "empirical",
-        "practical",
-        "data_gap"
+        "measurement",
+        "measurement_instrument",
+        "sample",
+        "contradictory_findings",
+        "unjustified_assumption",
+        "unexamined_implication"
       ]
     },
-    "related_claim": {
-      "type": "string",
-      "pattern": "^CLM-\\d{3,}$"
+    "dimension": {
+      "type": ["string", "null"],
+      "enum": ["population", "method", "sample", "country", "year",
+               "measurement", "statistical_power", "theory", null]
     },
-    "context": {
-      "type": "string"
+    "evidence_ids": {
+      "type": "array", "minItems": 1,
+      "items": { "type": "string", "pattern": "^EVD-\\d{3,}$" }
     },
-    "priority": {
-      "type": "string"
-    }
+    "supporting_source_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^SRC-\\d{3,}$" }
+    },
+    "contradicting_source_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^SRC-\\d{3,}$" }
+    },
+    "conflicting_claim_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^CLM-\\d{3,}$" }
+    },
+    "related_research_questions": {
+      "type": "array", "items": { "type": "string", "pattern": "^RQ-\\d{3,}$" }
+    },
+    "confidence": { "enum": ["low", "moderate", "high"] },
+    "notes": { "type": "string" }
   }
 }

@@ -1,74 +1,37 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/citation.json",
-  "title": "Atf",
-  "description": "Tezin bir atfi veya alinti kaydi.",
+  "title": "Atif",
+  "description": "Tek bir paragrafta tek bir kaynaga yapilan atif. Kaynak degil, atif edis yeridir.",
   "type": "object",
-  "required": [
-    "id",
-    "text",
-    "citation_type"
-  ],
+  "additionalProperties": false,
+  "required": ["id", "paragraph_id", "source_id", "style"],
   "examples": [
     {
-      "$comment": "KURGUSAL ORNEK. Gercek bir atfi temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "$comment": "KURGUSAL ORNEK. Kaynak uydurmadir.",
       "id": "CIT-001",
-      "text": "Kurgusal bir atfi metni.",
-      "citation_type": "article",
+      "paragraph_id": "P-001",
       "source_id": "SRC-001",
-      "author": "Orman, A.",
-      "title": "Kurgusal Bir Calisma Uzerine Bir Inceleme",
-      "journal": "Kurgusal Dergi",
-      "year": 2023,
-      "doi": "10.5555/kurgusal.ornek.2023.001",
-      "page_numbers": null
+      "page": 17,
+      "locator": "p. 17",
+      "style": "apa7",
+      "in_text_form": "(Orman ve Kaya, 2023, s. 17)",
+      "reference_entry": "Kurgusal kaynak girdisi.",
+      "verified": false
     }
   ],
   "properties": {
-    "id": {
-      "type": "string",
-      "pattern": "^CIT-\\d{3,}$"
+    "$comment": { "type": "string" },
+    "id": { "type": "string", "pattern": "^CIT-\\d{3,}$" },
+    "paragraph_id": { "type": "string", "pattern": "^P-\\d{3,}$" },
+    "source_id": { "type": "string", "pattern": "^SRC-\\d{3,}$" },
+    "page": { "type": ["integer", "null"], "minimum": 1 },
+    "locator": { "type": "string" },
+    "style": {
+      "enum": ["apa7", "mla9", "chicago", "ieee", "harvard", "vancouver", "turkish"]
     },
-    "text": {
-      "type": "string",
-      "minLength": 1
-    },
-    "citation_type": {
-      "enum": [
-        "article",
-        "book",
-        "thesis",
-        "report",
-        "conference",
-        "preprint",
-        "other"
-      ]
-    },
-    "source_id": {
-      "type": "string",
-      "pattern": "^SRC-\\d{3,}$"
-    },
-    "author": {
-      "type": "string"
-    },
-    "title": {
-      "type": "string"
-    },
-    "journal": {
-      "type": "string"
-    },
-    "year": {
-      "type": "integer"
-    },
-    "doi": {
-      "type": "string",
-      "pattern": "^$|^10\\.\\d{4,9}/\\S+$"
-    },
-    "page_numbers": {
-      "type": [
-        "string",
-        "null"
-      ]
-    }
+    "in_text_form": { "type": "string" },
+    "reference_entry": { "type": "string" },
+    "verified": { "type": "boolean", "default": false }
   }
 }
