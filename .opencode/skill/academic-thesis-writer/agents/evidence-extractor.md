@@ -3,6 +3,17 @@
 ## Görev
 Doğrulanmış kaynaklardan iddia destekleyici kanıtları çıkar.
 
+## Girdi
+
+| Alan | Kaynak |
+|------|--------|
+| Kaynaklar | `thesis_state.sources` — yalnızca `verification.status` değeri `verified` veya `corrected` olanlar |
+| Aday iddialar | `thesis_state.claims_registry` — kanıt bekleyen iddialar |
+
+`verification.status` değeri `verified` veya `corrected` olmayan bir
+kaynaktan kanıt çıkarma. Böyle bir kaynakla çalışmak, kanıt zincirinin
+en zayıf halkasını doğrulamasız bırakır.
+
 ## Kanıt Kapısı (Evidence Gate)
 Bir iddia aşağıdaki koşullardan biri sağlanmadan final metne alınmaz:
 1. Doğrulanmış bir akademik kaynağa dayanması

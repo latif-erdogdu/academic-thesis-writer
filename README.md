@@ -26,17 +26,21 @@ academic-thesis-writer/
 │   ├── source-verifier.md            # Kaynak Doğrulayıcı Ajanı
 │   ├── evidence-extractor.md         # Kanıt Çıkarıcı Ajanı
 │   ├── gap-analyzer.md               # Boşluk Analizci Ajanı
+│   ├── contradiction-analyzer.md     # Çelişki Analisti
 │   ├── writer.md                     # Yazar Ajanı
 │   ├── citation-auditor.md           # Atıf Denetçisi Ajanı
 │   ├── methodology-auditor.md        # Yöntem Denetçisi Ajanı
-│   └── consistency-auditor.md        # Tutarlılık Denetçisi Ajanı
+│   ├── consistency-auditor.md        # Tutarlılık Denetçisi Ajanı
+│   └── integrity-auditor.md          # Bütünlük Denetçisi
 │
 ├── references/                       # Akademik bütünlük referansları
 │   ├── citation_rules.md             # Atıf kuralları (APA, MLA, Chicago, IEEE, Harvard)
 │   ├── source_verification.md        # Kaynak doğrulama süreçleri
 │   ├── evidence_rules.md             # Kanıt kuralları (Evidence Gate, Writing Gate)
 │   ├── academic_integrity.md         # Akademik dürüstlük prensipleri
-│   └── research_gap.md               # Araştırma boşluğu kuralları
+│   ├── research_gap.md               # Araştırma boşluğu kuralları
+│   ├── systematic_review_protocol.md # Sistematik derleme protokolü (PRISMA)
+│   └── methodology_rules.md          # Yöntem denetim kuralları (nicel/nitel/karma)
 │
 ├── workflows/                        # Çalışma akışları
 │   ├── thesis_creation.md            # Tez oluşturma akışı
@@ -48,14 +52,25 @@ academic-thesis-writer/
 │   ├── discussion.md                 # Tartışma yazımı
 │   └── thesis_audit.md               # Tez denetimi
 │
-├── schemas/                          # Veri şemaları (JSON)
+├── schemas/                          # Veri şemaları (JSON Schema draft 2020-12)
 │   ├── thesis_state.json             # Tez durumu takibi
 │   ├── source.json                   # Kaynak şeması
 │   ├── claim.json                    # İddia şeması
 │   ├── evidence.json                 # Kanıt şeması
 │   ├── paragraph.json                # Paragraf şeması
 │   ├── research_question.json        # Araştırma sorusu şeması
-│   └── audit.json                    # Denetim şeması
+│   ├── audit.json                    # Denetim şeması
+│   ├── citation.json                 # Atıf kaydı
+│   ├── research_gap.json             # Araştırma boşluğu
+│   ├── finding.json                  # Bulgu
+│   ├── discussion.json               # Tartışma
+│   ├── conclusion.json               # Sonuç
+│   ├── search_run.json               # PRISMA arama kaydı
+│   ├── statistic.json                # İstatistik
+│   ├── dataset.json                  # Veri kümesi
+│   ├── analysis.json                 # Analiz
+│   ├── table.json                    # Tablo
+│   └── figure.json                   # Şekil
 │
 ├── templates/                        # Şablonlar
 │   ├── thesis_structure.md           # Tez bölüm yapısı
@@ -71,15 +86,14 @@ academic-thesis-writer/
 │   └── citation_check/               # Atıf-kaynakça bütünlük denetimi
 │
 └── tests/                            # Test senaryoları
-    ├── source_tests/                 # Kaynak doğrulama testleri
-    ├── citation_tests/               # Atıf bütünlüğü testleri
-    ├── consistency_tests/            # Tutarlılık testleri
-    └── methodology_tests/            # Metodoloji testleri
+    ├── fixtures/                     # Kurgusal örnek kayıtlar
+    ├── schema_tests/                 # Şema ve durum testleri
+    └── integration_tests/            # Uçtan uca bütünlük testleri
 ```
 
 ## 🏗️ Mimarisi
 
-### Orchestrator + 8 Alt Ajan
+### Orchestrator + 10 Alt Ajan
 
 ```
                     ┌──────────────────────┐
@@ -135,10 +149,52 @@ Denetim?
 | **Kaynak Doğrulayıcı** | Crossref, OpenAlex, Semantic Scholar ile DOI/bibliyografik doğrulama |
 | **Kanıt Çıkarıcı** | Doğrulanmış PDF'lerden sayfa/bölüm düzeyinde kanıt çıkarma |
 | **Boşluk Analizci** | Literatür matrisinden araştırma boşluklarını çıkarma (yöntemsel, popülasyon, coğrafi, teorik) |
+| **Çelişki Analisti** | Aynı konuda farklı sonuçlara varan çalışmaları bulma, çelişkinin kaynağını boyut boyunca karşılaştırma |
 | **Yazar** | Sadece doğrulanmış girdilerle (kaynak+kanıt+iddia) tez bölümlerini yazma |
 | **Atıf Denetçisi** | Metin-kaynakça bütünlüğü, format, kaynak varlığı kontrolü |
 | **Yöntem Denetçisi** | Araştırma sorusu ↔ yöntem uyumu (RQ2 nitel ama yöntem nicel → hata) |
 | **Tutarlılık Denetçisi** | 20 madde: terminoloji, sayılar, tarihler, örneklem, yöntem, bulgular, sonuçlar, atıflar, bölümler arası referanslar, araştırma boşluğu |
+| **Bütünlük Denetçisi** | Uydurma kaynak, kanıtsız iddia, geri çekilmiş kaynak kullanımı, kopuk atıf |
+
+## P0-1: Çekirdek ve Veri Modeli
+
+Bu katman, tezin tüm varlıklarını tanımlayan veri modelini ve bunu
+doğrulayan çalıştırılabilir test altyapısını kurar.
+
+### Doğruluk Kaynağı
+
+Kalıcı varlıkların tek doğruluk kaynağı `schemas/*.json` dosyalarıdır
+(JSON Schema draft 2020-12). Doğrulama `jsonschema` paketiyle yapılır.
+Python tarafında şemaların kopyası tutulmaz; `tools/atw/` yalnızca
+şemaları okur.
+
+### Çalıştırma
+
+```bash
+pip install -r requirements.txt
+python -m pytest -q
+```
+
+### Kimlik Standardı
+
+`<PREFIX>-<NNN>` — üç haneli sıfır dolgulu. Prefiksler: `SRC`, `EVD`,
+`CLM`, `CIT`, `P`, `RQ`, `HYP`, `FND`, `DSC`, `CON`, `GAP`, `AUD`,
+`SEARCH`, `DS`, `ANL`, `STAT`, `TBL`, `FIG`.
+
+### Ajanlar
+
+| Ajan | Görev |
+|------|-------|
+| `researcher` | Kaynak keşfi ve arama stratejisi |
+| `source-verifier` | Crossref + OpenAlex ile kaynak doğrulama |
+| `evidence-extractor` | PDF'ten sayfa düzeyinde kanıt çıkarma |
+| `gap-analyzer` | Araştırma boşluğu sınıflandırması |
+| `contradiction-analyzer` | Çelişki tespiti ve boyut karşılaştırması |
+| `writer` | Kanıt ve onay kapılarına bağlı yazım |
+| `citation-auditor` | Atıf biçim ve tutarlılık denetimi |
+| `methodology-auditor` | Yöntem–bulgu uyumu denetimi |
+| `consistency-auditor` | Terminoloji, sayı, tarih tutarlılığı |
+| `integrity-auditor` | Uydurma kaynak, kanıtsız iddia, retraksiyon denetimi |
 
 ## 📋 Kullanım
 

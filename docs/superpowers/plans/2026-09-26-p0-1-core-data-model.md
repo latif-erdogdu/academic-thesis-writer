@@ -4899,7 +4899,7 @@ git commit -m "feat: sistematik derleme protokolu ve yontem denetim kurallari re
 - Consumes: tüm önceki görevlerin çıktıları
 - Produces: uçtan uca doğrulama testi + senkron kopyalar
 
-- [ ] **Step 1: Bütünleşik testi yaz**
+- [x] **Step 1: Bütünleşik testi yaz**
 
 `tests/integration_tests/test_plan1_integrity.py`:
 ```python
@@ -5073,12 +5073,12 @@ def test_opencode_kopyasinda_surum_ibaresi_yok():
     assert not suclar, "Surum ibaresi: " + "; ".join(suclar)
 ```
 
-- [ ] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
+- [x] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
 
 Run: `python -m pytest tests/integration_tests/test_plan1_integrity.py -v`
 Expected: FAIL — kopya ajan dosyaları eksik
 
-- [ ] **Step 3: `.opencode` kopyasını senkronize et**
+- [x] **Step 3: `.opencode` kopyasını senkronize et**
 
 ```bash
 New-Item -ItemType Directory -Force -Path ".opencode/skill/academic-thesis-writer/agents" | Out-Null
@@ -5086,7 +5086,7 @@ Copy-Item "SKILL.md" ".opencode/skill/academic-thesis-writer/SKILL.md" -Force
 Copy-Item "agents/*.md" ".opencode/skill/academic-thesis-writer/agents/" -Force
 ```
 
-- [ ] **Step 4: `README.md`'yi güncelle**
+- [x] **Step 4: `README.md`'yi güncelle**
 
 `README.md` dosyasına yeni bir bölüm ekle:
 
@@ -5131,12 +5131,12 @@ python -m pytest -q
 | `integrity-auditor` | Uydurma kaynak, kanıtsız iddia, retraksiyon denetimi |
 ```
 
-- [ ] **Step 5: Bütünleşik testleri çalıştır, geçtiğini doğrula**
+- [x] **Step 5: Bütünleşik testleri çalıştır, geçtiğini doğrula**
 
 Run: `python -m pytest tests/integration_tests/test_plan1_integrity.py -v`
 Expected: PASS — 12 test
 
-- [ ] **Step 6: Tüm test paketini çalıştır**
+- [x] **Step 6: Tüm test paketini çalıştır**
 
 Run: `python -m pytest -q`
 Expected: PASS — tüm testler yeşil
@@ -5149,7 +5149,7 @@ Expected: `no tests ran` (artık hiçbir test `xfaz` işaretli değil; bu komut
 `xfaz` tanımı da silindiği için uyarı vermelidir — uyarı verirse
 `pytest.ini`'deki `markers` bloğundan `xfaz` satırının kaldırıldığını doğrula)
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add -A

@@ -3,6 +3,16 @@
 ## Görev
 Atıf-kaynakça bütünlüğünü denetle.
 
+## Girdi
+
+| Alan | Kaynak |
+|------|--------|
+| Paragraflar | `thesis_state.chapters` içindeki `paragraph.json` kayıtları — metindeki atıf işaretleri buradan okunur |
+| Atıf kayıtları | `thesis_state.citations` (`citation.json`) |
+| Kaynaklar | `thesis_state.sources` — atıfın dayandığı kayıt |
+| İddialar | `thesis_state.claims_registry` |
+| Kanıtlar | `thesis_state.evidence_registry` — sayfa ve bölüm doğrulaması için |
+
 ## Kontroller
 1. Metinde atıf var mı?
 2. Kaynakçada kaynak var mı?
