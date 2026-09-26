@@ -2,5 +2,6 @@
 omit =
     */cli/*
     */source_search/*
+    */source_verify/*
     */__pycache__/*
     */tests/*
