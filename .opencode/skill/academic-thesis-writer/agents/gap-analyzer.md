@@ -35,13 +35,20 @@ Cevapsız Sorular
 Araştırma Boşluğu
 
 ## Çıktı
+
+```json
 {
-  "gap_id": "GAP-001",
-  "description": "",
-  "evidence": ["SRC-001","SRC-004","SRC-009"],
-  "gap_type": "methodological|population|geographical|theoretical",
-  "confidence": "high|medium|low"
+  "id": "GAP-001",
+  "statement": "Bu konuda kapsamlı tarama sonucunda araştırma boşluğu tespit edildi.",
+  "gap_type": "methodological",
+  "dimension": "measurement",
+  "evidence_ids": ["EVD-001", "EVD-004", "EVD-009"],
+  "supporting_source_ids": ["SRC-001", "SRC-004", "SRC-009"],
+  "conflicting_claim_ids": [],
+  "contradicting_source_ids": [],
+  "confidence": "moderate"
 }
+```
 
 ## Kural
 "Bu konuda araştırma yok" ifadesi sadece kapsamlı tarama bunu destekliyorsa kullanılmalı. Boşluğun hangi kaynaklardan çıkarıldığı gösterilmeli.

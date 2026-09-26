@@ -33,7 +33,7 @@ her birini tek tek karşılaştır. Farklı olan boyut çelişkinin kaynağıdı
 | Ülke / coğrafya | `source.json` → `journal`, kanıt notları |
 | Yıl / dönem | `source.json` → `year` |
 | Ölçüm aracı | `dataset.json` → `provenance.collection_instrument` |
-| İstatistiksel güç | `statistic.json` → `n`, `power` alanları |
+| İstatistiksel güç | `statistic.json` → `n`, `effect_size` alanları |
 | Yöntem | `analysis.json` → `method` |
 | Kuramsal çerçeve | `source.json` → doğrulama notları, `research_gap.json` → `dimension` |
 
@@ -57,11 +57,14 @@ her birini tek tek karşılaştır. Farklı olan boyut çelişkinin kaynağıdı
 ```json
 {
   "id": "CLM-003",
+  "text": "Farklı ölçüm araçlarıyla elde edilen sonuçlar çelişiyor.",
+  "importance": "high",
+  "verification_status": "refuted",
+  "evidence_ids": ["EVD-001", "EVD-002"],
   "contradicted_by": ["CLM-004"],
   "counter_claims": ["CLM-004"],
-  "verification_status": "refuted",
   "requires_followup": true,
-  "notes": "SRC-001 (olcum araci: Kurgusal Anket A) basariyi bulurken SRC-006 (olcum araci: Kurgusal Olcek B) bulamiyor. Olcum araci farki sonucu aciklamiyor; incelenmeli."
+  "notes": "SRC-001 (ölçüm aracı: Kurgusal Anket A) başarıyı bulurken SRC-006 (ölçüm aracı: Kurgusal Ölçek B) bulamıyor. Ölçüm aracı farkı sonucu açıklamıyor; incelenmeli."
 }
 ```
 
