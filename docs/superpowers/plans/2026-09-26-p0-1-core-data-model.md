@@ -4450,7 +4450,7 @@ git commit -m "feat: celiski ve butunluk ajanlari eklendi, alti ajana girdi bolu
 - Consumes: `schemas/search_run.json` alanları, `schemas/analysis.json` alanları
 - Produces: 2 referans dosyası
 
-- [ ] **Step 1: Testleri yaz**
+- [x] **Step 1: Testleri yaz**
 
 `tests/schema_tests/test_references.py`:
 ```python
@@ -4529,12 +4529,12 @@ def test_yontem_kurallari_tek_sablon_kullanmaz():
     assert metin.lower().count("|") > 40, "Yontem kurallari tablo icermeli"
 ```
 
-- [ ] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
+- [x] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_references.py -v`
 Expected: FAIL — `Eksik referans: .../references/systematic_review_protocol.md`
 
-- [ ] **Step 3: `systematic_review_protocol.md` dosyasını yaz**
+- [x] **Step 3: `systematic_review_protocol.md` dosyasını yaz**
 
 `references/systematic_review_protocol.md`:
 ```markdown
@@ -4727,7 +4727,7 @@ Preprint, hakemli sürümü yayınlanmış kaynağın yerine
 - `schemas/research_gap.json` — sentez sonucu
 ```
 
-- [ ] **Step 4: `methodology_rules.md` dosyasını yaz**
+- [x] **Step 4: `methodology_rules.md` dosyasını yaz**
 
 `references/methodology_rules.md`:
 ```markdown
@@ -4873,12 +4873,12 @@ kapısı bu kuralların tamamı uygulandıktan **sonra** açılır.
 - `schemas/finding.json` — bulgu → kanıt bağı
 ```
 
-- [ ] **Step 5: Testleri çalıştır, geçtiğini doğrula**
+- [x] **Step 5: Testleri çalıştır, geçtiğini doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_references.py -v`
 Expected: PASS — 27 test (3 parametrik × 7 referans = 21, + 6 içerik denetimi)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add references/systematic_review_protocol.md references/methodology_rules.md tests/schema_tests/test_references.py
