@@ -1,0 +1,217 @@
+name: academic-thesis-writer
+version: "1.0.0"
+description: "Akademik tez yazım sistemi — kaynak doğrulama, kanıt grafiği, atıf denetimi, PRISMA protokolü"
+author: "latif-erdogdu"
+license: "Academic use only"
+
+# Minimum OpenCode sürümü
+opencode_version: ">=0.2.0"
+
+# Skill giriş noktası
+entry:
+  skill: "SKILL.md"
+
+# Agent tanımları (her biri .opencode/agent/ altına kopyalanır)
+agents:
+  - name: researcher
+    description: "Araştırma sorusuna uygun kaynak keşfi, arama stratejisi, sistematik tarama"
+    file: "agents/researcher.md"
+    tools:
+      - source_search
+      - source_verify
+      - pdf_extract
+      - citation_check
+
+  - name: source-verifier
+    description: "Crossref, OpenAlex, Semantic Scholar ile DOI/bibliyografik doğrulama (en az 2 bağımsız kaynak)"
+    file: "agents/source-verifier.md"
+    tools:
+      - source_verify
+
+  - name: evidence-extractor
+    description: "Doğrulanmış PDF'lerden sayfa/bölüm düzeyinde kanıt çıkarma, claim-evidence linking"
+    file: "agents/evidence-extractor.md"
+    tools:
+      - pdf_extract
+
+  - name: gap-analyzer
+    description: "Literatür matrisinden araştırma boşluklarını çıkarma (yöntemsel, popülasyon, coğrafi, teorik)"
+    file: "agents/gap-analyzer.md"
+    tools:
+      - source_search
+      - source_verify
+
+  - name: contradiction-analyzer
+    description: "Aynı konuda farklı sonuçlara varan çalışmaları bulma, boyut boyunca karşılaştırma"
+    file: "agents/contradiction-analyzer.md"
+    tools:
+      - source_search
+      - source_verify
+      - citation_check
+
+  - name: writer
+    description: "Sadece doğrulanmış girdilerle (kaynak+kanıt+iddia) tez bölümlerini yazma"
+    file: "agents/writer.md"
+    tools:
+      - citation_check
+
+  - name: citation-auditor
+    description: "Metin-kaynakça bütünlüğü, APA 7 format, kaynak varlığı, sahte atıf tespiti"
+    file: "agents/citation-auditor.md"
+    tools:
+      - citation_check
+
+  - name: methodology-auditor
+    description: "Araştırma sorusu ↔ yöntem uyumu (RQ2 nitel ama yöntem nicel → hata)"
+    file: "agents/methodology-auditor.md"
+
+  - name: consistency-auditor
+    description: "20 madde: terminoloji, sayılar, tarihler, örneklem, yöntem, bulgular, atıflar"
+    file: "agents/consistency-auditor.md"
+
+  - name: integrity-auditor
+    description: "Uydurma kaynak, kanıtsız iddia, retraksiyon, kopuk atıf — 5 aşamalı denetim"
+    file: "agents/integrity-auditor.md"
+
+# Araç tanımları (her biri tools/ altında)
+tools:
+  - name: source_search
+    description: "Crossref, OpenAlex, Semantic Scholar, PubMed, Google Scholar üzerinden kaynak keşfi"
+    file: "tools/source_search/README.md"
+
+  - name: source_verify
+    description: "DOI ve bibliyografik doğrulama (en az 2 bağımsız kaynak, skor ≥0.60)"
+    file: "tools/source_verify/README.md"
+
+  - name: pdf_extract
+    description: "Doğrulanmış PDF'lerden sayfa/bölüm düzeyinde kanıt çıkarma (claim-evidence linking)"
+    file: "tools/pdf_extract/README.md"
+
+  - name: citation_check
+    description: "Atıf-kaynakça bütünlük denetimi (sahte atıf, retraksiyon, APA 7 format)"
+    file: "tools/citation_check/README.md"
+
+# Hooks (OpenCode yaşam döngüsü entegrasyonu)
+hooks:
+  # Yeni tez başlatıldığında thesis_state.json şablonu kopyala
+  - name: thesis-init
+    event: "session_start"
+    condition: "not exists(thesis_state.json)"
+    command: "cp schemas/thesis_state.json thesis_state.json"
+    description: "Yeni tez için thesis_state.json şablonu oluştur"
+
+  # Her yazım oturumunda Evidence Gate kontrolü
+  - name: evidence-gate
+    event: "pre_write"
+    condition: "matches(path, '.*chapter.*\\.md$')"
+    command: "python -m tools.atw.cli check-evidence --file {file}"
+    description: "Bölüm yazımından önce kanıt kapısı kontrolü"
+
+  # Atıf ekleme sonrası Writing Gate kontrolü
+  - name: writing-gate
+    event: "post_write"
+    condition: "matches(path, '.*citation.*\\.json$')"
+    command: "python -m tools.atw.cli check-citations --file {file}"
+    description: "Atıf ekleme sonrası format/bütünlük kontrolü"
+
+  # Otomatik kaynak doğrulama (source.json değiştiğinde)
+  - name: auto-verify-source
+    event: "post_write"
+    condition: "matches(path, '.*source\\.json$')"
+    command: "python -m tools.atw.cli verify-source --file {file}"
+    description: "Yeni kaynak eklendiğinde otomatik DOI/bibliyografik doğrulama"
+
+# Komutlar (OpenCode slash command olarak kayıtlı)
+commands:
+  - name: thesis:new
+    description: "Yeni tez başlat — thesis_state.json oluştur, araştırma sorusu tanımla"
+    usage: "/thesis:new <tez_id> <başlık>"
+    handler: "python -m tools.atw.cli new-thesis --id {args[0]} --title {args[1]}"
+
+  - name: thesis:search
+    description: "Araştırma sorusu için sistematik kaynak arama başlat"
+    usage: "/thesis:search <RQ-ID> [--databases crossref,openalex,pubmed]"
+    handler: "python -m tools.atw.cli search --rq {args[0]} --databases {options.databases}"
+
+  - name: thesis:verify
+    description: "Kaynak adaylarını DOI/bibliyografik doğrula (en az 2 kaynak)"
+    usage: "/thesis:verify [--all]"
+    handler: "python -m tools.atw.cli verify --all {options.all}"
+
+  - name: thesis:extract
+    description: "Doğrulanmış PDF'lerden kanıt çıkar (claim-evidence linking)"
+    usage: "/thesis:extract <SRC-ID> --claim <CLM-ID>"
+    handler: "python -m tools.atw.cli extract --source {args[0]} --claim {options.claim}"
+
+  - name: thesis:write
+    description: "Doğrulanmış girdilerle bölüm yaz (Evidence Gate → Writing Gate)"
+    usage: "/thesis:write <CHAPTER-ID> --rq <RQ-ID>"
+    handler: "python -m tools.atw.cli write --chapter {args[0]} --rq {options.rq}"
+
+  - name: thesis:audit
+    description: "Tam tez denetimi (5 aşama: yapısal, atıf, metodoloji, tutarlılık, yazım)"
+    usage: "/thesis:audit [--type citation|methodology|consistency|integrity|all]"
+    handler: "python -m tools.atw.cli audit --type {options.type}"
+
+  - name: thesis:status
+    description: "Tez durumu özeti (RQ, iddialar, kanıtlar, kaynaklar, boşluklar)"
+    usage: "/thesis:status"
+    handler: "python -m tools.atw.cli status"
+
+  - name: thesis:export
+    description: "Final tez metnini birleştir (bölümler + kaynakça + ekler)"
+    usage: "/thesis:export [--format md|docx|pdf]"
+    handler: "python -m tools.atw.cli export --format {options.format}"
+
+# Referans dosyaları (agents/references/ içinden kopyalanır)
+references:
+  - citation_rules.md
+  - source_verification.md
+  - evidence_rules.md
+  - academic_integrity.md
+  - research_gap.md
+  - systematic_review_protocol.md
+  - methodology_rules.md
+
+# Şemalar (JSON Schema draft 2020-12)
+schemas:
+  - thesis_state.json
+  - source.json
+  - claim.json
+  - evidence.json
+  - paragraph.json
+  - research_question.json
+  - audit.json
+  - citation.json
+  - research_gap.json
+  - finding.json
+  - discussion.json
+  - conclusion.json
+  - search_run.json
+  - statistic.json
+  - dataset.json
+  - analysis.json
+  - table.json
+  - figure.json
+  - chapter.json
+  - variable.json
+  - hypothesis.json
+
+# Test gereksinimleri
+test_requirements:
+  - pytest>=8.0.0
+  - pytest-cov>=5.0.0
+  - jsonschema>=4.22.0
+
+# Python sürümü
+python_version: ">=3.9"
+
+# Etiketler
+tags:
+  - academic
+  - thesis
+  - research
+  - citation
+  - verification
+  - prisma
+  - apa7
