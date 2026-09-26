@@ -1,60 +1,73 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/claim.json",
-  "title": "Taleb",
+  "title": "Iddia",
   "description": "Tezin bir iddia olarak kabul edilmesi icin yeterli dugumlari barinan iddia kaydi.",
   "type": "object",
-  "properties": {
-    "id": {
-      "type": "string"
-    },
-    "text": {
-      "type": "string"
-    },
-    "evidence_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "minItems": 1
-    },
-    "contradicted_by": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "gap_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": []
-    },
-    "strength": {
-      "type": "string"
-    },
-    "verified": {
-      "type": "boolean"
-    }
-  },
-  "required": [
-    "id",
-    "text",
-    "evidence_ids"
-  ],
+  "additionalProperties": false,
+  "required": ["id", "text", "importance", "verification_status", "evidence_ids"],
   "examples": [
     {
-      "$comment": "KURGUSAL ORNEK. Gercek bir iddia temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "$comment": "KURGUSAL ORNEK. Metin uydurmadir; sema dogrulamasi icindir.",
       "id": "CLM-001",
-      "text": "Kurgusal bir iddia metni.",
-      "evidence_ids": [
-        "EVD-001"
-      ],
-      "contradicted_by": null,
-      "gap_ids": [],
+      "text": "Kurgusal ornek iddiasi: incelenen yontem basariyi artirmaktadir.",
+      "importance": "high",
+      "sources": ["SRC-001"],
+      "evidence_ids": ["EVD-001"],
       "strength": "direct",
-      "verified": true
+      "evidence_type": "empirical",
+      "contradicted_by": [],
+      "gap_ids": [],
+      "verification_status": "verified",
+      "confidence_level": null,
+      "notes": "",
+      "chapter_id": null,
+      "section_id": null,
+      "created_at": "2026-09-26T10:20:00+00:00",
+      "last_verified_at": "2026-09-26T10:20:00+00:00",
+      "verified_by": null,
+      "related_claims": [],
+      "counter_claims": [],
+      "requires_followup": false
     }
-  ]
+  ],
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": { "type": "string", "pattern": "^CLM-\\d{3,}$" },
+    "text": { "type": "string", "minLength": 1 },
+    "importance": { "enum": ["high", "medium", "low"] },
+    "sources": {
+      "type": "array", "items": { "type": "string", "pattern": "^SRC-\\d{3,}$" }
+    },
+    "evidence_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^EVD-\\d{3,}$" }
+    },
+    "strength": { "enum": ["direct", "indirect"] },
+    "evidence_type": {
+      "enum": ["empirical", "theoretical", "primary_data"]
+    },
+    "contradicted_by": {
+      "type": "array", "items": { "type": "string", "pattern": "^CLM-\\d{3,}$" }
+    },
+    "gap_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^GAP-\\d{3,}$" }
+    },
+    "verification_status": {
+      "enum": ["verified", "pending", "unverified", "refuted", "unsupported"]
+    },
+    "confidence_level": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "notes": { "type": "string" },
+    "chapter_id": { "type": ["string", "null"] },
+    "section_id": { "type": ["string", "null"] },
+    "created_at": { "type": "string" },
+    "last_verified_at": { "type": ["string", "null"] },
+    "verified_by": { "type": ["string", "null"] },
+    "related_claims": {
+      "type": "array", "items": { "type": "string", "pattern": "^CLM-\\d{3,}$" }
+    },
+    "counter_claims": {
+      "type": "array", "items": { "type": "string", "pattern": "^CLM-\\d{3,}$" }
+    },
+    "requires_followup": { "type": "boolean", "default": false }
+  }
 }

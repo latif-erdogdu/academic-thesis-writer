@@ -4,140 +4,14 @@
   "title": "Kaynak",
   "description": "Dogrulanmis veya dogrulanmayi bekleyen bir bibliyografik kayit.",
   "type": "object",
-  "properties": {
-    "id": {
-      "type": "string"
-    },
-    "title": {
-      "type": "string"
-    },
-    "authors": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "year": {
-      "type": "integer"
-    },
-    "journal": {
-      "type": "string"
-    },
-    "publisher": {
-      "type": "string"
-    },
-    "doi": {
-      "type": "string",
-      "pattern": "^10\\.\\d{4,9}/\\S+$"
-    },
-    "url": {
-      "type": "string"
-    },
-    "source_type": {
-      "type": "string"
-    },
-    "publication_status": {
-      "type": "string"
-    },
-    "retraction_status": {
-      "enum": [
-        "not_retracted"
-      ]
-    },
-    "correction_status": {
-      "type": "string"
-    },
-    "supersedes_source_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "verified": {
-      "type": "boolean"
-    },
-    "verification": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "string"
-        },
-        "bibliographic_match": {
-          "type": "number"
-        },
-        "doi_match": {
-          "type": "boolean"
-        },
-        "author_match": {
-          "type": "boolean"
-        },
-        "title_match": {
-          "type": "boolean"
-        },
-        "year_match": {
-          "type": "boolean"
-        },
-        "journal_match": {
-          "type": "boolean"
-        },
-        "verified_at": {
-          "type": "string"
-        },
-        "verification_sources": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "verification_notes": {
-      "type": "string"
-    },
-    "supports_claims": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "evidence_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "page_numbers": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "volume": {
-      "type": "string"
-    },
-    "issue": {
-      "type": "string"
-    },
-    "language": {
-      "type": "string"
-    }
-  },
-  "required": [
-    "id",
-    "title",
-    "source_type",
-    "verification"
-  ],
+  "additionalProperties": false,
+  "required": ["id", "title", "source_type", "verification"],
   "examples": [
     {
-      "$comment": "KURGUSAL ORNEK. Bu kayit gercek bir yayini temsil etmez; DOI, yazar ve yayinci bilgileri uurdurmadir. Yalnizca sema dogrulamak icin kullanilir.",
+      "$comment": "KURGUSAL ORNEK. Bu kayit gercek bir yayini temsil etmez; DOI, yazar ve yayinci bilgileri uydurmadir. Yalnizca sema dogrulamak icin kullanilir.",
       "id": "SRC-001",
       "title": "Kurgusal Bir Calisma Uzerine Bir Inceleme",
-      "authors": [
-        "Orman, A.",
-        "Kaya, B."
-      ],
+      "authors": ["Orman, A.", "Kaya, B."],
       "year": 2023,
       "journal": "Kurgusal Dergi",
       "publisher": "",
@@ -158,22 +32,94 @@
         "year_match": true,
         "journal_match": true,
         "verified_at": "2026-09-26T10:00:00+00:00",
-        "verification_sources": [
-          "crossref",
-          "openalex"
-        ]
+        "verification_sources": ["crossref", "openalex"]
       },
       "verification_notes": "",
-      "supports_claims": [
-        "CLM-001"
-      ],
-      "evidence_ids": [
-        "EVD-001"
-      ],
+      "supports_claims": ["CLM-001"],
+      "evidence_ids": ["EVD-001"],
       "page_numbers": null,
       "volume": "12",
       "issue": "3",
-      "language": "tr"
+      "pages": "45-67",
+      "edition": "",
+      "isbn": "",
+      "location_verified": true,
+      "access_date": "2026-09-26",
+      "language": "tr",
+      "peer_reviewed": true
     }
-  ]
+  ],
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": { "type": "string", "pattern": "^SRC-\\d{3,}$" },
+    "title": { "type": "string", "minLength": 1 },
+    "authors": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "year": { "type": "integer", "minimum": 1500, "maximum": 2100 },
+    "journal": { "type": "string" },
+    "publisher": { "type": "string" },
+    "doi": { "type": "string", "pattern": "^$|^10\\.\\d{4,9}/\\S+$" },
+    "url": { "type": "string" },
+    "source_type": {
+      "enum": ["article", "book", "book_chapter", "thesis", "report",
+               "conference", "preprint", "dataset", "website", "legislation", "other"]
+    },
+    "publication_status": {
+      "enum": ["published", "accepted", "in_press", "preprint", "unpublished", "retracted"],
+      "default": "published"
+    },
+    "retraction_status": {
+      "enum": ["not_retracted", "retracted", "expression_of_concern", "unknown"],
+      "default": "not_retracted"
+    },
+    "correction_status": {
+      "enum": ["none", "corrected", "erratum", "retracted_and_republished"],
+      "default": "none"
+    },
+    "supersedes_source_id": {
+      "type": ["string", "null"],
+      "pattern": "^SRC-\\d{3,}$"
+    },
+    "verified": { "type": "boolean", "default": false },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "bibliographic_match", "verified_at", "verification_sources"],
+      "properties": {
+        "status": {
+          "enum": ["verified", "unverified", "pending", "retracted", "corrected"]
+        },
+        "bibliographic_match": { "type": "number", "minimum": 0, "maximum": 1 },
+        "doi_match": { "type": ["boolean", "null"] },
+        "author_match": { "type": ["boolean", "null"] },
+        "title_match": { "type": ["boolean", "null"] },
+        "year_match": { "type": ["boolean", "null"] },
+        "journal_match": { "type": ["boolean", "null"] },
+        "verified_at": { "type": "string" },
+        "verification_sources": {
+          "type": "array",
+          "items": { "enum": ["crossref", "openalex", "semantic_scholar", "manual"] }
+        }
+      }
+    },
+    "verification_notes": { "type": "string" },
+    "supports_claims": {
+      "type": "array", "items": { "type": "string", "pattern": "^CLM-\\d{3,}$" }
+    },
+    "evidence_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^EVD-\\d{3,}$" }
+    },
+    "page_numbers": { "type": ["array", "null"], "items": { "type": "integer" } },
+    "volume": { "type": "string" },
+    "issue": { "type": "string" },
+    "pages": { "type": "string" },
+    "edition": { "type": "string" },
+    "isbn": { "type": "string" },
+    "location_verified": { "type": "boolean", "default": false },
+    "access_date": { "type": ["string", "null"] },
+    "language": { "type": "string" },
+    "peer_reviewed": { "type": ["boolean", "null"] }
+  }
 }

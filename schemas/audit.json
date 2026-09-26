@@ -1,83 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/audit.json",
-  "title": "Denetim",
-  "description": "Tez calismasinda (methodoloji/istatistik/gibi) gorusmenin ve/veya bulgunun integrity durumunu kaydetmek icin kullanilan denetim kaydi.",
+  "title": "Denetim Kaydi",
+  "description": "Tez calismasinda butunluk, metodoloji, kanit ve kaynak denetimlerinin sonuclarini tutan kayit.",
   "type": "object",
-  "properties": {
-    "audit_id": {
-      "type": "string"
-    },
-    "thesis_id": {
-      "type": "string"
-    },
-    "audit_type": {
-      "enum": [
-        "methodology",
-        "statistics",
-        "integrity"
-      ]
-    },
-    "date": {
-      "type": "string"
-    },
-    "findings": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "total_claims": {
-      "type": "integer"
-    },
-    "verified": {
-      "type": "integer"
-    },
-    "needs_evidence": {
-      "type": "integer"
-    },
-    "unsupported": {
-      "type": "integer"
-    },
-    "unverified_sources": {
-      "type": "integer"
-    },
-    "mismatches": {
-      "type": "integer"
-    },
-    "critical_issues": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "deferred_minors": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "integrity_checks": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    }
-  },
-  "required": [
-    "audit_id",
-    "thesis_id",
-    "audit_type",
-    "date"
-  ],
+  "additionalProperties": false,
+  "required": ["audit_id", "thesis_id", "audit_type", "date"],
   "examples": [
     {
-      "$comment": "KURGUSAL ORNEK. Gercek bir denetim kaydi temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "$comment": "KURGUSAL ORNEK. Denetim bulgulari uydurmadir.",
       "audit_id": "AUD-001",
       "thesis_id": "THESIS-2026-001",
       "audit_type": "integrity",
-      "date": "2026-09-26T10:00:00+00:00",
+      "date": "2026-09-26",
       "findings": [],
+      "integrity_checks": {
+        "fabricated_sources": 0,
+        "unsupported_claims": 0,
+        "retracted_sources_in_use": 0,
+        "orphaned_citations": 0,
+        "unverifiable_claims": 0
+      },
       "total_claims": 0,
       "verified": 0,
       "needs_evidence": 0,
@@ -85,8 +28,48 @@
       "unverified_sources": 0,
       "mismatches": 0,
       "critical_issues": [],
-      "deferred_minors": [],
-      "integrity_checks": []
+      "deferred_minors": []
     }
-  ]
+  ],
+  "properties": {
+    "$comment": { "type": "string" },
+    "audit_id": { "type": "string", "pattern": "^AUD-\\d{3,}$" },
+    "thesis_id": { "type": "string", "minLength": 1 },
+    "audit_type": {
+      "enum": ["citation", "methodology", "consistency", "integrity", "evidence"]
+    },
+    "date": { "type": "string" },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["severity", "message"],
+        "properties": {
+          "severity": { "enum": ["critical", "major", "minor", "info"] },
+          "message": { "type": "string", "minLength": 1 },
+          "location": { "type": "string" },
+          "entity_id": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "integrity_checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fabricated_sources": { "type": "integer", "minimum": 0 },
+        "unsupported_claims": { "type": "integer", "minimum": 0 },
+        "retracted_sources_in_use": { "type": "integer", "minimum": 0 },
+        "orphaned_citations": { "type": "integer", "minimum": 0 },
+        "unverifiable_claims": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "total_claims": { "type": "integer", "minimum": 0 },
+    "verified": { "type": "integer", "minimum": 0 },
+    "needs_evidence": { "type": "integer", "minimum": 0 },
+    "unsupported": { "type": "integer", "minimum": 0 },
+    "unverified_sources": { "type": "integer", "minimum": 0 },
+    "mismatches": { "type": "integer", "minimum": 0 },
+    "critical_issues": { "type": "array", "items": { "type": "string" } },
+    "deferred_minors": { "type": "array", "items": { "type": "string" } }
+  }
 }

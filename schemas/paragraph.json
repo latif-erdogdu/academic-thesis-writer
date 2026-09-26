@@ -4,6 +4,8 @@
   "title": "Paragraf",
   "description": "Tezin bir paragraf bölümü olarak kabul edilmesi icin yeterli bilgileri barinen paragraf kaydi.",
   "type": "object",
+  "additionalProperties": false,
+  "required": [ "id", "type" ],
   "properties": {
     "$comment": { "type": "string" },
     "id": { "type": "string", "pattern": "^P-\\d{3,}$" },
@@ -11,7 +13,7 @@
     "section": { "type": "string" },
     "type": {
       "enum": ["literature_synthesis", "methodology", "finding", "discussion",
-               "conclusion", "introduction"]
+               "conclusion", "introduction", "background"]
     },
     "text": { "type": "string" },
     "claims": {
@@ -35,7 +37,6 @@
       "items": { "type": "string", "pattern": "^RQ-\\d{3,}$" }
     }
   },
-  "required": [ "id", "chapter", "section", "type", "claims", "evidence", "sources", "research_questions" ],
   "examples": [
     {
       "$comment": "KURGUSAL ORNEK. Metin uydurmadir.",

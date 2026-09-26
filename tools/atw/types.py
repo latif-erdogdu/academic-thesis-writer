@@ -17,7 +17,7 @@ VERIFICATION_STATUSES: Final[tuple[str, ...]] = (
 )
 
 EVIDENCE_TYPES: Final[tuple[str, ...]] = (
-    "finding", "method", "theory", "data", "statistical", "primary_data",
+    "literature", "primary_data", "statistical", "finding", "method", "theory",
 )
 
 STRENGTHS: Final[tuple[str, ...]] = ("direct", "indirect")

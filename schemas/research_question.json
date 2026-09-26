@@ -1,67 +1,53 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/research_question.json",
-  "title": "Ara Soru",
-  "description": "Tezin bir ara soru veya sub-soru tanimi.",
+  "title": "Arastirma Sorusu",
+  "description": "Tezin ana arastirma sorusu veya alt sorusu tanimi.",
   "type": "object",
-  "properties": {
-    "id": {
-      "type": "string"
-    },
-    "text": {
-      "type": "string"
-    },
-    "chapter": {
-      "type": "string"
-    },
-    "method": {
-      "type": "string"
-    },
-    "status": {
-      "type": "string"
-    },
-    "type_values": {
-      "type": "string"
-    },
-    "related_claims": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "related_findings": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "finding_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    }
-  },
-  "required": [
-    "id",
-    "text",
-    "chapter",
-    "method",
-    "status",
-    "type_values"
-  ],
+  "additionalProperties": false,
+  "required": ["id", "text", "type", "status"],
   "examples": [
     {
-      "$comment": "KURGUSAL ORNEK. Gercek bir ara soru veya sub-soru temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "$comment": "KURGUSAL ORNEK. Soru uydurmadir.",
       "id": "RQ-001",
-      "text": "Orijinal bir ara soru metni.",
-      "chapter": "Giris",
-      "method": "",
-      "status": "answered",
-      "type_values": "main|sub",
-      "related_claims": [],
+      "text": "Kurgusal ornek arastirma sorusu: yontemin etkisi nedir?",
+      "type": "main",
+      "chapter": "1",
+      "method": "Kurgusal yontem",
+      "status": "pending",
+      "hypothesis_ids": ["HYP-001"],
+      "related_claims": ["CLM-001"],
       "related_findings": [],
-      "finding_ids": []
+      "finding_ids": [],
+      "answered_by": [],
+      "notes": ""
     }
-  ]
+  ],
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": { "type": "string", "pattern": "^RQ-\\d{3,}$" },
+    "text": { "type": "string", "minLength": 1 },
+    "type": { "enum": ["main", "sub"] },
+    "chapter": { "type": "string" },
+    "method": { "type": "string" },
+    "status": {
+      "enum": ["answered", "pending", "partially_answered", "dropped"]
+    },
+    "hypothesis_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^HYP-\\d{3,}$" }
+    },
+    "related_claims": {
+      "type": "array", "items": { "type": "string", "pattern": "^CLM-\\d{3,}$" }
+    },
+    "related_findings": {
+      "type": "array", "items": { "type": "string", "pattern": "^FND-\\d{3,}$" }
+    },
+    "finding_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^FND-\\d{3,}$" }
+    },
+    "answered_by": {
+      "type": "array", "items": { "type": "string", "pattern": "^FND-\\d{3,}$" }
+    },
+    "notes": { "type": "string" }
+  }
 }
