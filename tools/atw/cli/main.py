@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]  # tools/atw/cli -> repo root
+REPO_ROOT = Path(__file__).resolve().parents[3]  # tools/atw/cli -> repo root
 
 
 def load_state() -> dict:
@@ -79,11 +79,49 @@ def cmd_new(args) -> int:
 
 def cmd_search(args) -> int:
     """Kaynak arama başlat."""
+    from tools.source_search import run_systematic_search, PICO, parse_pico
+
     state = load_state()
-    print(f"🔍 Arama başlatılıyor: RQ={args.rq}")
-    print(f"   Veritabanları: {args.databases}")
-    # Gerçek implementasyon: tools/source_search modülü
-    print("⚠️  Henüz implemente edilmedi (tools/source_search)")
+
+    # RQ'den PICO oluştur veya state'den al
+    pico = None
+    if hasattr(args, 'pico') and args.pico:
+        pico = parse_pico(args.pico)
+    elif args.rq:
+        # State'den RQ'yi bul ve PICO'ya çevir
+        rq_id = args.rq
+        for rq in state.get("research_questions", []):
+            if rq.get("id") == rq_id:
+                # RQ metninden PICO parse et
+                pico = parse_pico(rq.get("text", ""))
+                break
+        if not pico:
+            print(f"⚠️  RQ {args.rq} bulunamadı, boş PICO ile devam ediliyor")
+            pico = PICO()
+
+    databases = [db.strip() for db in args.databases.split(",")]
+
+    result = run_systematic_search(
+        pico=pico,
+        databases=[db.strip() for db in args.databases.split(",")],
+        year_from=args.year_from,
+        year_to=args.year_to,
+        max_results_per_db=args.max_results,
+    )
+
+    print(f"\n✅ Arama tamamlandı: {result.search_run_id}")
+    print(f"   Kayıtlar: {result.prisma_flow['records_identified']}")
+    print(f"   Kopya kaldırıldı: {result.deduplication.stats['removed']}")
+    print(f"   Dahil edilen: {len(result.included_source_ids)}")
+
+    # State'e kaydet
+    state["search_runs"].append(result.to_dict())
+    for db_result in result.database_results:
+        for record in db_result.records:
+            if "id" in record and record["id"]:
+                state["sources"].append(record)
+    save_state(state)
+
     return 0
 
 
@@ -155,6 +193,10 @@ def main() -> int:
     p_search = sub.add_parser("search", help="Kaynak arama başlat")
     p_search.add_argument("rq", help="Araştırma sorusu ID (örn: RQ-001)")
     p_search.add_argument("--databases", default="crossref,openalex,pubmed", help="Veritabanları (virgülle ayrılmış)")
+    p_search.add_argument("--year-from", type=int, help="Başlangıç yılı")
+    p_search.add_argument("--year-to", type=int, help="Bitiş yılı")
+    p_search.add_argument("--max-results", type=int, default=100, help="Veritabanı başına max sonuç")
+    p_search.add_argument("--pico", help="PICO metni (RQ yerine doğrudan)")
     p_search.set_defaults(func=cmd_search)
 
     # thesis:verify
