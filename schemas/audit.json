@@ -1,15 +1,92 @@
 {
-  "audit_id": "AUD-XXX",
-  "thesis_id": "",
-  "audit_type": "citation|methodology|consistency",
-  "date": "",
-  "findings": [],
-  "total_claims": 0,
-  "verified": 0,
-  "needs_evidence": 0,
-  "unsupported": 0,
-  "unverified_sources": 0,
-  "mismatches": 0,
-  "critical_issues": [],
-  "deferred_minors": []
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/audit.json",
+  "title": "Denetim",
+  "description": "Tez calismasinda (methodoloji/istatistik/gibi) gorusmenin ve/veya bulgunun integrity durumunu kaydetmek icin kullanilan denetim kaydi.",
+  "type": "object",
+  "properties": {
+    "audit_id": {
+      "type": "string"
+    },
+    "thesis_id": {
+      "type": "string"
+    },
+    "audit_type": {
+      "enum": [
+        "methodology",
+        "statistics",
+        "integrity"
+      ]
+    },
+    "date": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "total_claims": {
+      "type": "integer"
+    },
+    "verified": {
+      "type": "integer"
+    },
+    "needs_evidence": {
+      "type": "integer"
+    },
+    "unsupported": {
+      "type": "integer"
+    },
+    "unverified_sources": {
+      "type": "integer"
+    },
+    "mismatches": {
+      "type": "integer"
+    },
+    "critical_issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deferred_minors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "integrity_checks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "audit_id",
+    "thesis_id",
+    "audit_type",
+    "date"
+  ],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Gercek bir denetim kaydi temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "audit_id": "AUD-001",
+      "thesis_id": "THESIS-2026-001",
+      "audit_type": "integrity",
+      "date": "2026-09-26T10:00:00+00:00",
+      "findings": [],
+      "total_claims": 0,
+      "verified": 0,
+      "needs_evidence": 0,
+      "unsupported": 0,
+      "unverified_sources": 0,
+      "mismatches": 0,
+      "critical_issues": [],
+      "deferred_minors": [],
+      "integrity_checks": []
+    }
+  ]
 }

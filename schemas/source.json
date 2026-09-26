@@ -1,25 +1,179 @@
 {
-  "id": "SRC-XXX",
-  "authors": [],
-  "year": 0,
-  "title": "",
-  "journal": "",
-  "publisher": "",
-  "doi": "",
-  "url": "",
-  "source_type": "article|book|thesis|report|conference|website|other",
-  "verified": false,
-  "verification_notes": "",
-  "supports_claims": [],
-  "page_numbers": null,
-  "volume": "",
-  "issue": "",
-  "pages": "",
-  "edition": "",
-  "isbn": "",
-  "location_verified": false,
-  "access_date": null,
-  "language": "",
-  "quality_score": null,
-  "peer_reviewed": null
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/source.json",
+  "title": "Kaynak",
+  "description": "Dogrulanmis veya dogrulanmayi bekleyen bir bibliyografik kayit.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "year": {
+      "type": "integer"
+    },
+    "journal": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "doi": {
+      "type": "string",
+      "pattern": "^10\\.\\d{4,9}/\\S+$"
+    },
+    "url": {
+      "type": "string"
+    },
+    "source_type": {
+      "type": "string"
+    },
+    "publication_status": {
+      "type": "string"
+    },
+    "retraction_status": {
+      "enum": [
+        "not_retracted"
+      ]
+    },
+    "correction_status": {
+      "type": "string"
+    },
+    "supersedes_source_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "verified": {
+      "type": "boolean"
+    },
+    "verification": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "bibliographic_match": {
+          "type": "number"
+        },
+        "doi_match": {
+          "type": "boolean"
+        },
+        "author_match": {
+          "type": "boolean"
+        },
+        "title_match": {
+          "type": "boolean"
+        },
+        "year_match": {
+          "type": "boolean"
+        },
+        "journal_match": {
+          "type": "boolean"
+        },
+        "verified_at": {
+          "type": "string"
+        },
+        "verification_sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "verification_notes": {
+      "type": "string"
+    },
+    "supports_claims": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "page_numbers": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "volume": {
+      "type": "string"
+    },
+    "issue": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "source_type",
+    "verification"
+  ],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Bu kayit gercek bir yayini temsil etmez; DOI, yazar ve yayinci bilgileri uurdurmadir. Yalnizca sema dogrulamak icin kullanilir.",
+      "id": "SRC-001",
+      "title": "Kurgusal Bir Calisma Uzerine Bir Inceleme",
+      "authors": [
+        "Orman, A.",
+        "Kaya, B."
+      ],
+      "year": 2023,
+      "journal": "Kurgusal Dergi",
+      "publisher": "",
+      "doi": "10.5555/kurgusal.ornek.2023.001",
+      "url": "",
+      "source_type": "article",
+      "publication_status": "published",
+      "retraction_status": "not_retracted",
+      "correction_status": "none",
+      "supersedes_source_id": null,
+      "verified": true,
+      "verification": {
+        "status": "verified",
+        "bibliographic_match": 0.96,
+        "doi_match": true,
+        "author_match": true,
+        "title_match": true,
+        "year_match": true,
+        "journal_match": true,
+        "verified_at": "2026-09-26T10:00:00+00:00",
+        "verification_sources": [
+          "crossref",
+          "openalex"
+        ]
+      },
+      "verification_notes": "",
+      "supports_claims": [
+        "CLM-001"
+      ],
+      "evidence_ids": [
+        "EVD-001"
+      ],
+      "page_numbers": null,
+      "volume": "12",
+      "issue": "3",
+      "language": "tr"
+    }
+  ]
 }

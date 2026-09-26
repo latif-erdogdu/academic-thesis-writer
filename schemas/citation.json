@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/citation.json",
+  "title": "Atf",
+  "description": "Tezin bir atfi veya alinti kaydi.",
+  "type": "object",
+  "required": [
+    "id",
+    "text",
+    "citation_type"
+  ],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Gercek bir atfi temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "id": "CIT-001",
+      "text": "Kurgusal bir atfi metni.",
+      "citation_type": "article",
+      "source_id": "SRC-001",
+      "author": "Orman, A.",
+      "title": "Kurgusal Bir Calisma Uzerine Bir Inceleme",
+      "journal": "Kurgusal Dergi",
+      "year": 2023,
+      "doi": "10.5555/kurgusal.ornek.2023.001",
+      "page_numbers": null
+    }
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^CIT-\\d{3,}$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "citation_type": {
+      "enum": [
+        "article",
+        "book",
+        "thesis",
+        "report",
+        "conference",
+        "preprint",
+        "other"
+      ]
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^SRC-\\d{3,}$"
+    },
+    "author": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "journal": {
+      "type": "string"
+    },
+    "year": {
+      "type": "integer"
+    },
+    "doi": {
+      "type": "string",
+      "pattern": "^$|^10\\.\\d{4,9}/\\S+$"
+    },
+    "page_numbers": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/dataset.json",
+  "title": "Veri Kumesi",
+  "description": "Tez çalışmasinda kullanilan birincil veri kumesi kaydi.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "raw_path", "cleaned_path", "provenance"],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Dosya yollari ve islem gecmeleri uydurmadir.",
+      "id": "DS-001",
+      "name": "Kurgusal Birincil Veri Kumesi",
+      "raw_path": "veri/kurgusal/ham.csv",
+      "cleaned_path": "veri/kurgusal/temiz.csv",
+      "format": "csv",
+      "row_count_raw": 240,
+      "row_count_cleaned": 214,
+      "provenance": {
+        "collected_by": "Kurgusal suru",
+        "collected_at": "2026-03-01",
+        "collection_instrument": "Kurgusal anket formu",
+        "operations": [
+          { "operation": "Eksik degerler atildi", "rows_affected": 19, "at": "2026-03-05" },
+          { "operation": "Cift kayitlar temizlendi", "rows_affected": 7, "at": "2026-03-05" }
+        ]
+      },
+      "ethics_approval": "Kurgusal etik kurul kodu",
+      "notes": ""
+    }
+  ],
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": { "type": "string", "pattern": "^DS-\\d{3,}$" },
+    "name": { "type": "string" },
+    "raw_path": { "type": "string", "minLength": 1 },
+    "cleaned_path": { "type": "string", "minLength": 1 },
+    "format": { "enum": ["csv", "xlsx", "json", "sav", "dta", "rds", "parquet", "other"] },
+    "row_count_raw": { "type": ["integer", "null"], "minimum": 0 },
+    "row_count_cleaned": { "type": ["integer", "null"], "minimum": 0 },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operations"],
+      "properties": {
+        "collected_by": { "type": ["string", "null"] },
+        "collected_at": { "type": ["string", "null"] },
+        "collection_instrument": { "type": ["string", "null"] },
+        "operations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["operation", "at"],
+            "properties": {
+              "operation": { "type": "string", "minLength": 1 },
+              "rows_affected": { "type": ["integer", "null"], "minimum": 0 },
+              "at": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "ethics_approval": { "type": ["string", "null"] },
+    "notes": { "type": "string" }
+  }
+}

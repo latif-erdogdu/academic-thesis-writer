@@ -1,10 +1,54 @@
 {
-  "id": "P-XXX",
-  "chapter": "",
-  "section": "",
-  "type": "literature_synthesis|methodology|finding|discussion|conclusion",
-  "claims": [],
-  "evidence": [],
-  "sources": [],
-  "research_questions": []
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/paragraph.json",
+  "title": "Paragraf",
+  "description": "Tezin bir paragraf bölümü olarak kabul edilmesi icin yeterli bilgileri barinen paragraf kaydi.",
+  "type": "object",
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": { "type": "string", "pattern": "^P-\\d{3,}$" },
+    "chapter": { "type": "string" },
+    "section": { "type": "string" },
+    "type": {
+      "enum": ["literature_synthesis", "methodology", "finding", "discussion",
+               "conclusion", "introduction"]
+    },
+    "text": { "type": "string" },
+    "claims": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^CLM-\\d{3,}$" }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^EVD-\\d{3,}$" }
+    },
+    "sources": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^SRC-\\d{3,}$" }
+    },
+    "citations": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^CIT-\\d{3,}$" }
+    },
+    "research_questions": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^RQ-\\d{3,}$" }
+    }
+  },
+  "required": [ "id", "chapter", "section", "type", "claims", "evidence", "sources", "research_questions" ],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Metin uydurmadir.",
+      "id": "P-001",
+      "chapter": "1",
+      "section": "1.1",
+      "type": "literature_synthesis",
+      "text": "Kurgusal ornek paragraf metni.",
+      "claims": ["CLM-001"],
+      "evidence": ["EVD-001"],
+      "sources": ["SRC-001"],
+      "citations": ["CIT-001"],
+      "research_questions": ["RQ-001"]
+    }
+  ]
 }

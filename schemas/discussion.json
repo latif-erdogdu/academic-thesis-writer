@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/discussion.json",
+  "title": "Gorusme",
+  "description": "Tezin gorusme bölümunu temsil eden gorusme kaydi.",
+  "type": "object",
+  "required": [
+    "id",
+    "text",
+    "finding_ids"
+  ],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Gercek bir gorusme metni temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "id": "DSC-001",
+      "text": "Kurgusal bir gorusme metni.",
+      "title": "Ornek Gorusme",
+      "finding_ids": [
+        "FND-001"
+      ],
+      "related_claim": "CLM-001",
+      "source_id": "SRC-001"
+    }
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^DSC-\\d{3,}$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "finding_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^FND-\\d{3,}$"
+      }
+    },
+    "related_claim": {
+      "type": "string",
+      "pattern": "^CLM-\\d{3,}$"
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^SRC-\\d{3,}$"
+    }
+  }
+}

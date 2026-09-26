@@ -1,7 +1,8 @@
 """Sema yukleme, tez durumu yukleme/kaydetme ve dogrulama.
 
-Kalici varliklarin tek dogruluk kaynagi ``schemas/*.json`` dosyalaridir.
-Bu modul semalari yukler, ``thesis_state`` belgesini dogrular ve diskte
+Kalici varliklarin tek dogruluk kaynagi ``schemas/*.json`` dosyardir.
+
+Bu modul semarii yukler, ``thesis_state`` belgesini dogrular ve diskte
 tutar. Semalarin Python karsiliklari burada tanimlanmaz.
 """
 from __future__ import annotations
@@ -135,7 +136,7 @@ def validate_state(state: dict[str, Any]) -> list[str]:
     """Durumu semaya gore dogrular.
 
     Returns:
-        Hata mesajlari listesi. Dokuman gecerliyse bos liste doner.
+        Hata mesajlari listesi. Dokuman gecerliyse bosListe doner.
     """
     dogrulayici = _state_validator()
     hatalar = []
@@ -168,8 +169,7 @@ def find_dangling_references(state: dict[str, Any]) -> list[str]:
                     continue
                 mevcut = {
                     k.get(_STATE_IDENTITY)
-                    for k in (state.get(hedef_alan) or [])
-                    if isinstance(k, dict)
+                    for k in (state.get(hedef_alan) or []) if isinstance(k, dict)
                 }
                 if referans not in mevcut:
                     kopuk.append(
@@ -215,3 +215,58 @@ def save_state(path: str | Path, state: dict[str, Any]) -> None:
         json.dumps(state, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def validate_prisma_flow(flow: dict[str, Any]) -> list[str]:
+    """PRISMA sayimlari arasindaki aritmetik tutarliligi denetler.
+
+    Denetlenen uc iliski:
+      1. records_identified - duplicates_removed = records_screened
+      2. records_screened  - records_excluded  = reports_sought
+      3. reports_sought    - reports_not_retrieved
+         = reports_excluded + studies_included
+
+    Ucuncu iliskide `reports_not_retrieved` ayri bir sayimdir:
+    ulasilan rapor sayisi, alinamayan raporlar dusuldugunde
+    dislenen raporlar + dahil edilen calismalar toplamina esit olmalidir.
+
+    `exclusion_reasons` toplaminin `records_excluded`a esitligi bu
+    fonksiyonda denetlenemez: alan `prisma_flow` disindadir ve fonksiyon
+    yalnizca `prisma_flow` alir.
+
+    Args:
+        flow: ``search_run.json`` icindeki ``prisma_flow`` nesnesi.
+
+    Returns:
+        Hata mesajlari listesi. Tutarliysa bosListe doner.
+    """
+    hatalar: list[str] = []
+    sayi = flow.get
+
+    sol = sayi("records_identified", 0) - sayi("duplicates_removed", 0)
+    if sol != sayi("records_screened", 0):
+        hatalar.append(
+            f"records_identified({sayi("records_identified", 0)}) - "
+            f"duplicates_removed({sayi("duplicates_removed", 0)}) = {sol}, "
+            f"ancak records_screened = {sayi("records_screened", 0)}"
+        )
+
+    sol = sayi("records_screened", 0) - sayi("records_excluded", 0)
+    if sol != sayi("reports_sought", 0):
+        hatalar.append(
+            f"records_screened({sayi("records_screened", 0)}) - "
+            f"records_excluded({sayi("records_excluded", 0)}) = {sol}, "
+            f"ancak reports_sought = {sayi("reports_sought", 0)}"
+        )
+
+    sol = sayi("reports_sought", 0) - sayi("reports_not_retrieved", 0)
+    sag = sayi("reports_excluded", 0) + sayi("studies_included", 0)
+    if sol != sag:
+        hatalar.append(
+            f"reports_sought({sayi("reports_sought", 0)}) - "
+            f"reports_not_retrieved({sayi("reports_not_retrieved", 0)}) = {sol}, "
+            f"ancak reports_excluded({sayi("reports_excluded", 0)}) + "
+            f"studies_included({sayi("studies_included", 0)}) = {sag}"
+        )
+
+    return hatalar

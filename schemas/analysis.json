@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/analysis.json",
+  "title": "Analiz",
+  "description": "Veri kumesi üzerinde yapilan bir analiz kaydi.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "dataset_id", "method", "software", "parameters", "run_at"],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Yazilim surumu ve parametreler uydurmadir.",
+      "id": "ANL-001",
+      "dataset_id": "DS-001",
+      "method": "Kurgusal istatistiksel yontem",
+      "software": "KurgusalYazilim",
+      "software_version": "0.0.0",
+      "parameters": { "alpha": 0.05 },
+      "run_at": "2026-04-01T10:00:00+00:00",
+      "script_path": "analiz/kurgusal.py",
+      "output_path": "cikti/kurgusal.csv",
+      "notes": ""
+    }
+  ],
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": { "type": "string", "pattern": "^ANL-\\d{3,}$" },
+    "dataset_id": { "type": "string", "pattern": "^DS-\\d{3,}$" },
+    "method": { "type": "string", "minLength": 1 },
+    "software": { "type": "string", "minLength": 1 },
+    "software_version": { "type": ["string", "null"] },
+    "parameters": { "type": "object" },
+    "run_at": { "type": "string" },
+    "script_path": { "type": ["string", "null"] },
+    "output_path": { "type": ["string", "null"] },
+    "notes": { "type": "string" }
+  }
+}

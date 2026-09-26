@@ -1,18 +1,60 @@
 {
-  "id": "CLM-XXX",
-  "text": "",
-  "importance": "high|medium|low",
-  "sources": [],
-  "verification_status": "verified|pending|unverified|refuted",
-  "confidence_level": null,
-  "evidence_type": "direct|indirect|theoretical|empirical",
-  "notes": "",
-  "chapter_id": null,
-  "section_id": null,
-  "created_at": null,
-  "last_verified_at": null,
-  "verified_by": null,
-  "related_claims": [],
-  "counter_claims": [],
-  "requires_followup": false
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/claim.json",
+  "title": "Taleb",
+  "description": "Tezin bir iddia olarak kabul edilmesi icin yeterli dugumlari barinan iddia kaydi.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "contradicted_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "gap_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "strength": {
+      "type": "string"
+    },
+    "verified": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "text",
+    "evidence_ids"
+  ],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Gercek bir iddia temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "id": "CLM-001",
+      "text": "Kurgusal bir iddia metni.",
+      "evidence_ids": [
+        "EVD-001"
+      ],
+      "contradicted_by": null,
+      "gap_ids": [],
+      "strength": "direct",
+      "verified": true
+    }
+  ]
 }

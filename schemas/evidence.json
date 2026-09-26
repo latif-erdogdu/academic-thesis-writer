@@ -1,15 +1,86 @@
 {
-  "id": "EVD-XXX",
-  "source_id": "SRC-XXX",
-  "location": {
-    "page": null,
-    "section": "",
-    "paragraph": null
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/evidence.json",
+  "title": "Kanit",
+  "description": "Tezin bir kanit olarak kabul edilmesi icin yeterli dugumlari barinan kanit kaydi.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "section": {
+          "type": "string"
+        },
+        "paragraph": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "text": {
+      "type": "string"
+    },
+    "evidence_type": {
+      "type": "string"
+    },
+    "supports_claim": {
+      "type": "string"
+    },
+    "strength": {
+      "type": "string"
+    },
+    "verified": {
+      "type": "boolean"
+    },
+    "extracted_at": {
+      "type": "string"
+    },
+    "extraction_method": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
   },
-  "text": "",
-  "evidence_type": "finding|method|theory|data",
-  "supports_claim": "CLM-XXX",
-  "strength": "direct|indirect",
-  "verified": false,
-  "notes": ""
+  "required": [
+    "id",
+    "source_id",
+    "text",
+    "evidence_type"
+  ],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Gercek bir veri seti, makale veya deneyci raporu temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "id": "EVD-001",
+      "source_id": "SRC-001",
+      "location": {
+        "page": 1,
+        "section": "",
+        "paragraph": null
+      },
+      "text": "Orijinal bir kanit metni veya bulgu.",
+      "evidence_type": "literature",
+      "supports_claim": "CLM-001",
+      "strength": "direct",
+      "verified": true,
+      "extracted_at": "2026-09-26T10:00:00+00:00",
+      "extraction_method": "manual",
+      "notes": ""
+    }
+  ]
 }

@@ -1,10 +1,67 @@
 {
-  "id": "RQ-XXX",
-  "text": "",
-  "type": "main|sub",
-  "chapter": "",
-  "method": "",
-  "status": "answered|pending",
-  "related_claims": [],
-  "related_findings": []
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/research_question.json",
+  "title": "Ara Soru",
+  "description": "Tezin bir ara soru veya sub-soru tanimi.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    },
+    "chapter": {
+      "type": "string"
+    },
+    "method": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "type_values": {
+      "type": "string"
+    },
+    "related_claims": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "related_findings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "finding_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "text",
+    "chapter",
+    "method",
+    "status",
+    "type_values"
+  ],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Gercek bir ara soru veya sub-soru temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "id": "RQ-001",
+      "text": "Orijinal bir ara soru metni.",
+      "chapter": "Giris",
+      "method": "",
+      "status": "answered",
+      "type_values": "main|sub",
+      "related_claims": [],
+      "related_findings": [],
+      "finding_ids": []
+    }
+  ]
 }

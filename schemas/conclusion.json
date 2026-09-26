@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/conclusion.json",
+  "title": "Sonuc",
+  "description": "Tezin sonucu olarak kabul edilmesi icin yeterli bilgileri barinen sonuc kaydi.",
+  "type": "object",
+  "required": [
+    "id",
+    "text",
+    "summary_fields"
+  ],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Gercek bir sonuc metni temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "id": "CON-001",
+      "text": "Kurgusal bir sonuc metni.",
+      "title": "Ornek Sonuc",
+      "summary_fields": {
+        "main_contribution": "Kurgusal bir inceleme yapildi.",
+        "key_findings": [
+          "FND-001"
+        ],
+        "recommendations": [
+          "More research needed"
+        ]
+      },
+      "related_claim": "CLM-001",
+      "source_id": "SRC-001"
+    }
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^CON-\\d{3,}$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary_fields": {
+      "type": "object",
+      "properties": {
+        "main_contribution": {
+          "type": "string"
+        },
+        "key_findings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^FND-\\d{3,}$"
+          }
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "main_contribution",
+        "key_findings"
+      ]
+    },
+    "related_claim": {
+      "type": "string",
+      "pattern": "^CLM-\\d{3,}$"
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^SRC-\\d{3,}$"
+    }
+  }
+}

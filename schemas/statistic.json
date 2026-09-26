@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/statistic.json",
+  "title": "Istatistik",
+  "description": "Bir bulguyu destekleyen tek bir sayisal sonuc.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "finding_id", "label", "n", "test_name", "p_value"],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Tum sayilar uydurmadir; sema ve aritmetik denetimi icindir.",
+      "id": "STAT-001",
+      "finding_id": "FND-001",
+      "analysis_id": "ANL-001",
+      "label": "Kurgusal ornek etki olcumu",
+      "statistic_type": "effect_size",
+      "test_name": "Kurgusal test",
+      "n": 214,
+      "mean": null,
+      "sd": null,
+      "se": null,
+      "test_statistic": null,
+      "p_value": 0.013,
+      "value": 0.42,
+      "ci_lower": 0.11,
+      "ci_upper": 0.73,
+      "effect_size": { "measure": "cohens_d", "value": 0.42 },
+      "significance_level": 0.05,
+      "reported_in_chapter": "4"
+    }
+  ],
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": { "type": "string", "pattern": "^STAT-\\d{3,}$" },
+    "finding_id": { "type": "string", "pattern": "^FND-\\d{3,}$" },
+    "analysis_id": { "type": ["string", "null"], "pattern": "^ANL-\\d{3,}$" },
+    "label": { "type": "string", "minLength": 1 },
+    "statistic_type": {
+      "enum": ["descriptive", "inferential", "effect_size", "regression",
+               "correlation", "chi_square", "anova", "nonparametric", "other"]
+    },
+    "test_name": { "type": "string", "minLength": 1 },
+    "n": { "type": ["integer", "null"], "minimum": 0 },
+    "mean": { "type": ["number", "null"] },
+    "sd": { "type": ["number", "null"], "minimum": 0 },
+    "se": { "type": ["number", "null"], "minimum": 0 },
+    "test_statistic": { "type": ["number", "null"] },
+    "p_value": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "value": { "type": ["number", "null"] },
+    "ci_lower": { "type": ["number", "null"] },
+    "ci_upper": { "type": ["number", "null"] },
+    "effect_size": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["measure", "value"],
+      "properties": {
+        "measure": {
+          "enum": ["cohens_d", "hedges_g", "eta_squared", "r_squared",
+                   "cramers_v", "odds_ratio", "risk_ratio", "glass_delta", "other"]
+        },
+        "value": { "type": "number" },
+        "interpretation": { "type": ["string", "null"] }
+      }
+    },
+    "significance_level": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "reported_in_chapter": { "type": ["string", "null"] }
+  }
+}

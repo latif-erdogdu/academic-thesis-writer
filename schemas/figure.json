@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/figure.json",
+  "title": "Sekil",
+  "description": "Tezde kullanilan bir sekil/kaydetim kaydi.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "image_path", "caption", "source"],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Gorel yol uydurmadir.",
+      "id": "FIG-001",
+      "caption": "Kurgusal ornek sekil basligi",
+      "chapter": "4",
+      "image_path": "sekiller/kurgusal-ornek.png",
+      "alt_text": "Kurgusal ornek sekil aciklamasi",
+      "source": "Yazar calismasindan uyarildi",
+      "is_adapted": false,
+      "original_source_id": null,
+      "finding_ids": ["FND-001"],
+      "notes": ""
+    }
+  ],
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": { "type": "string", "pattern": "^FIG-\\d{3,}$" },
+    "caption": { "type": "string", "minLength": 1 },
+    "chapter": { "type": ["string", "null"] },
+    "image_path": {
+      "type": "string", "pattern": "\\.(png|jpg|jpeg|svg|pdf|emf|wmf)$"
+    },
+    "alt_text": { "type": ["string", "null"] },
+    "source": { "type": "string", "minLength": 1 },
+    "is_adapted": { "type": "boolean", "default": false },
+    "original_source_id": { "type": ["string", "null"], "pattern": "^SRC-\\d{3,}$" },
+    "finding_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^FND-\\d{3,}$" }
+    },
+    "notes": { "type": "string" }
+  }
+}

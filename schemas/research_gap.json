@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/research_gap.json",
+  "title": "Ara Aralik",
+  "description": "Tezin aralik tanimi olarak kabul edilir bir research gap kaydi.",
+  "type": "object",
+  "required": [
+    "id",
+    "text",
+    "gap_type"
+  ],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Gercek bir aralik tanimi temsil etmez. Yalnizca sema dogrulamasi icin kullanilir.",
+      "id": "GAP-001",
+      "text": "Orijinal bir aralik tanimi metni.",
+      "gap_type": "methodological",
+      "related_claim": "CLM-001",
+      "context": "Tezin metodolojik kısımlarinda eksik gozuken bir alandir.",
+      "priority": "high",
+      "title": "Orikal Aralik"
+    }
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^GAP-\\d{3,}$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gap_type": {
+      "enum": [
+        "methodological",
+        "theoretical",
+        "empirical",
+        "practical",
+        "data_gap"
+      ]
+    },
+    "related_claim": {
+      "type": "string",
+      "pattern": "^CLM-\\d{3,}$"
+    },
+    "context": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string"
+    }
+  }
+}

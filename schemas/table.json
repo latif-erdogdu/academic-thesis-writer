@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/table.json",
+  "title": "Tablo",
+  "description": "Tezde kullanilan bir tablo kaydi.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "caption", "source"],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Tablo verisi uydurmadir.",
+      "id": "TBL-001",
+      "caption": "Kurgusal ornek tablo basligi",
+      "chapter": "4",
+      "source": "Kurgusal kaynaktan uyarildi",
+      "is_adapted": true,
+      "original_source_id": "SRC-001",
+      "statistic_ids": ["STAT-001"],
+      "column_headers": ["Gruup", "n", "Olcum"],
+      "row_count": 3,
+      "notes": ""
+    }
+  ],
+  "properties": {
+    "$comment": { "type": "string" },
+    "id": { "type": "string", "pattern": "^TBL-\\d{3,}$" },
+    "caption": { "type": "string", "minLength": 1 },
+    "chapter": { "type": ["string", "null"] },
+    "source": { "type": "string", "minLength": 1 },
+    "is_adapted": { "type": "boolean", "default": false },
+    "original_source_id": { "type": ["string", "null"], "pattern": "^SRC-\\d{3,}$" },
+    "statistic_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^STAT-\\d{3,}$" }
+    },
+    "column_headers": { "type": "array", "items": { "type": "string" } },
+    "row_count": { "type": ["integer", "null"], "minimum": 0 },
+    "notes": { "type": "string" }
+  }
+}
