@@ -31,13 +31,17 @@ Taslak → Atıf Denetçisi → Yöntem Denetçisi → Tutarlılık Denetçisi
 - Paragraf metadata etiketleme
 
 ## Paragraf Metadata
+
+```json
 {
   "id": "P-014",
-  "chapter": "2",
+  "chapter": "CH-002",
   "section": "2.3",
   "type": "literature_synthesis",
-  "claims": ["CLM-001","CLM-004"],
-  "evidence": ["EVD-001","EVD-004"],
-  "sources": ["SRC-001","SRC-007"],
-  "research_questions": ["RQ2"]
+  "text": "Literatür sentezi paragrafı örneği.",
+  "claims": ["CLM-001", "CLM-004"],
+  "evidence": ["EVD-001", "EVD-004"],
+  "sources": ["SRC-001", "SRC-007"],
+  "research_questions": ["RQ-002"]
 }
+```
