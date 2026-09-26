@@ -44,8 +44,28 @@ Her sorgu `search_run.json` kaydı olur:
   "timestamp": "2026-09-26T09:00:00+00:00",
   "results_returned": 482,
   "inclusion_criteria": ["Son 10 yil", "Dogrulanmis kaynak"],
-  "exclusion_criteria": ["Tam metne erisilemeyen", "Diger dillere yayinlanmis"]
+  "exclusion_criteria": ["Tam metne erisilemeyen", "Diger dillere yayinlanmis"],
+  "prisma_flow": {
+    "records_identified": 482,
+    "duplicates_removed": 30,
+    "records_screened": 452,
+    "records_excluded": 400,
+    "reports_sought": 52,
+    "reports_not_retrieved": 2,
+    "reports_excluded": 41,
+    "studies_included": 9
+  }
 }
+```
+
+`prisma_flow` sayımları aşağıdaki üç eşitliği sağlamak zorundadır
+(`tools.atw.state.validate_prisma_flow`):
+
+```
+482 - 30 = 452      (records_identified - duplicates_removed = records_screened)
+452 - 400 = 52      (records_screened   - records_excluded   = reports_sought)
+52 - 2 = 41 + 9     (reports_sought     - reports_not_retrieved
+                              = reports_excluded + studies_included)
 ```
 
 ### 3. Veritabanları
