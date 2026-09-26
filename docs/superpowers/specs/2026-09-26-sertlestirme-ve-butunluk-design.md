@@ -64,6 +64,8 @@ doğrulandığını gösterir.
 | F18 | `audit.json` kimlik alanı `audit_id`, `id` **değil** | `state.py:160` `kayit.get("id")` → `None` → `continue`. `find_dangling_references()` audit kayıtlarını **hiç gezmiyor**; `audit.findings`, `audit.mismatches` denetlenmiyor | Denetim sessizce bir varlık türünü atlıyor |
 | F19 | `chapter` referansları pattern'siz | `paragraph.chapter` ve `research_question.chapter` çıplak `string` — `pattern` yok, önek bilgisi yok. S2 `chapter.json` eklediği için bu iki alana `^CH-\d{3,}$` verilmezse kenar **türetilemez** | Bölüm bağı denetlenemez hâlde kalır |
 | F20 | `citation_rules.md` 5 stil listeliyor, 1 tanesini uyguluyor | Satır 10–14: APA 7, MLA 9, Chicago, IEEE, Harvard. Satır 27–30 ve 33–40'taki tüm örnekler ve "Özel Durumlar" bölümü **yalnız APA**. `thesis_state.style_profile` tek değer (`"apa7"`) | "Çoklu atıf stili" ✅ işareti gerçeği yansıtmıyor |
+| F21 | `writer.md:34` geçersiz kimlik biçimi | `research_questions: ["RQ2"]` — `research_question.json` deseni `^RQ-\d{3,}$`, yani `RQ-002` olmalı. Bu blok **fence'siz** yazılmış, bu yüzden gözden kaçmıştı | Ajan geçersiz kimlik üretiyor |
+| F22 | En bozuk iki çıktı bloğu fence içinde **değil** | `source-verifier.md:38` ve `gap-analyzer.md:38` bloğu sütun 0'da `{` ile başlayan düz metin; ` ```json ` kapağı yok. Yalnız fence arayan bir test F1 ve F2'yi **tamamen kaçırır**. Ölçüldü: 8 blok bulundu, 4'ü fence'li 4'ü fence'siz | Sözleşme testi iki en kritik bulguyu göremez |
 
 ### 2.2 `sorun.md` için düzeltmeler
 
@@ -114,6 +116,8 @@ ikinci fonksiyonun bu karşılığı **olmadığını** gösteriyor. Bu spec onu
 ### 3.1 Kapsam içi
 
 - 4 belgenin şemaya karşı doğrulanması ve onarılması (F1, F2, F3, F4)
+- `writer.md:34` geçersiz kimlik biçimi (F21)
+- 4 fence'siz çıktı bloğunun fence'e alınması (F22)
 - `chapter.json`, `variable.json`, `hypothesis.json` (F9, F10, F11)
 - `paragraph.chapter` ve `research_question.chapter` alanlarına `^CH-` deseni (F19)
 - `fulltext_available` alanı (F16)
@@ -162,19 +166,58 @@ ikinci fonksiyonun bu karşılığı **olmadığını** gösteriyor. Bu spec onu
 
 **Yeni dosya:** `tests/contract_tests/test_agent_schema_agreement.py`
 
-**Denetlenen üç sınıf:**
+**Denetlenen üç sınıf (tamamı mevcut veriye karşı denendi):**
 
-1. **Gömülü JSON örnekleri.** Her ajan `.md` dosyasındaki ve `SKILL.md`'deki
-   ```json blokları, metinde adı geçen şemaya karşı `Draft202012Validator` ile
-   doğrulanır.
-2. **Alan referansları.** Belgedeki `şema.json → alan` ve `` `alan` `` biçimindeki
-   atıfların hedef alanı şemada var mı kontrol edilir. Enum *değerleri* de
-   doğrulanır.
-3. **Kimlik önekleri.** Belgede geçen `XX-XXX` kalıpları `ID_PREFIXES`'te var mı
-   kontrol edilir.
+1. **Gömülü JSON örnekleri.** Ajan `.md` dosyalarındaki ve `SKILL.md`'deki
+   JSON blokları, metinde adı geçen şemaya karşı `Draft202012Validator` ile
+   doğrulanır. Ölçüldü: **8 blok** bulundu — 4'ü fence'li
+   (`contradiction-analyzer.md:57,70`, `integrity-auditor.md:80`,
+   `SKILL.md:242`), 4'ü **fence'siz** (`evidence-extractor.md:24`,
+   `gap-analyzer.md:38`, `source-verifier.md:38`, `writer.md:34`).
+   **Fence'siz bloklar atlanmamalıdır** (F22): en bozuk iki blok fence'sizdir.
+2. **Alan referansları.** Belgedeki `şema.json → alan` biçimindeki atıfların
+   hedef alanı şemada var mı kontrol edilir. **Yalnız okunun başındaki ardaşık
+   backtick'li tanımlayıcı dizisi** alınır; cümle ortasındaki alan adları
+   (ör. `citation.json → source_id işaret ettiği kaynak sources listesinde
+   yoksa`) kapsam dışıdır. Ölçüldü: 27 atıftan 26'sı doğru, 1'i yanlış.
+3. **Kimlik önekleri.** Belgede geçen `XX-NNN` kalıpları `ID_PREFIXES`'te var mı
+   kontrol edilir. `THESIS` **bilinçli olarak hariçtir** — `thesis_id` ayrı bir
+   kimlik uzayıdır ve `thesis_state.json`'da `{"type":"string","minLength":1}`
+   (desen yok). Ölçüldü: 7 önek kullanılıyor (AUD, CIT, CLM, EVD, GAP, P, SRC),
+   hepsi tanımlı — bu sınıf şu an **yeşil**, yani ileriye dönük bir nöbetçidir.
 
-**Uygulama sırası:** Test önce yazılır ve **kırmızı doğrulanır**. F1, F2 ve F4
-kırmızı çıkmalıdır. Test yeşile dönmeden S2'ye geçilmez.
+**`required` hatası neden yok sayılır:** Ajan belgeleri bilerek *kırpı* JSON
+parçası gösterir; parçanın zorunlu alanları taşımaması saptırma değildir. Bu
+yüzden `validator == "required"` olan hatalar filtrelenir; `additionalProperties`,
+`enum`, `pattern` ve `type` hataları **geçerlidir** — bunlar tam olarak
+"yanlış alan adı", "yanlış değer", "geçersiz kimlik" saptırmalarıdır.
+**İstisna:** `SKILL.md` tam kayıt gösterdiği için `TAM_KAYIT_DOSYALARI`
+sabitinde listelenir ve `required` hataları da raporlanır.
+
+**Şema tespiti:** Blok, kendisinden önceki 400 karakterde geçen son `X.json`
+adından şemasını alır. Hiçbiri yoksa (4 blokta olduğu gibi) belge adına
+bağlı bir varsayılan kullanılır.
+
+**Ölçülmüş kırmızı çıktı (referans — test bu tabloyu vermelidir):**
+
+| Blok | Doğrulanan şema | Doğrulayıcı hata | Bulgu |
+|---|---|---|---|
+| `source-verifier.md:38` | `source.json` | 1 × `additionalProperties` (5 alan) | F1 |
+| `gap-analyzer.md:38` | `research_gap.json` | 1 × `additionalProperties` (3 alan) + 2 × `enum` | F2 |
+| `SKILL.md:242` | `thesis_state.json` | 1 × `additionalProperties` (`claims`) + 11 × `required` | F4 |
+| `writer.md:34` | `paragraph.json` | 1 × `pattern` (`RQ2` ≠ `^RQ-\d{3,}$`) | F21 |
+| `contradiction-analyzer.md:36` | sınıf 2 | 1 alan referansı yok | F3 |
+| `evidence-extractor.md:24` | `evidence.json` | — | geçerli |
+| `writer.md:34` | `paragraph.json` | (yukarıdaki dışında) | geçerli |
+| `contradiction-analyzer.md:57,70` | `claim`, `research_gap` | — | geçerli |
+| `integrity-auditor.md:80` | `audit.json` | — | geçerli |
+
+**Kapsam dışı tarama:** `references/systematic_review_protocol.md` içindeki 3
+JSON bloğu (`:39`, `:96`, `:144`) şemalarına karşı **temiz** — ek iş gerekmiyor.
+`workflows/` ve `templates/` altında hiç JSON bloğu yok.
+
+**Uygulama sırası:** Test önce yazılır ve **kırmızı doğrulanır**. F1, F2, F3,
+F4 ve F21 kırmızı çıkmalıdır. Test yeşile dönmeden S2'ye geçilmez.
 
 **Onarım (D2 kuralıyla):**
 
@@ -185,11 +228,19 @@ kırmızı çıkmalıdır. Test yeşile dönmeden S2'ye geçilmez.
 | `source-verifier.md` | `verification` kök düzeyde | **İç içe al** — `verification` nesnesinin içeriği |
 | `source-verifier.md` | `status: "verified\|unverified\|pending"` | **5 enum değerinin tamamı** |
 | `source-verifier.md` | `verified_at: "2026-09-25"` | **`format: date-time`** — 4 fixture tam tarih-saat kullanıyor (F12) |
+| `source-verifier.md` | blok fence'siz | **Fence'e al** — sözleşme testi onu görmeli (F22) |
 | `gap-analyzer.md` | `gap_id`, `description`, `evidence` | **Alan adlarını düzelt** |
 | `gap-analyzer.md` | `gap_type` 4 pipe-birleştirilmiş değer | **12 değerli enum** |
 | `gap-analyzer.md` | `confidence: "high\|medium\|low"` | **`low\|moderate\|high`** — `medium` şemada yok |
+| `gap-analyzer.md` | blok fence'siz | **Fence'e al** (F22) |
 | `contradiction-analyzer.md` | `statistic.json → power` | **Gerçek alanlar:** `n`, `effect_size`, `p_value` |
-| `SKILL.md` | 12 hata | **`empty_state()` çıktısıyla değiştir** |
+| `writer.md:34` | `research_questions: ["RQ2"]` | **`RQ-002`** (F21) |
+| `writer.md:34` | blok fence'siz | **Fence'e al** (F22) |
+| `SKILL.md:242-270` | 12 hata | **`empty_state()` çıktısıyla değiştir** |
+
+**Dört blok fence'e alınır.** Bu bir güzellik düzeltmesi değil, mekanik bir
+gereklilik: fence'siz bir blok test tarafından bulunamaz, dolayısıyla düzeltilen
+belge de denetlenemez hâle gelir. Düzeltme ile denetim aynı iş adımındadır.
 
 **`SKILL.md` için özel kural:** Örnek elle yazılmaz. `tools/atw/state.py:95`
 `empty_state()` tam olarak bu kaydı üretir; `SKILL.md` bu fonksiyonun gerçek
@@ -200,7 +251,8 @@ ortadan kalkar.
 sırası zorunludur ve kayda geçirilir:
 
 1. Test yazılır, belgeler **onarılmadan önce** çalıştırılır.
-2. F1, F2 ve F4 için **kırmızı** olduğu gözlenir ve çıktı commit mesajına yazılır.
+2. Yukarıdaki "ölçülmüş kırmızı çıktı" tablosuyla karşılaştırılır; **F1, F2,
+   F3, F4 ve F21 kırmızı olduğu gözlenir** ve çıktı commit mesajına yazılır.
 3. Belgeler onarılır.
 4. Test **yeşil** olur.
 
@@ -480,6 +532,10 @@ Tümü sağlanmadan spec tamamlanmış sayılmaz.
 2. 21 şema `Draft202012Validator` ile geçerli; her birinin `$id`'si GitHub'a bakıyor
 3. 21 kayıt şemasında örnek ve/veya `$comment` mevcut
 4. S1'in sözleşme testi `SKILL.md` + 10 ajan belgesini geçirir
+4a. S1'in kırmızı çıktısı §5, S1'deki "ölçülmüş kırmızı çıktı" tablosuyla
+    aynıdır: F1, F2, F3, F4 ve F21 kırmızı; sınıf 3 (kimlik önekleri) yeşil
+4b. Ajanlardaki 4 fence'siz JSON bloğu fence içine alınmış ve test tarafından
+    bulunuyor — yani onarılan belgeler de denetleniyor
 5. `CH-001` ve `VAR-001` üretilebiliyor; `ID_PREFIXES` 20 önek
 6. `graph.kenar_tablosu()` şemalardaki her referans alanını kapsıyor
    (iki yönlü doğrulama: tablo ⊆ şema ve şema ⊆ tablo)
