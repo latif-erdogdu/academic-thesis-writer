@@ -16,20 +16,17 @@ from tools.atw.state import (
 )
 
 
-@pytest.mark.xfaz
 def test_tum_semalar_draft_2020_12_uyumlu(schema_dir):
     for sema_dosyasi in sorted(schema_dir.glob("*.json")):
         sema = json.loads(sema_dosyasi.read_text(encoding="utf-8"))
         Draft202012Validator.check_schema(sema), sema_dosyasi.name
 
 
-@pytest.mark.xfaz
 def test_sema_sayisi_onsekiz():
     from tools.atw.state import SCHEMA_DIR
     assert len(list(SCHEMA_DIR.glob("*.json"))) == 18
 
 
-@pytest.mark.xfaz
 def test_her_semanin_id_alani_var(schema_dir):
     for sema_dosyasi in sorted(schema_dir.glob("*.json")):
         sema = json.loads(sema_dosyasi.read_text(encoding="utf-8"))
@@ -82,7 +79,6 @@ def test_sema_surumu_sabit():
     assert hatalar != []
 
 
-@pytest.mark.xfaz
 def test_kimlik_bicimi_yanlis_kayit_reddedilir():
     durum = empty_state("THESIS-2026-001")
     durum["evidence_registry"].append({"id": "EVD-1"})  # iki hane yetersiz

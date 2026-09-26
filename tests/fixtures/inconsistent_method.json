@@ -1,0 +1,15 @@
+{
+  "$comment": "KURGUSAL ORNEK. Nitel soruya nicel yontem baglanmis, bulgu baglanmamis durum ornegi.",
+  "id": "RQ-002",
+  "text": "Kurgusal ornek: deneyimler nasil kurgulanmaktadir?",
+  "type": "main",
+  "chapter": "1",
+  "method": "Istatistiksel anket analizi",
+  "status": "pending",
+  "hypothesis_ids": [],
+  "related_claims": [],
+  "related_findings": [],
+  "finding_ids": [],
+  "answered_by": [],
+  "notes": "KURGUSAL ORNEK: soru niteldir ama 'Istatistiksel anket analizi' yontemi niceldir; ayrica hicbir bulgu bu soruya baglanmamistir. Bu kayit, metodoloji denetiminin bu iki durumu yakaladigini gosterir."
+}

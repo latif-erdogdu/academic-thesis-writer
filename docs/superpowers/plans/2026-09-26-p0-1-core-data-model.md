@@ -1,6 +1,6 @@
 # P0-1 Çekirdek ve Veri Modeli Implementation Plan
 
-> **Ajanik çalışanlar için:** ZORUNLU ALT-SKILL: Bu planı görev görev uygulamak için `superpowers:subagent-driven-development` (önerilir) veya `superpowers:executing-plans` kullanılmalıdır. Adımlar `- [ ]` onay kutusu sözdizimiyle izlenir.
+> **Ajanik çalışanlar için:** ZORUNLU ALT-SKILL: Bu planı görev görev uygulamak için `superpowers:subagent-driven-development` (önerilir) veya `superpowers:executing-plans` kullanılmalıdır. Adımlar `- [x]` onay kutusu sözdizimiyle izlenir.
 
 **Goal:** Repo'yu gerçek çalışan bir veri modeli ve Python çekirdeği ile donatmak: 18 geçerli JSON şema, çalışan `pytest` altyapısı, fixture seti, 10 ajan ve 7 referans dosyası.
 
@@ -107,7 +107,7 @@ docstring'inde.
   - `tools.atw.ids.is_valid_id(value: str) -> bool`
   - `tools.atw.ids.next_id(existing: Iterable[str], prefix: str) -> str`
 
-- [ ] **Step 1: Bağımlılıkları ve pytest yapılandırmasını yaz**
+- [x] **Step 1: Bağımlılıkları ve pytest yapılandırmasını yaz**
 
 `requirements.txt`:
 ```
@@ -128,7 +128,7 @@ markers =
     live: Canli ag cagrisi gerektiren test (varsayilan olarak atlanir)
 ```
 
-- [ ] **Step 2: Testleri yaz (önce test)**
+- [x] **Step 2: Testleri yaz (önce test)**
 
 `tests/conftest.py`:
 ```python
@@ -245,12 +245,12 @@ def test_next_id_cakisan_kimligi_atlar():
     assert next_id(["SRC-001", "SRC-001"], "SRC") == "SRC-002"
 ```
 
-- [ ] **Step 3: Testleri çalıştır, başarısız olduğunu doğrula**
+- [x] **Step 3: Testleri çalıştır, başarısız olduğunu doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_ids.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'tools'`
 
-- [ ] **Step 4: Paket işaretçilerini ve `ids.py` dosyasını yaz**
+- [x] **Step 4: Paket işaretçilerini ve `ids.py` dosyasını yaz**
 
 `tools/__init__.py`:
 ```python
@@ -435,12 +435,12 @@ def next_id(existing: Iterable[str], prefix: str) -> str:
     return format_id(prefix, en_yuksek + 1)
 ```
 
-- [ ] **Step 5: Testleri çalıştır, geçtiğini doğrula**
+- [x] **Step 5: Testleri çalıştır, geçtiğini doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_ids.py -v`
 Expected: PASS — 12 test
 
-- [ ] **Step 6: Python önbelleğini ignore et**
+- [x] **Step 6: Python önbelleğini ignore et**
 
 `git status` her pytest koşusunda `__pycache__/` dizinlerini göstermelidir;
 aksi hâlde sonraki dokuz görevin her biri kirli bir çalışma ağacıyla başlar.
@@ -451,7 +451,7 @@ __pycache__/
 *.pyc
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add requirements.txt pytest.ini .gitignore tools/__init__.py tools/atw/__init__.py tools/atw/ids.py tests/conftest.py tests/schema_tests/
@@ -477,7 +477,7 @@ git commit -m "feat: kimlik uretimi cekirdegi, pytest altyapisi ve ortak test ya
   - `tools.atw.types.Location(page: int | None, section: str, paragraph: int | None)`
   - `TypeError` yerine yerleşik `ValueError` kullanılır (kimlik doğrulaması için)
 
-- [ ] **Step 1: Testleri yaz**
+- [x] **Step 1: Testleri yaz**
 
 `tests/schema_tests/test_types.py`:
 ```python
@@ -670,12 +670,12 @@ def test_enum_kumeleri_bos_degil():
     assert set(STRENGTHS) == {"direct", "indirect"}
 ```
 
-- [ ] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
+- [x] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_types.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'tools.atw.types'`
 
-- [ ] **Step 3: `types.py` dosyasını yaz**
+- [x] **Step 3: `types.py` dosyasını yaz**
 
 `tools/atw/types.py`:
 ```python
@@ -835,12 +835,12 @@ class EvidenceDraft:
             )
 ```
 
-- [ ] **Step 4: Testleri çalıştır, geçtiğini doğrula**
+- [x] **Step 4: Testleri çalıştır, geçtiğini doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_types.py -v`
 Expected: PASS — 20 test (16 tekil + 1 parametrik × 4 geçersiz DOI)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tools/atw/types.py tests/schema_tests/test_types.py
@@ -869,7 +869,7 @@ git commit -m "feat: calisma-zamani tipleri (PageText, Passage, SourceCandidate,
   - `tools.atw.state.validate_state(state: dict) -> list[str]` — hata mesajları
   - `tools.atw.state.find_dangling_references(state: dict) -> list[str]` — kopuk bağlar
 
-- [ ] **Step 1: Testleri yaz**
+- [x] **Step 1: Testleri yaz**
 
 `tests/schema_tests/test_thesis_state_schema.py`:
 ```python
@@ -1022,12 +1022,12 @@ def test_sema_dosyasi_bulunamazsa_hata():
         raise AssertionError("Eksik sema icin FileNotFoundError bekleniyordu")
 ```
 
-- [ ] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
+- [x] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_thesis_state_schema.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'tools.atw.state'`
 
-- [ ] **Step 3: `thesis_state.json` şemasını yaz**
+- [x] **Step 3: `thesis_state.json` şemasını yaz**
 
 `schemas/thesis_state.json`:
 ```json
@@ -1173,7 +1173,7 @@ Expected: FAIL — `ModuleNotFoundError: No module named 'tools.atw.state'`
 > `empty_state()` çıktısını doğrular; `empty_state` yalnızca boş
 > diziler ürettiği için çözülmesi gereken `$ref` yoktur.
 
-- [ ] **Step 4: `state.py` dosyasını yaz**
+- [x] **Step 4: `state.py` dosyasını yaz**
 
 `tools/atw/state.py`:
 ```python
@@ -1396,7 +1396,7 @@ def save_state(path: str | Path, state: dict[str, Any]) -> None:
     )
 ```
 
-- [ ] **Step 5: Testleri çalıştır, geçtiğini doğrula**
+- [x] **Step 5: Testleri çalıştır, geçtiğini doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_thesis_state_schema.py -v`
 Expected: PASS — 13 test, 4 deselected (`xfaz`)
@@ -1469,7 +1469,7 @@ Expected: PASS — 13 test, 4 deselected (`xfaz`)
 >
 > Task 7'nin son adiminda bu dört isaretin hepsi kaldirilir.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add schemas/thesis_state.json tools/atw/state.py tests/schema_tests/test_thesis_state_schema.py pytest.ini
@@ -1497,7 +1497,7 @@ git commit -m "feat: thesis_state gercek JSON Schema ve durum yonetimi (kaydet/y
   - `claim.json` yeni alanlar: `evidence_ids`, `contradicted_by`, `gap_ids`
   - `audit.json` yeni alan: `integrity_checks`
 
-- [ ] **Step 1: Testleri yaz**
+- [x] **Step 1: Testleri yaz**
 
 `tests/schema_tests/test_core_schemas.py`:
 ```python
@@ -1679,12 +1679,12 @@ def test_tek_alanlik_sema_yok():
         assert len(alanlar) >= 3, f"{yol.name} en az 3 alan tasimali, {len(alanlar)} var"
 ```
 
-- [ ] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
+- [x] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_core_schemas.py -v`
 Expected: FAIL — `examples` alanı şemalarda yok
 
-- [ ] **Step 3: `source.json` şemasını yaz**
+- [x] **Step 3: `source.json` şemasını yaz**
 
 `schemas/source.json`:
 ```json
@@ -1815,7 +1815,7 @@ Expected: FAIL — `examples` alanı şemalarda yok
 }
 ```
 
-- [ ] **Step 4: `evidence.json`, `claim.json`, `paragraph.json`, `research_question.json`, `audit.json` şemalarını yaz**
+- [x] **Step 4: `evidence.json`, `claim.json`, `paragraph.json`, `research_question.json`, `audit.json` şemalarını yaz**
 
 `schemas/evidence.json`:
 ```json
@@ -2131,7 +2131,7 @@ Expected: FAIL — `examples` alanı şemalarda yok
 }
 ```
 
-- [ ] **Step 5: Testleri çalıştır, geçtiğini doğrula**
+- [x] **Step 5: Testleri çalıştır, geçtiğini doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_core_schemas.py -v`
 Expected: PASS — 21 test
@@ -2141,7 +2141,7 @@ Expected: PASS — 21 test
 > şemaları da tarar. Bu nedenle `xfaz` işaretiyle atlanır ve
 > `pytest.ini`'de `-m "not xfaz"` ile dışlanır. Task 7'de kaldırılır.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add schemas/source.json schemas/evidence.json schemas/claim.json schemas/paragraph.json schemas/research_question.json schemas/audit.json tests/schema_tests/test_core_schemas.py
@@ -2166,7 +2166,7 @@ git commit -m "feat: cekirdek varlik semalari gercek JSON Schema'ya donusturuldu
   Kimlik alanları: `citation.json` → `id: CIT-`, `research_gap.json` → `id: GAP-`,
   `finding.json` → `id: FND-`, `discussion.json` → `id: DSC-`, `conclusion.json` → `id: CON-`.
 
-- [ ] **Step 1: Testleri yaz**
+- [x] **Step 1: Testleri yaz**
 
 `tests/schema_tests/test_chain_schemas.py`:
 ```python
@@ -2308,12 +2308,12 @@ def test_atif_stili_enum_kapsiyor():
     assert ornek["style"] == "apa7"
 ```
 
-- [ ] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
+- [x] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_chain_schemas.py -v`
 Expected: FAIL — `AssertionError: 5 zincir şeması var` (dosyalar yok)
 
-- [ ] **Step 3: Beş şemayı yaz**
+- [x] **Step 3: Beş şemayı yaz**
 
 `schemas/citation.json`:
 ```json
@@ -2606,12 +2606,12 @@ Expected: FAIL — `AssertionError: 5 zincir şeması var` (dosyalar yok)
 }
 ```
 
-- [ ] **Step 4: Testleri çalıştır, geçtiğini doğrula**
+- [x] **Step 4: Testleri çalıştır, geçtiğini doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_chain_schemas.py -v`
 Expected: PASS — 15 test
 
-- [ ] **Step 5: Zincirin bütünlüğünü uçtan uca doğrula**
+- [x] **Step 5: Zincirin bütünlüğünü uçtan uca doğrula**
 
 `tests/schema_tests/test_chain_schemas.py` dosyasının sonuna ekle:
 ```python
@@ -2636,7 +2636,7 @@ def test_bosluk_kaniti_bulgu_kanitiyla_tutarli():
 Run: `python -m pytest tests/schema_tests/test_chain_schemas.py -v`
 Expected: PASS — 17 test (15 + 2 zincir bütünlüğü denetimi)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add schemas/citation.json schemas/research_gap.json schemas/finding.json schemas/discussion.json schemas/conclusion.json tests/schema_tests/test_chain_schemas.py
@@ -2660,7 +2660,7 @@ git commit -m "feat: zincir semalari eklendi (citation, research_gap, finding, d
 - Consumes: `tools.atw.state.schema_registry` (Task 3)
 - Produces: 6 şema. PRISMA akış sayımı (`search_run.json`) ve veri kökeni zinciri.
 
-- [ ] **Step 1: Testleri yaz**
+- [x] **Step 1: Testleri yaz**
 
 `tests/schema_tests/test_provenance_schemas.py`:
 ```python
@@ -2852,12 +2852,12 @@ def test_sekil_dosya_uzantisi_gecerli():
     assert list(dogrulayici.iter_errors(ornek)) != []
 ```
 
-- [ ] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
+- [x] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_provenance_schemas.py -v`
 Expected: FAIL — `AssertionError: 6 köken şeması var` (dosyalar yok)
 
-- [ ] **Step 3: Altı şemayı yaz**
+- [x] **Step 3: Altı şemayı yaz**
 
 `schemas/search_run.json`:
 ```json
@@ -2966,7 +2966,7 @@ Expected: FAIL — `AssertionError: 6 köken şeması var` (dosyalar yok)
 > bekleyen bir test **bulunmaz** — boyle bir test, ayni gorevin
 > kabuluyle celisir.
 
-- [ ] **Step 4: Kalan beş şemayı yaz**
+- [x] **Step 4: Kalan beş şemayı yaz**
 
 `schemas/dataset.json`:
 ```json
@@ -3237,7 +3237,7 @@ Expected: FAIL — `AssertionError: 6 köken şeması var` (dosyalar yok)
 }
 ```
 
-- [ ] **Step 5: `state.py`'ye PRISMA doğrulamasını ekle**
+- [x] **Step 5: `state.py`'ye PRISMA doğrulamasını ekle**
 
 `tools/atw/state.py` dosyasının sonuna ekle:
 ```python
@@ -3328,12 +3328,12 @@ def test_prisma_dahil_edilen_sifir_olabilir():
     assert validate_prisma_flow(akis) == []
 ```
 
-- [ ] **Step 6: Testleri çalıştır, geçtiğini doğrula**
+- [x] **Step 6: Testleri çalıştır, geçtiğini doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_provenance_schemas.py -v`
 Expected: PASS — 20 test
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add schemas/search_run.json schemas/dataset.json schemas/analysis.json schemas/statistic.json schemas/table.json schemas/figure.json tools/atw/state.py tests/schema_tests/test_provenance_schemas.py
@@ -3358,7 +3358,7 @@ git commit -m "feat: PRISMA akis ve veri kokeni semalari eklendi, prisma_flow ar
 - Consumes: `tools.atw.state.load_schema` (Task 3), `tools.atw.state.schema_registry` (Task 3), `tools.atw.ids.parse_id` (Task 1)
 - Produces: 7 JSON fixture + 1 doğrulama testi. Plan 2 ve Plan 3 bu fixture'ları kullanır.
 
-- [ ] **Step 1: `test_fixtures.py` dosyasını yaz**
+- [x] **Step 1: `test_fixtures.py` dosyasını yaz**
 
 `tests/schema_tests/test_fixtures.py`:
 ```python
@@ -3499,12 +3499,12 @@ def test_yontem_tutarsizligi_notlarda_aciklanir():
     assert "notes" in kayit
 ```
 
-- [ ] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
+- [x] **Step 2: Testleri çalıştır, başarısız olduğunu doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_fixtures.py -v`
 Expected: FAIL — `AssertionError: Eksik fixture: valid_source.json`
 
-- [ ] **Step 3: Yedi fixture'ı yaz**
+- [x] **Step 3: Yedi fixture'ı yaz**
 
 `tests/fixtures/valid_source.json`:
 ```json
@@ -3757,12 +3757,12 @@ Expected: FAIL — `AssertionError: Eksik fixture: valid_source.json`
 }
 ```
 
-- [ ] **Step 4: Testleri çalıştır, geçtiğini doğrula**
+- [x] **Step 4: Testleri çalıştır, geçtiğini doğrula**
 
 Run: `python -m pytest tests/schema_tests/test_fixtures.py -v`
 Expected: PASS — 27 test (13 tekil + 2 parametrik × 7 fixture)
 
-- [ ] **Step 5: `xfaz` işaretlerini kaldır ve tüm testleri çalıştır**
+- [x] **Step 5: `xfaz` işaretlerini kaldır ve tüm testleri çalıştır**
 
 `pytest.ini`:
 ```ini
@@ -3817,7 +3817,7 @@ yeşil olmalıdır.
 Run: `python -m pytest -q`
 Expected: PASS — tüm testler yeşil
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add tests/fixtures/ tests/schema_tests/ pytest.ini

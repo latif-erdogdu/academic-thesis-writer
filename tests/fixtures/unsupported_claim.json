@@ -1,0 +1,22 @@
+{
+  "$comment": "KURGUSAL ORNEK. Kaniti olmayan iddia ornegi. Metin uydurmadir.",
+  "id": "CLM-002",
+  "text": "Kurgusal ornek: hicbir kaynak bu iddiayi desteklememektedir.",
+  "importance": "high",
+  "sources": [],
+  "evidence_ids": [],
+  "contradicted_by": [],
+  "gap_ids": [],
+  "verification_status": "unsupported",
+  "confidence_level": null,
+  "evidence_type": "empirical",
+  "notes": "Yazar tarafindan destek kaynak sunulmadi. Yazima alinmamalidir.",
+  "chapter_id": null,
+  "section_id": null,
+  "created_at": "2026-09-26T10:30:00+00:00",
+  "last_verified_at": null,
+  "verified_by": null,
+  "related_claims": [],
+  "counter_claims": [],
+  "requires_followup": true
+}

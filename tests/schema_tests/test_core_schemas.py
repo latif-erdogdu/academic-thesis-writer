@@ -28,13 +28,11 @@ def _gecerli_kayit(dosya_adi: str) -> dict:
 def test_kayit_olmayan_semalar_ornek_tasiyor(schema_dir):
     import json
     for yol in sorted(schema_dir.glob("*.json")):
-        if yol.name in _KAYIT_DEGIL:
+        if yol.name == "thesis_state.json":
             continue
-        dogrulayici = _validator(yol.name)
-        for indeks, ornek in enumerate(json.loads(
-                yol.read_text(encoding="utf-8"))["examples"]):
-            hatalar = list(dogrulayici.iter_errors(ornek))
-            assert hatalar == [], f"{yol.name} ornek[{indeks}]: {hatalar[0].message}"
+        sema = json.loads(yol.read_text(encoding="utf-8"))
+        assert sema.get("examples"), f"{yol.name} ornek kayit icermiyor"
+        assert sema["examples"][0].get("$comment"), f"{yol.name} ornegi aciklamali"
 
 
 def test_tum_ornek_kayitlar_ilgili_semayi_geceriyor(schema_dir):
@@ -75,7 +73,7 @@ def test_source_geri_caledilen_kayit_reddedilir():
     "doi:10.5555/ornek",   # bicim oneki karistirilmis
 ])
 def test_source_doi_bicimsizse_reddedilir(bozuk_doi):
-    """Geçersiz DOI reddedilmeli.
+    r"""Geçersiz DOI reddedilmeli.
 
     Dikkat: `10.5555/` oneki fixture öneki olarak tanimli ve `^10\.\d{4,9}/\S+$` deseniyle **eslesir**.
     Bu yuzden "gecersiz" ornegi `10.5555/` onekiyle kurulamaz.
