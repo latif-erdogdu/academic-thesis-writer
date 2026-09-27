@@ -253,10 +253,212 @@ def cmd_search(args, durum) -> int:
 
 @_durum_gerekir
 def cmd_verify(args, durum) -> int:
-    """Kaynak doğrulama."""
-    print("🔍 Kaynak doğrulama başlatılıyor...")
-    print("⚠️  Henüz implemente edilmedi (tools/source_verify)")
-    return 0
+    """Kaynak doğrulaması — `tools.source_verify` motoruna bağlı.
+
+    Neden bağlandı
+    --------------
+    Bu komut iki satırdı: "Henüz implemente edilmedi (tools/source_verify)"
+    basıp 0 dönüyordu. Oysa `tools/source_verify/` tam uygulanmış ve
+    24 testi var: Crossref + OpenAlex, en az 2 bağımsız kaynak, skor ≥ 0.60,
+    retraksiyon ve korizyon. Yani CLI'daki yüzey GERÇEK OLMAYAN taraftı.
+    Aynı "ikinci yüzey" hastalığı: iki şema ağacı, iki `empty_state`, ölü
+    `pdf_extract` test dizini, eksik `__main__.py`, `skill.yaml`'nın var
+    olmayan CLI yüzeyini göstermesi.
+
+    Çıkış kodu
+    ----------
+    0 yalnız "doğrulanan kaynak var" demektir. Bir kaynak `unverified`,
+    `pending` ya da `retracted` ise 1 döner: `thesis:write` yalnızca
+    `verification.status == "verified"` kaynakları brifinge koyar
+    (`write.haric_eden_kaynaklar`), yani 0 dönmek "yazılabilir" izlenimi
+    verirdi.
+
+    Retraksyon yalnızca yukarı gider
+    -------------------------------
+    `retraction_status` ve `correction_status` alanları yeni bir
+    doğrulamayla temizlenmez. Tek bir veritabanının yanlış/eksik
+    yanıtı, geri çekilmiş bir kaynağı akta sokardı. Depodaki tek retraksiyon
+    kuralı `citation_check/checker.py:58` yalnız `== "retracted"` diyor;
+    burada da aynısı uygulanır, `expression_of_concern` genişletilmez.
+    """
+    from tools.source_verify import MIN_BIBLIOGRAPHIC_MATCH, verify_sources_batch
+
+    kaynaklar = [k for k in (durum.get("sources") or []) if isinstance(k, dict)]
+
+    secilen = _dogrulanacak_kaynaklar(args, kaynaklar)
+    if secilen is None:
+        return CIKIS_SORUN
+
+    if not secilen:
+        print("✅ Doğrulanacak kaynak yok — tüm kaynaklar zaten 'verified'.")
+        for kaynak in kaynaklar:
+            dogrulama = kaynak.get("verification")
+            durum_degeri = dogrulama.get("status") if isinstance(dogrulama, dict) else None
+            print(f"   {kaynak.get('id')}  {durum_degeri}")
+        return CIKIS_OK
+
+    print(f"🔍 Kaynak doğrulama başlatılıyor: {len(secilen)} kaynak…")
+    sonuclar = verify_sources_batch(secilen)
+
+    # `verify_batch` kayıt sırasını korur; yine de kimlikle eşleştirilir.
+    sonuc_haritasi = {s.source_id: s for s in sonuclar if getattr(s, "source_id", None)}
+
+    dogrulanan: list[str] = []
+    sorunlu: list[tuple[str, str]] = []
+    for kaynak in secilen:
+        kimlik = kaynak.get("id")
+        sonuc = sonuc_haritasi.get(kimlik)
+        if sonuc is None:
+            sorunlu.append((kimlik, "doğrulama sonucu dönmedi"))
+            continue
+        _dogrulama_uygula(kaynak, sonuc, MIN_BIBLIOGRAPHIC_MATCH)
+        durum_degeri = sonuc.status
+        if durum_degeri == "verified":
+            dogrulanan.append(kimlik)
+        else:
+            sorunlu.append((kimlik, _DOGRULAMA_SONUCU.get(durum_degeri, durum_degeri)))
+
+    save_state(durum)
+
+    for kaynak in secilen:
+        dogrulama = kaynak.get("verification") or {}
+        durum_degeri = dogrulama.get("status")
+        skor = dogrulama.get("bibliographic_match")
+        aciklama = _DOGRULAMA_SONUCU.get(durum_degeri, durum_degeri)
+        print(f"   {kaynak.get('id')}  {aciklama}  (skor={skor})")
+
+    if sorunlu:
+        print(f"\n⚠️  {len(sorunlu)} kaynak doğrulanmadı:")
+        for kimlik, sebep in sorunlu:
+            print(f"   • {kimlik}: {sebep}")
+        print("   Doğrulanmayan kaynak thesis:write brifingine GİRMEZ.")
+    if dogrulanan:
+        print(f"\n✅ {len(dogrulanan)} kaynak doğrulandı → sources")
+    return CIKIS_SORUN if sorunlu else CIKIS_OK
+
+
+#: `VerificationStatus` değerleri -> kullanıcının göreceği Türkçe sonuç.
+#: Çıktıda İngilizce enum bırakmak, en kritik sonucu (geri çekilmiş kaynak)
+#: okunması en zor şekilde gösterirdi.
+_DOGRULAMA_SONUCU: dict[str, str] = {
+    "verified": "doğrulandı",
+    "unverified": "eşleşme eşiğin altında (en az 2 bağımsız kaynak gerekli)",
+    "pending": "hiçbir veritabanı eşleşme bulamadı (DOI yok ya da ulaşılamadı)",
+    "retracted": "⚠️  GERİ ÇEKİLMİŞ — bu kaynakla atıf yapılamaz",
+    "corrected": "⚠️  DÜZELTME/KORİZYON YAYIMLANDI — kaynak gözden geçirilmeli",
+}
+
+
+def _dogrulanacak_kaynaklar(args, kaynaklar: list) -> list[dict] | None:
+    """Hangi kaynaklar doğrulanacak? Hatalı girdide ``None``.
+
+    ``--all`` DOĞRULANMAMIŞ kaynakları seçer, hepsini değil: doğrulanmış bir
+    kaynağı yeniden ağa göndermek onu gereksiz yere düşürme riskine sokar.
+    """
+    istenen = getattr(args, "source", None)
+    hepsi = getattr(args, "all", False)
+
+    if isinstance(istenen, str):
+        istenen = [istenen] if istenen else []
+    elif istenen is None:
+        istenen = []
+
+    if hepsi:
+        secilen = [
+            k for k in kaynaklar
+            if not _dogrulanmis(k)
+        ]
+    elif istenen:
+        secilen = []
+        for kimlik in istenen:
+            kaynak = _kayit_bul(kaynaklar, kimlik)
+            if kaynak is None:
+                print(f"❌ Kaynak bulunamadı: {kimlik}")
+                return None
+            secilen.append(kaynak)
+    else:
+        print("❌ Hangi kaynak doğrulanacak belirtilmedi.")
+        bekleyen = [k for k in kaynaklar if not _dogrulanmis(k)]
+        for kaynak in bekleyen:
+            print(f"   bekleyen: {kaynak.get('id')}")
+        if not bekleyen:
+            print("   (tüm kaynaklar zaten doğrulanmış)")
+        print("   Kullanım: verify <SRC-ID> [<SRC-ID>…]  |  verify --all")
+        return None
+
+    # Ayni kaynak iki kez gonderilmesin.
+    gorulen: set[str] = set()
+    benzersiz: list[dict] = []
+    for kaynak in secilen:
+        kimlik = kaynak.get("id")
+        if kimlik in gorulen:
+            continue
+        gorulen.add(kimlik)
+        benzersiz.append(kaynak)
+    return benzersiz
+
+
+def _dogrulanmis(kaynak: dict) -> bool:
+    dogrulama = kaynak.get("verification")
+    return isinstance(dogrulama, dict) and dogrulama.get("status") == "verified"
+
+
+def _dogrulama_uygula(kaynak: dict, sonuc, esik: float) -> None:
+    """`VerificationResult` -> `source.verification` (yalnız şema alanları).
+
+    `verification_details` bilerek KOPYALANMAZ: `source.json`
+    `additionalProperties: false` ve o alanın karşılığı yok. Detay
+    (veritabanı başına ham skor) yalnız ekranda okunabilir olur.
+    """
+    detay = sonuc.verification_details or {}
+    # En yüksek `overall` skorlu veritabanı: karşılaştırma işaretleri
+    # ("başlık tuttu mu?") EN İYİ kanıttan gelmelidir, ortalamadan değil.
+    en_iyi_ad = ""
+    en_iyi_skor = -1.0
+    for ad, deger in detay.items():
+        if isinstance(deger, dict):
+            skor = deger.get("overall")
+            if isinstance(skor, (int, float)) and skor > en_iyi_skor:
+                en_iyi_ad, en_iyi_skor = ad, float(skor)
+    en_iyi = detay.get(en_iyi_ad) if en_iyi_ad else None
+    en_iyi = en_iyi if isinstance(en_iyi, dict) else {}
+
+    # `title_match` vb. boolean/null. Skor -> boolean ESIGI UYDURULMAZ:
+    # motorun kendi `min_match` degeri kullanilir (MIN_BIBLIOGRAPHIC_MATCH).
+    esik_gecer = lambda ad: (  # noqa: E731
+        None if en_iyi.get(ad) is None else float(en_iyi[ad]) >= esik
+    )
+
+    kaynak["verification"] = {
+        "status": sonuc.status,
+        "bibliographic_match": sonuc.bibliographic_match,
+        "verified_at": sonuc.verified_at,
+        "verification_sources": list(sonuc.verification_sources or []),
+        "doi_match": _isaret(en_iyi.get("doi_match")),
+        "title_match": esik_gecer("title"),
+        "author_match": esik_gecer("author"),
+        "year_match": esik_gecer("year"),
+        "journal_match": esik_gecer("journal"),
+    }
+
+    # Ust duzey `verified` bayragı: yalnız gerçekten dogrulanmışsa true.
+    # RETRAKSIYONLU KAYNAKTA ISE ASLA true DEGIL. Geri cekilmis bir
+    # kayit "dogrulanmis" olarak sunulamaz; tek bir veritabaninin yanlis
+    # ya da eksik yaniti bu bayragi tekrar true yapamaz, cunku
+    # `retraction_status` geri alinmaz.
+    kaynak["verified"] = (
+        sonuc.status == "verified" and kaynak.get("retraction_status") != "retracted"
+    )
+
+    if sonuc.status == "retracted":
+        kaynak["retraction_status"] = "retracted"
+    if sonuc.status == "corrected":
+        kaynak["correction_status"] = "corrected"
+
+
+def _isaret(deger) -> bool | None:
+    """`doi_match` zaten boolean; bilinmiyorsa ``None`` (sema izin verir)."""
+    return deger if isinstance(deger, bool) else None
 
 
 @_durum_gerekir
@@ -716,7 +918,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     # thesis:verify
     p_verify = sub.add_parser("verify", help="Kaynak doğrulama")
-    p_verify.add_argument("--all", action="store_true", help="Tüm bekleyen kaynakları doğrula")
+    p_verify.add_argument(
+        "source",
+        nargs="*",
+        help="Doğrulanacak kaynak kimlikleri (örn: SRC-001 SRC-002)",
+    )
+    p_verify.add_argument(
+        "--all",
+        action="store_true",
+        help="DOĞRULANMAMIŞ tüm kaynakları doğrula",
+    )
     p_verify.set_defaults(func=cmd_verify)
 
     # thesis:extract

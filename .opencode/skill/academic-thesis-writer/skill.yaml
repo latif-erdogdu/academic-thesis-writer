@@ -147,9 +147,9 @@ commands:
     handler: "python -m tools.atw.cli search {args[0]} --databases {options.databases}"
 
   - name: thesis:verify
-    description: "Kaynak adaylarını DOI/bibliyografik doğrula (en az 2 kaynak)"
-    usage: "/thesis:verify [--all]"
-    handler: "python -m tools.atw.cli verify --all {options.all}"
+    description: "Kaynakları Crossref + OpenAlex ile DOI/bibliyografik doğrular (en az 2 bağımsız kaynak, skor ≥ 0.60) ve sonucu source.verification alanına yazar. Retraksiyon ve korizyon da denetlenir; geri çekilmiş kaynak doğrulanmış işaretlenmez ve geri çekilmişliği bir daha silinmez"
+    usage: "/thesis:verify [<SRC-ID> …] | /thesis:verify --all"
+    handler: "python -m tools.atw.cli verify {args[0]} --all {options.all}"
 
   - name: thesis:extract
     description: "Doğrulanmış PDF'lerden kanıt çıkar (claim-evidence linking)"

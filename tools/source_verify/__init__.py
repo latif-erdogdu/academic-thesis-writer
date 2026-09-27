@@ -19,6 +19,7 @@ from .bibliographic import (
     compare_journals,
 )
 from .retraction import check_retraction_status, check_correction_status
+from .verify import MIN_BIBLIOGRAPHIC_MATCH, MIN_INDEPENDENT_SOURCES
 
 __all__ = [
     "verify_source",
@@ -32,4 +33,9 @@ __all__ = [
     "compare_journals",
     "check_retraction_status",
     "check_correction_status",
+    # Eşikler. `tools.atw.cli.cmd_verify` karşılaştırma işaretlerini
+    # (title_match vb.) motorun KENDI eşiğinden türetir; eşiği ikinci bir
+    # yerde yazmak motorun kuralıyla ayrışabilir.
+    "MIN_BIBLIOGRAPHIC_MATCH",
+    "MIN_INDEPENDENT_SOURCES",
 ]
