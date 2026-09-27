@@ -8,6 +8,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from tools.atw.state import empty_state
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]  # tools/atw/cli -> repo root
 
@@ -26,46 +28,6 @@ def save_state(state: dict) -> None:
     state["updated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     state["version"] = state.get("version", 0) + 1
     state_file.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def empty_state(thesis_id: str, title: str) -> dict:
-    """Boş tez durumu oluştur."""
-    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    return {
-        "schema_version": "1.0",
-        "thesis_id": thesis_id,
-        "title": title,
-        "language": "tr",
-        "style_profile": "apa7",
-        "created_at": now,
-        "updated_at": now,
-        "version": 1,
-        "methodology": {},
-        "human_approvals": {},
-        "definitions": [],
-        "conceptual_framework": [],
-        "open_questions": [],
-        "quality_issues": [],
-        "research_questions": [],
-        "hypotheses": [],
-        "chapters": [],
-        "variables": [],
-        "evidence_registry": [],
-        "claims_registry": [],
-        "findings_registry": [],
-        "discussion_registry": [],
-        "conclusion_registry": [],
-        "gap_registry": [],
-        "audit_registry": [],
-        "search_runs": [],
-        "sources": [],
-        "citations": [],
-        "datasets": [],
-        "analyses": [],
-        "statistics": [],
-        "tables": [],
-        "figures": [],
-    }
 
 
 def cmd_new(args) -> int:
@@ -135,9 +97,91 @@ def cmd_verify(args) -> int:
 
 def cmd_extract(args) -> int:
     """PDF'ten kanıt çıkar."""
-    print(f"📄 PDF çıkarma: SRC={args.source}, Claim={args.claim}")
-    print("⚠️  Henüz implemente edilmedi (tools/pdf_extract)")
+    from tools.pdf_extract import find_evidence_for_claim
+
+    state = load_state()
+
+    if _kayit_bul(state.get("sources", []), args.source) is None:
+        print(f"❌ Kaynak bulunamadı: {args.source}")
+        return 1
+
+    iddia = _kayit_bul(state.get("claims_registry", []), args.claim)
+    if iddia is None:
+        print(f"❌ İddia bulunamadı: {args.claim}")
+        return 1
+
+    # source.json'da yerel dosya yolu alanı yok; yol CLI'den verilir.
+    if not getattr(args, "pdf", None):
+        print("❌ --pdf zorunlu (source.json'da yerel dosya yolu alanı yok)")
+        return 1
+    pdf_yolu = Path(args.pdf)
+    if not pdf_yolu.is_absolute():
+        pdf_yolu = REPO_ROOT / pdf_yolu
+    if not pdf_yolu.exists():
+        print(f"❌ PDF bulunamadı: {pdf_yolu}")
+        return 1
+
+    print(f"📄 Kanıt aranıyor: {args.source} → {args.claim}")
+    bulgular = find_evidence_for_claim(pdf_yolu, iddia.get("text", ""))
+
+    if not bulgular:
+        print(f"⚠️  {args.claim} iddiasını destekleyen kanıt bulunamadı ({pdf_yolu.name})")
+        return 1
+
+    sira = _sonraki_kanit_sirasi(state.get("evidence_registry", []))
+    for bulgu in bulgular:
+        kayit = _kanit_kaydi(bulgu, args.source, args.claim, sira)
+        state["evidence_registry"].append(kayit)
+        konum = f"s.{kayit['location']['page']}" if kayit["location"]["page"] else "s.?"
+        print(f"   {kayit['id']}  {konum}  ({kayit['strength']})")
+        sira += 1
+
+    save_state(state)
+    print(f"✅ {len(bulgular)} kanıt eklendi → evidence_registry")
+    print(f"   Kanıtlar 'verified: false' olarak işaretlendi — elle doğrulama gerekli.")
     return 0
+
+
+def _kayit_bul(kayitlar: list, kimlik: str) -> dict | None:
+    """Listede verilen kimliğe sahip ilk kaydı döndürür."""
+    for kayit in kayitlar or []:
+        if kayit.get("id") == kimlik:
+            return kayit
+    return None
+
+
+def _sonraki_kanit_sirasi(kayitlar: list) -> int:
+    """Bir sonraki EVD-NNN numarasını hesaplar."""
+    en_yuksek = 0
+    for kayit in kayitlar or []:
+        kimlik = kayit.get("id", "")
+        if isinstance(kimlik, str) and kimlik.startswith("EVD-"):
+            try:
+                en_yuksek = max(en_yuksek, int(kimlik[4:]))
+            except ValueError:
+                continue
+    return en_yuksek + 1
+
+
+def _kanit_kaydi(bulgu, source_id: str, claim_id: str, sira: int) -> dict:
+    """ExtractedEvidence nesnesini evidence.json kaydına dönüştürür."""
+    return {
+        "id": f"EVD-{sira:03d}",
+        "source_id": source_id,
+        "location": {
+            "page": bulgu.page,
+            "section": bulgu.section or "",
+            "paragraph": bulgu.paragraph_index,
+        },
+        "text": bulgu.text,
+        "evidence_type": bulgu.evidence_type,
+        "supports_claim": claim_id,
+        "strength": bulgu.strength,
+        "verified": False,
+        "extracted_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "extraction_method": "pdf_text_layer",
+        "notes": bulgu.subsection or "",
+    }
 
 
 def cmd_write(args) -> int:
@@ -208,6 +252,7 @@ def main() -> int:
     p_extract = sub.add_parser("extract", help="PDF'ten kanıt çıkar")
     p_extract.add_argument("source", help="Kaynak ID (SRC-XXX)")
     p_extract.add_argument("--claim", required=True, help="Hedef iddia ID (CLM-XXX)")
+    p_extract.add_argument("--pdf", help="Yerel PDF dosya yolu (source.json'da yol alanı yok)")
     p_extract.set_defaults(func=cmd_extract)
 
     # thesis:write
