@@ -206,36 +206,54 @@ def cmd_new(args) -> int:
 
 @_durum_gerekir
 def cmd_search(args, durum) -> int:
-    """Kaynak arama başlat."""
-    from tools.source_search import run_systematic_search, PICO, parse_pico
+    """Kaynak arama başlat.
 
-    # RQ'den PICO oluştur veya state'den al
-    pico = None
-    if hasattr(args, 'pico') and args.pico:
-        pico = parse_pico(args.pico)
-    elif args.rq:
-        # State'den RQ'yi bul ve PICO'ya çevir
-        rq_id = args.rq
-        for rq in durum.get("research_questions", []):
-            if rq.get("id") == rq_id:
-                # RQ metninden PICO parse et
-                pico = parse_pico(rq.get("text", ""))
-                break
-        if not pico:
-            print(f"⚠️  RQ {args.rq} bulunamadı, boş PICO ile devam ediliyor")
-            pico = PICO()
+    Boş PICO reddi
+    --------------
+    Bu komut bilinmeyen RQ'yu bir uyarıyla geçiyordu: "boş PICO ile devam
+    ediliyor". Bu bir uyarı değil, bir kirlilik kaynağıydı — boş PICO
+    Crossref/OpenAlex/PubMed'e genel bir sorgu gönderir ve sonuçları
+    `sources`'a yazar. Yani "RQ-001" yerine "RQ-01" yazan kullanıcı,
+    "100 kaynak buldum" sanarken tezin kaynak kütüphanesine alakasız
+    kaynakları doldurur. Ölçüldü: 100 kaynak.
 
-    databases = [db.strip() for db in args.databases.split(",")]
+    Artık arama iki koşulla başlar:
+
+      * `--pico` verilmişse metin doğrudan kullanılır (ön tarama).
+      * `--rq` verilmişse RQ `research_questions` içinde BULUNMALI ve
+        metni en az bir PICO bileşeni üretmeli.
+
+    Boş PICO'nun reddi ayrı bir ölçüt: `PICO()` bir dataclass olduğu için
+    her zaman doğrudur; gerçek boşluk `PICO.non_empty()` ile anılır.
+    Kayıtlı ama içeriği olmayan bir RQ, kaydı bulmakla arama yapmak
+    arasındaki farkı kapatmaz.
+    """
+    from tools.source_search import run_systematic_search, parse_pico
+
+    pico, hata = _aramaya_pico(args, durum)
+    if hata:
+        print(hata)
+        return CIKIS_SORUN
+
+    veritabanlari = [db.strip() for db in (args.databases or "").split(",") if db.strip()]
+    if not veritabanlari:
+        print("❌ --databases boş olamaz (örn: --databases crossref,openalex)")
+        return CIKIS_SORUN
 
     result = run_systematic_search(
         pico=pico,
-        databases=[db.strip() for db in args.databases.split(",")],
+        databases=veritabanlari,
         year_from=args.year_from,
         year_to=args.year_to,
         max_results_per_db=args.max_results,
     )
 
     print(f"\n✅ Arama tamamlandı: {result.search_run_id}")
+    if args.rq:
+        # Hangi sorunun arandığı çıktıda görünmeli: `search_runs` kaydı
+        # `rq`'yu taşımıyor, sonraki bir denetimde hangi aramanın
+        # hangisine ait olduğu anlaşılamıyor.
+        print(f"   Soru: {args.rq}")
     print(f"   Kayıtlar: {result.prisma_flow['records_identified']}")
     print(f"   Kopya kaldırıldı: {result.deduplication.stats['removed']}")
     print(f"   Dahil edilen: {len(result.included_source_ids)}")
@@ -248,7 +266,56 @@ def cmd_search(args, durum) -> int:
                 durum["sources"].append(record)
     save_state(durum)
 
-    return 0
+    return CIKIS_OK
+
+
+def _aramaya_pico(args, durum: dict) -> tuple:
+    """Aramanın PICO'su ve kullanıcıya gösterilecek hata mesajı.
+
+    Hata varsa PICO ``None`` döner ve mesaj boş ``None`` değildir; çağıran
+    tek bir `if hata` ile hem durdurur hem açıklar. Ayrı bir istisna
+    sınıfı burada gereksiz: `write.brifing_uret`'in `YazimHatasi`'ndan
+    farklı olarak bu bir kullanım hatası, yakalanıp ekrana basılması
+    gereken bir program hatası değil.
+    """
+    from tools.source_search import parse_pico
+
+    if getattr(args, "pico", None):
+        return parse_pico(args.pico), None
+
+    rq_id = getattr(args, "rq", None)
+    sorular = durum.get("research_questions") or []
+    if not rq_id:
+        kayitli = ", ".join(s.get("id", "?") for s in sorular if isinstance(s, dict))
+        return None, (
+            "❌ Araştırma sorusu verilmedi.\n"
+            f"   Kayıtlı sorular: {kayitli or '(hiç kayıt yok — research_questions boş)'}\n"
+            "   Kullanım: search <RQ-ID>  |  search <RQ-ID> --pico \"pop: …, outcome: …\""
+        )
+
+    rq = _kayit_bul(sorular, rq_id)
+    if rq is None:
+        kayitli = ", ".join(s.get("id", "?") for s in sorular if isinstance(s, dict))
+        return None, (
+            f"❌ Araştırma sorusu bulunamadı: {rq_id}\n"
+            f"   Kayıtlı sorular: {kayitli or '(hiç kayıt yok — research_questions boş)'}\n"
+            "   Arama yapılmadı; boş PICO ile 100 alakasız kaynak yazılması engellendi."
+        )
+
+    pico = parse_pico(rq.get("text", "") or "")
+    if not pico.non_empty():
+        return None, (
+            f"❌ {rq_id} metninden arama terimi üretilemedi.\n"
+            f"   Soru metni: {rq.get('text')!r}\n"
+            "   `tools.source_search.parse_pico` yalnızca İngilizce anahtar\n"
+            "   kelimelere bakar (patients, treatment, randomized …); terim\n"
+            "   bulunmayan bir metin boş PICO'ya dönüşür ve arama genel bir\n"
+            "   sorguya dönüşür. Arama yapılmadı — alakasız kaynak yazılmadı.\n"
+            "   Çözüm: `--pico` ile özgün PICO ver\n"
+            "   (örn. --pico \"pop: …, intervention: …, outcome: …\")."
+        )
+
+    return pico, None
 
 
 @_durum_gerekir
