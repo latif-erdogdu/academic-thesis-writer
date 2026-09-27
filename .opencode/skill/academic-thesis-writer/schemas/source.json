@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://academic-thesis-writer/schemas/source.json",
+  "title": "Academic Source",
+  "type": "object",
+  "required": [
+    "id", "doi", "title", "authors", "year", "type", "journal", "venue",
+    "volume", "issue", "pages", "url", "verification_status",
+    "verification_sources", "verification_score", "retracted",
+    "retraction_notice", "created_at", "updated_at"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^SRC-\\d{4}-\\d{3}$" },
+    "doi": { "type": "string", "pattern": "^10\\.\\d{4,9}/.+$" },
+    "title": { "type": "string", "minLength": 1 },
+    "authors": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "year": { "type": "integer", "minimum": 1900, "maximum": 2100 },
+    "type": { "type": "string", "enum": ["journal-article", "book", "book-chapter", "conference-paper", "thesis", "preprint", "report", "webpage", "other"] },
+    "journal": { "type": "string" },
+    "venue": { "type": "string" },
+    "volume": { "type": "string" },
+    "issue": { "type": "string" },
+    "pages": { "type": "string" },
+    "url": { "type": "string", "format": "uri" },
+    "verification_status": { "type": "string", "enum": ["verified", "unverified", "pending", "retracted", "corrected"] },
+    "verification_sources": { "type": "array", "items": { "type": "string", "enum": ["crossref", "openalex", "semantic-scholar", "pubmed", "google-scholar"] }, "minItems": 1 },
+    "verification_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "retracted": { "type": "boolean" },
+    "retraction_notice": { "type": ["string", "null"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}
