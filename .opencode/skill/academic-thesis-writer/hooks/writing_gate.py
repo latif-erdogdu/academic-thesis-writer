@@ -3,20 +3,30 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
+# parents[4] = depo kökü. parents[3] (.opencode) kullanılırsa nispi yollar
+# .opencode/ altında aranır, bulunamaz ve betik sessizce 0 döner.
+REPO_ROOT = Path(__file__).resolve().parents[4]
+
+
+def _cozumle(yol: str) -> Path:
+    """Nispi yolları depo köküne göre çözümler; mutlak yollara dokunmaz."""
+    aday = Path(yol)
+    return aday if aday.is_absolute() else REPO_ROOT / aday
+
 
 def main(file_path: str):
-    repo_root = Path(__file__).resolve().parents[3]
-    citation_file = repo_root / file_path
+    citation_file = _cozumle(file_path)
 
     if not citation_file.exists():
         print(f"⚠️  Dosya yok: {citation_file}")
         return 0
 
     try:
-        data = json.loads(citation_file.read_text(encoding="utf-8"))
+        data = json.loads(citation_file.read_text(encoding="utf-8-sig"))
     except json.JSONDecodeError as e:
         print(f"❌ Geçersiz JSON: {e}")
         return 1
@@ -33,7 +43,6 @@ def main(file_path: str):
         print(f"⚠️  Stil 'apa7' değil: {data.get('style')} (APA 7 varsayılan)")
 
     # source_id formatı kontrolü
-    import re
     if not re.match(r"^SRC-\d{3,}$", data.get("source_id", "")):
         print(f"⚠️  source_id formatı yanlış: {data.get('source_id')}")
 
@@ -41,10 +50,15 @@ def main(file_path: str):
         print(f"⚠️  paragraph_id formatı yanlış: {data.get('paragraph_id')}")
 
     # source_id thesis_state.json'da var mı kontrolü
-    thesis_state_file = Path(__file__).resolve().parents[3] / "thesis_state.json"
+    #
+    # Bu kontrol bir zamanlar HİÇ ÇALIŞMIYORDU: yol `parents[3] /
+    # "thesis_state.json"` idi, yani `.opencode/thesis_state.json`. O dosya
+    # hiç var olmadığı için `if ... .exists()` her zaman False dönüyor ve
+    # denetim sessizce atlanıyordu. Sonuç: tezde olmayan `SRC-999` gibi
+    # uydurma bir source_id taşıyan atıf Writing Gate'i geçiyordu.
+    thesis_state_file = REPO_ROOT / "thesis_state.json"
     if thesis_state_file.exists():
-        import json as json_lib
-        thesis_state = json_lib.loads(thesis_state_file.read_text(encoding="utf-8"))
+        thesis_state = json.loads(thesis_state_file.read_text(encoding="utf-8-sig"))
         source_ids = {s.get("id") for s in thesis_state.get("sources", [])}
         if data.get("source_id") not in source_ids:
             print(f"⚠️  source_id thesis_state.json'da yok: {data.get('source_id')}")

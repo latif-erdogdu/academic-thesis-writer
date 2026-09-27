@@ -13,7 +13,10 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[3]  # .opencode/skill/.../hooks -> repo root
+# parents[4] = depo kökü. Bu değer hem sys.path'e hem de varsayılan
+# thesis_state.json konumuna giriyor; parents[3] (.opencode) kullanılırsa
+# tez durumu .opencode/thesis_state.json altına yazılırdı.
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
 
 from tools.atw.state import empty_state  # noqa: E402

@@ -2,23 +2,32 @@
 """Hook: Bölüm yazımından önce Evidence Gate kontrolü."""
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
+# parents[4] = depo kökü. parents[3] (.opencode) kullanılırsa nispi yollar
+# .opencode/ altında aranır, bulunamaz ve betik sessizce 0 döner.
+REPO_ROOT = Path(__file__).resolve().parents[4]
+
+
+def _cozumle(yol: str) -> Path:
+    """Nispi yolları depo köküne göre çözümler; mutlak yollara dokunmaz."""
+    aday = Path(yol)
+    return aday if aday.is_absolute() else REPO_ROOT / aday
+
 
 def main(file_path: str):
-    repo_root = Path(__file__).resolve().parents[3]
-    chapter_file = repo_root / file_path
+    chapter_file = _cozumle(file_path)
 
     if not chapter_file.exists():
         print(f"⚠️  Dosya yok: {chapter_file}")
         return 0
 
     # Basit kontrol: bölüm dosyasında claim/evidence/source referansları var mı?
-    content = chapter_file.read_text(encoding="utf-8")
+    content = chapter_file.read_text(encoding="utf-8-sig")
 
     # Claim referansı kontrolü (CLM-XXX)
-    import re
     claims = re.findall(r"CLM-\d{3,}", content)
     evidence = re.findall(r"EVD-\d{3,}", content)
     sources = re.findall(r"SRC-\d{3,}", content)
