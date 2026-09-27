@@ -185,8 +185,35 @@ def _kanit_kaydi(bulgu, source_id: str, claim_id: str, sira: int) -> dict:
     }
 
 
+def _kapi_raporu(durum: dict, kapi: str) -> bool:
+    """Kapiyi kontrol eder; engel varsa ekrana basar ve False doner.
+
+    Bu, onay motorunun CLI'daki TEK giriş noktasidir. Yazim ve ihracat
+    kapilari sormadan ilerlemez.
+    """
+    from tools.atw.approval import kontrol_yaz
+
+    engeller = kontrol_yaz(durum, kapi)
+    if not engeller:
+        return True
+
+    print(f"🚧 '{kapi}' kapısı kapalı — işlem durduruldu:")
+    for engel in engeller:
+        print(f"   • {engel}")
+    print("   İnsan onayı gerekiyor; kapıyı tez durumundan açın.")
+    return False
+
+
 def cmd_write(args) -> int:
-    """Bölüm yaz."""
+    """Bölüm yaz.
+
+    Önce 'methodology' kapısı sorulur: yazım yöntem onayından geçmeden
+    yapılırsa, sonradan yöntem değişince tüm bölümler geçersiz olur.
+    """
+    durum = load_state()
+    if not _kapi_raporu(durum, "methodology"):
+        return 1
+
     print(f"✍️  Bölüm yazımı: Chapter={args.chapter}, RQ={args.rq}")
     print("⚠️  Henüz implemente edilmedi (agent/writer)")
     return 0
@@ -251,11 +278,36 @@ def cmd_status(args) -> int:
     print(f"   Bulgular: {len(state.get('findings_registry', []))}")
     print(f"   Boşluklar: {len(state.get('gap_registry', []))}")
     print(f"   Denetimler: {len(state.get('audit_registry', []))}")
+
+    # Onay akisi: bu blok daha once YALNIZCA sayi yaziyordu, kapilarin
+    # gercekten zorlandigi yeri degil. Simdi akis motorundan tek kaynak
+    # alinir.
+    from tools.atw.approval import acik_olanlar, ozet
+
+    print("\n🔐 Onay kapıları (PRISMA):")
+    for kapi, acik_mi, engeller in ozet(state):
+        isaret = "✅" if acik_mi else "⬜"
+        satir = f"   {isaret} {kapi}"
+        if engeller and acik_mi:
+            satir += f"  ⚠️  {engeller[0]}"
+        elif not acik_mi and engeller:
+            satir += f"  — {engeller[0]}"
+        print(satir)
+    print(f"   → {len(acik_olanlar(state))}/7 aşama onaylı")
     return 0
 
 
 def cmd_export(args) -> int:
-    """Tez dışa aktar."""
+    """Tez dışa aktar.
+
+    Dışa aktarma, tezin İNSAN ONAYLI bitmiş halini paylaşmak demektir.
+    Bu yüzden en katı kapı sorulur: 'final_thesis' — bütünlük, kanıtsız
+    iddia ve retraksiyon denetimi de burada devreye girer.
+    """
+    durum = load_state()
+    if not _kapi_raporu(durum, "final_thesis"):
+        return 1
+
     fmt = args.format or "md"
     print(f"📤 Dışa aktarma: format={fmt}")
     print("⚠️  Henüz implemente edilmedi")

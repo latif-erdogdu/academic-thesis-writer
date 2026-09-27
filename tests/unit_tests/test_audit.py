@@ -283,6 +283,20 @@ def test_metodoloji_pending_ama_bulgusu_olan_soruyu_bulur():
     assert any("RQ-001" in m for m in _bulgu_metinleri(kayit))
 
 
+def test_metodoloji_sozluk_olmayan_kaydi_atlar():
+    """ Bozuk kayit (dict degil) denetimi cokertmemeli, sessizce gecilmeli.
+
+    Semaya uymayan veri dogrulama katmanina aittir; denetim yine de
+    TypeError fırlatmamalidir.
+    """
+    durum = _temiz_durum()
+    durum["research_questions"] = ["bozuk kayit", {"id": "RQ-001", "text": "S",
+                                                   "method": "g", "status": "answered"}]
+    durum["findings_registry"] = []
+    kayit = denetim_calistir(durum, "methodology")
+    assert any("RQ-001" in m for m in _bulgu_metinleri(kayit))
+
+
 def test_metodoloji_tutarli_soru_sessiz_gecer():
     """finding_ids ile status uyumluysa bulgu olmamali."""
     durum = _temiz_durum()

@@ -1,0 +1,199 @@
+"""Insan onayi kapilari: PRISMA akisinin 7 asamasini kapiya baglar.
+
+Neden bu modul gerekiyor
+-------------------------
+``state.APPROVAL_GATES`` 7 kapinin adini soyluyordu, ama HICBIR YERDE
+zorlanmiyordu. Durumda kapilar ``False`` olarak basliyor ve oyle kaliyordu;
+`cmd_status` yalnizca sayiyordu. Yani "her yazim oturumunda insan onayi
+zorunlu" vaadi (skill.yaml) kodda hicbir sey ifade etmiyordu.
+
+PRISMA (Preferred Reporting Items for Systematic Reviews and Meta-Analyses)
+akisi: kaynak secimi, tarama, eleme ve sentez insan kararidir. Bir
+asamanin ciktisi, onceki asama onaylanmadan uretilmemelidir.
+
+Iki kavram ayridir
+------------------
+  onay  -> insan bir karari VERDI, kapı acildi (human_approvals)
+  hazir -> verilen karari uygulamaya hazir veri var (write, export)
+
+`kapi_acik_mi()` sadece onayi sorar. `kontrol_yaz()` ayrica verinin
+gercekten hazir olup olmadigini da dener; yalniz "onay var" demek, bos bir
+capaya onay vermis olmak kadar anlamsizdir.
+
+Kapsam ilkesi
+-------------
+Bu modul KALDIYLA degil, veriyle karar verir. Onaylanmamis bir asamayi
+otomatik gecmek mumkun degildir; onun yerine eksigi ADIYLA bildirir.
+"""
+from __future__ import annotations
+
+from typing import Any, Callable
+
+from tools.atw.graph import (
+    kanitsiz_iddialar,
+    kopuk_baglari,
+    retraksiyona_ugrayan_iddialar,
+)
+from tools.atw.state import APPROVAL_GATES
+
+# Her kapi icin: kapinin hangi registry'leri bos olmamali, ve o asamada
+# calisacak ek hazirlik denetimi. Sirayla bagimlidir: bir onceki kapinin
+# onayi olmadan sonrakinin denetimi calistirilmaz.
+GATE_ASAMALARI: dict[str, tuple[str, ...]] = {
+    "research_question": ("research_questions",),
+    "search_strategy": ("search_runs",),
+    "source_set": ("sources",),
+    "research_gap": ("gap_registry",),
+    "methodology": ("chapters",),
+    "findings": ("findings_registry",),
+    # final_thesis'te ayrica butunluk ve kanit denetimi calisir; tez
+    # kanitsiz iddia veya kopuk referans iceriyorsa onaylanabilir degildir.
+    "final_thesis": (),
+}
+
+
+class OnayHatasi(RuntimeError):
+    """Kapi acilmadan once bir asamaya girilmeye calisildi."""
+
+
+def kapi_acik_mi(durum: dict[str, Any], kapi: str) -> bool:
+    """Verilen kapi insan tarafindan onaylanmis mi?
+
+    Taninmayan kapi adi hata verir; sessizce "kapali" donmek, kapi
+    sistemine eklenen ama burada unutulan bir asamayi gizlerdi.
+    """
+    if kapi not in GATE_ASAMALARI:
+        raise ValueError(f"bilinmeyen onay kapisi: {kapi}")
+    return bool(durum.get("human_approvals", {}).get(kapi, False))
+
+
+def onay_ver(durum: dict[str, Any], kapi: str) -> dict[str, Any]:
+    """Kapiyi acar ve durumu gunceller.
+
+    Kapi acilmadan once ONCEDEN KAPALI olan tum kapilarin acik olmasi
+    gerekir; aksi halde akis atlanmis olur.
+    """
+    if kapi not in GATE_ASAMALARI:
+        raise ValueError(f"bilinmeyen onay kapisi: {kapi}")
+
+    eksik = [
+        onceki
+        for onceki in APPROVAL_GATES[: APPROVAL_GATES.index(kapi)]
+        if not kapi_acik_mi(durum, onceki)
+    ]
+    if eksik:
+        raise OnayHatasi(
+            f"'{kapi}' kapisi acilamiyor: onceki asamalar onayli degil -> {', '.join(eksik)}"
+        )
+
+    durum.setdefault("human_approvals", {})[kapi] = True
+    return durum
+
+
+def onay_geri_al(durum: dict[str, Any], kapi: str) -> dict[str, Any]:
+    """Kapiyi kapatir ve sonraki acik kapilari da kapatir.
+
+    Bir onay geri alinirsa, ona dayanan onaylar da gecersizdir; aksi halde
+    "methodology geri alindi ama final_thesis onayli" gibi durum olusur.
+    """
+    if kapi not in GATE_ASAMALARI:
+        raise ValueError(f"bilinmeyen onay kapisi: {kapi}")
+
+    onaylar = durum.setdefault("human_approvals", {})
+    onaylar[kapi] = False
+    for sonraki in APPROVAL_GATES[APPROVAL_GATES.index(kapi) + 1 :]:
+        onaylar[sonraki] = False
+    return durum
+
+
+def _bos_registry(durum: dict[str, Any], alan: str) -> bool:
+    return not (durum.get(alan) or [])
+
+
+def _bulgulari_tara(durum: dict[str, Any]) -> list[str]:
+    """Bütünlük taraması: gerçekten bozuk olanı döndürür.
+
+    Burada kopuk referans veya retraksiyonlu kaynak yoksa liste boştur.
+    """
+    sorunlar = []
+    kopuk = kopuk_baglari(durum)
+    if kopuk:
+        sorunlar.append(f"{len(kopuk)} kopuk referans: {kopuk[0]}")
+    retraksiyon = retraksiyona_ugrayan_iddialar(durum)
+    if retraksiyon:
+        sorunlar.append(f"geri çekilmiş kaynağa dayanan iddia: {', '.join(retraksiyon)}")
+    kanitsiz = kanitsiz_iddialar(durum)
+    if kanitsiz:
+        sorunlar.append(f"{len(kanitsiz)} kanıtsız iddia: {', '.join(kanitsiz)}")
+    return sorunlar
+
+
+# Kapi basina hazirlik denetimleri. Bos liste = ek kosul yok.
+def _registry_dolu(durum: dict[str, Any], alan: str) -> list[str]:
+    """Registry bos ise eksigi dondurur."""
+    if _bos_registry(durum, alan):
+        return [f"'{alan}' boş — bu aşamanın çıktısı henüz üretilmemiş"]
+    return []
+
+
+# Kapi basina hazirlik denetimleri. Her kapi kendi asamasinin registry'sini
+# doldurmus olmalidir; aksi halde kapı, içliği boş bir belgeye verilmiş
+# onay olur.
+GATE_HAZIRLIK: dict[str, Callable[[dict[str, Any]], list[str]]] = {
+    "research_question": lambda d: _registry_dolu(d, "research_questions"),
+    "search_strategy": lambda d: _registry_dolu(d, "search_runs"),
+    "source_set": lambda d: _registry_dolu(d, "sources"),
+    "research_gap": lambda d: _registry_dolu(d, "gap_registry"),
+    "methodology": lambda d: _registry_dolu(d, "chapters"),
+    "findings": lambda d: _registry_dolu(d, "findings_registry"),
+    "final_thesis": _bulgulari_tara,
+}
+
+
+def acik_olanlar(durum: dict[str, Any]) -> list[str]:
+    """Açık olan kapılar, akış sırasına göre."""
+    return [k for k in APPROVAL_GATES if kapi_acik_mi(durum, k)]
+
+
+def kapali_olanlar(durum: dict[str, Any]) -> list[str]:
+    return [k for k in APPROVAL_GATES if not kapi_acik_mi(durum, k)]
+
+
+def kontrol_yaz(durum: dict[str, Any], kapi: str) -> list[str]:
+    """Yazim/ihracat icin kapinin acik ve verinin hazir olup olmadigini doner.
+
+    Donen liste bos ise yazim yapilabilir. Dolu ise her ogge bir engeldir.
+
+    Iki ayri kontrol:
+      1. onay   -> insan karari verilmis mi (kapi_acik_mi)
+      2. hazirlik -> o karari uygulayacak veri gercekten var mi
+    """
+    if kapi not in GATE_ASAMALARI:
+        raise ValueError(f"bilinmeyen onay kapisi: {kapi}")
+
+    engeller: list[str] = []
+    if not kapi_acik_mi(durum, kapi):
+        engeller.append(
+            f"'{kapi}' kapısı insan onayı bekliyor "
+            f"(human_approvals.{kapi} = false)"
+        )
+    denetim = GATE_HAZIRLIK.get(kapi)
+    if denetim is not None:
+        engeller.extend(denetim(durum))
+    return engeller
+
+
+def yazim_hazir_mi(durum: dict[str, Any], kapi: str = "methodology") -> bool:
+    return not kontrol_yaz(durum, kapi)
+
+
+def ozet(durum: dict[str, Any]) -> list[tuple[str, bool, list[str]]]:
+    """Tum kapilarin durumunu ve engellerini sirayla doner.
+
+    CLI raporu ve `thesis:status` bunu kullanir; akis tek bir yerde
+    tanimli kalir, cift tanim olusmaz.
+    """
+    return [
+        (kapi, kapi_acik_mi(durum, kapi), kontrol_yaz(durum, kapi))
+        for kapi in APPROVAL_GATES
+    ]
