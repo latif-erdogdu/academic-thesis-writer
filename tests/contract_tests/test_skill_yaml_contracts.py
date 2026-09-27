@@ -216,8 +216,42 @@ def test_ajanin_arsaclari_tanimli_araclardan(ajan: dict):
 
 @pytest.mark.parametrize("ajan", _skill()["agents"], ids=lambda k: k["name"])
 def test_ajan_dosyasi_diskte_var(ajan: dict):
-    """agents[].file isaret ettigi dosya var olmali."""
-    assert (SKILL_DIR / ajan["file"]).is_file(), f"{ajan['name']}: dosya yok -> {ajan['file']}"
+    """agents[].file isaret ettigi dosya var olmali.
+
+    Bu yol SKILL_DIR'e gore cozumlenir: ajan .md'leri skill dizininde
+    tutulur. Depo kokundeki agents/ kopyasi vardir ve
+    test_plan1_integrity.py her ikisinin birebir ayni oldugunu ve
+    senkron kaldigini denetler; buradaki asil olan skill'in okudugu
+    yolun var olmasi.
+    """
+    yol = SKILL_DIR / ajan["file"]
+    assert yol.is_file(), f"{ajan['name']}: dosya yok -> {yol}"
+
+
+# --- references --------------------------------------------------------------
+
+def test_referans_listesi_diskte_var():
+    """references[] altindaki her dosya gercekten var olmali.
+
+    Bu blok HICBIR test tarafindan denetlenmiyordu: 7 dosya adi yaziliydi,
+    hicbiri kontrol edilmiyordu. Yollari references/ altinda, depo kokunden
+    cozumlenir (SKILL.md:339-345 ayni sekilde yaziyor).
+    """
+    adlar = _skill()["references"]
+    assert adlar, "references listesi bos"
+    eksikler = [ad for ad in adlar if not (REPO_ROOT / "references" / ad).is_file()]
+    assert not eksikler, f"diskte olmayan referans: {eksikler}"
+
+
+def test_referans_listesi_klasordeki_her_dosyayi_kapsiyor():
+    """references[] tam olmali: diskteki her referans listede olmali.
+
+    Ters yon: yeni bir referans dosyasi eklendiginde listeye girmezse
+    skill onu yukleyemez, ama hicbir test de uyarmaz.
+    """
+    adlar = set(_skill()["references"])
+    diskte = {p.name for p in (REPO_ROOT / "references").glob("*.md")}
+    assert not (diskte - adlar), f"diskte var ama listede yok: {sorted(diskte - adlar)}"
 
 
 def test_writer_ajani_gercekten_yazabiliyor():

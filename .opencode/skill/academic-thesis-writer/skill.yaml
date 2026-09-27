@@ -11,7 +11,16 @@ opencode_version: ">=0.2.0"
 entry:
   skill: "SKILL.md"
 
-# Agent tanımları (her biri .opencode/agent/ altına kopyalanır)
+# Agent tanımları.
+# DİKKAT: file yolları SKILL DİZİNİNE göre çözümlenir (tools[] ise depo
+# köküne göre — bkz. aşağıdaki not).
+# Depo kökünde agents/ altında aynı 10 dosyanın kaynak kopyası durur.
+# Bu kopya KASITLIDIR: skill dizini kendi başına taşınabilir olmalıdır.
+# Senkron 4 testle zorlanır (tests/integration_tests/test_plan1_integrity.py):
+# ajan kümeleri eşit, kök SKILL.md ile kopya aynı, her ajan dosyası
+# byte-özdeş. Kayma daha önce gerçekleştiği için bu testler yazıldı.
+# (Bu satırda önce ".opencode/agent/ altına kopyalanır" yazıyordu; o dizin
+#  diskte var ama BOŞ — betimlenen kopyalama adımı hiç gerçekleşmemiş.)
 agents:
   - name: researcher
     description: "Araştırma sorusuna uygun kaynak keşfi, arama stratejisi, sistematik tarama"
@@ -76,7 +85,8 @@ agents:
 # Araç tanımları.
 # DİKKAT: file yolları DEPO KÖKÜNE göre çözümlenir, skill dizinine göre değil
 # (skill dizininde tools/ klasörü yoktur). Araç kodu CLI ile paylaşılır ve
-# depo kökünde durur.
+# depo kökünde durur. agents[].file bundan FARKLIDIR: skill dizinine göre
+# çözülür. İki kural da test_skill_yaml_contracts.py ile zorlanır.
 tools:
   - name: source_search
     description: "Crossref, OpenAlex, Semantic Scholar, PubMed, Google Scholar üzerinden kaynak keşfi"
@@ -166,7 +176,11 @@ commands:
     usage: "/thesis:export [--format md|docx|pdf]"
     handler: "python -m tools.atw.cli export --format {options.format}"
 
-# Referans dosyaları (agents/references/ içinden kopyalanır)
+# Referans dosyaları. Yolları kökteki references/ klasöründedir
+# (SKILL.md:339-345 de aynı yolları yazar). Bu blok test_skill_yaml_contracts.py
+# tarafından denetlenir: her ad diskte var olmalı ve listede eksik dosya
+# kalmamalıdır. (Önce "agents/references/ içinden kopyalanır" yazıyordu; o
+#  dizin hiç var olmadı.)
 references:
   - citation_rules.md
   - source_verification.md
