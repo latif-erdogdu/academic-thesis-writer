@@ -64,6 +64,58 @@ class VerificationStatus:
 MIN_BIBLIOGRAPHIC_MATCH = 0.60
 MIN_INDEPENDENT_SOURCES = 2
 
+# Crossref yıl alanları, baskı önceliğine göre sırayla denenir.
+# 'issued' en sona konur çünkü 2000 öncesi kayıtlarda tek güvenilir alandır
+# ve yeni kayıtlarda baskı yılından farklı olabilir.
+CROSSREF_YEAR_FIELDS = (
+    "published-print",
+    "published-online",
+    "published",
+    "issued",
+)
+
+
+def _crossref_year(item: dict) -> int | None:
+    """Crossref kaydından yayın yılını çıkar.
+
+    Crossref birden fazla tarih alanı taşır. ``published-print`` en güvenilir
+    olanıdır (baskı yılı); erken görünüm kayıtlarında yıl bir önceki yıla
+    düşebildiği için sıralama bilinçlidir. Hiçbir alan bulunamazsa ``None``
+    döner; çağıran taraf bunu nötr puan olarak işler, uydurma yıl üretmez.
+    """
+    for alan in CROSSREF_YEAR_FIELDS:
+        parcalar = (item.get(alan) or {}).get("date-parts") or []
+        if not parcalar or not parcalar[0]:
+            continue
+        yil = parcalar[0][0]
+        if isinstance(yil, int) and 1900 <= yil <= 2100:
+            return yil
+    return None
+
+
+def _openalex_journal(item: dict) -> str:
+    """OpenAlex kaydından dergi (kaynak) adını çıkar.
+
+    OpenAlex ``host_venue`` alanını kaldırdı; dergi adı artık
+    ``primary_location.source.display_name`` altında geliyor. Hiçbir konum
+    dergi adı taşımiyorsa ``locations`` listesine düşülür. Alan hiç
+    bulunamazsa boş string döner — çağıran taraf bunu nötr puan olarak
+    işler, uydurma dergi adı üretmez.
+    """
+    ad = (item.get("host_venue") or {}).get("display_name")
+    if ad:
+        return ad
+    kaynaklar = []
+    birincil = item.get("primary_location") or {}
+    if birincil:
+        kaynaklar.append(birincil)
+    kaynaklar.extend(item.get("locations") or [])
+    for konum in kaynaklar:
+        ad = ((konum or {}).get("source") or {}).get("display_name")
+        if ad:
+            return ad
+    return ""
+
 
 class SourceVerifier:
     """Kaynak doğrulayıcı."""
@@ -131,8 +183,10 @@ class SourceVerifier:
                 "doi": item.get("DOI"),
                 "title": item.get("title", [""])[0] if item.get("title") else "",
                 "authors": [f"{a.get('family', '')}, {a.get('given', '')}" for a in item.get("author", []) if a.get("family") or a.get("given")],
-                "year": item.get("published-print", {}).get("date-parts", [[None]])[0][0] or
-                        item.get("published-online", {}).get("date-parts", [[None]])[0][0],
+                # Yıl: Crossref'de baskı tarihi, erken görünüm (online) tarihi
+                # ve genel 'issued' alanı bulunabilir. 2000 öncesi kayıtlarda
+                # 'issued' tek güvenilir alandır; geri düşümsüz okuma yapılır.
+                "year": _crossref_year(item),
                 "journal": item.get("container-title", [""])[0] if item.get("container-title") else "",
                 "volume": item.get("volume"),
                 "issue": item.get("issue"),
@@ -198,7 +252,7 @@ class SourceVerifier:
                     "title": item.get("display_name", ""),
                     "authors": authors,
                     "year": item.get("publication_year"),
-                    "journal": item.get("host_venue", {}).get("display_name", ""),
+                    "journal": _openalex_journal(item),
                     "volume": item.get("biblio", {}).get("volume"),
                     "issue": item.get("biblio", {}).get("issue"),
                     "pages": item.get("biblio", {}).get("first_page", "") + "-" + item.get("biblio", {}).get("last_page", "")

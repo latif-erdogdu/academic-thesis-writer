@@ -165,6 +165,21 @@ def compare_titles(title1: str, title2: str) -> float:
     return 0.7 * jaccard + 0.3 * fuzzy
 
 
+def _soyadi_kokenli_eslesme(a: str, b: str) -> bool:
+    """İki normalize yazar arasında soyadı kökenli eşleşme var mı?
+
+    Kaynakça biçimi çoğu zaman yalnızca soyadı verir ("Vidal"), veritabanı
+    ise "Soyad, Ad" biçimini ("Vidal, Jean J." -> "vidal j"). Bu iki biçim
+    birebir eşit olmadığı için normalizasyon sonrası tam küme kesişimi
+    boş kalır. Soyadı aynı olan yazarları eşleşmiş sayarız.
+    """
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    return a.split(" ")[0] == b.split(" ")[0]
+
+
 def compare_authors(authors1: list[str], authors2: list[str]) -> float:
     """İki yazar listesi karşılaştır (0.0 - 1.0)."""
     if not authors1 or not authors2:
@@ -177,14 +192,21 @@ def compare_authors(authors1: list[str], authors2: list[str]) -> float:
     # İlk 3 yazarı karşılaştır (genelde en önemli olanlar)
     set1 = set(norm1[:3])
     set2 = set(norm2[:3])
-    intersection = set1 & set2
-    union = set1 | set2
-    if not union:
+    if not set1 or not set2:
         return 0.0
-    jaccard = len(intersection) / len(union)
-    # İlk yazar tam eşleşmesi bonus
-    first_match = 1.0 if norm1[0] == norm2[0] else 0.0
-    return 0.7 * jaccard + 0.3 * first_match
+    # Tam küme kesişimi
+    union = set1 | set2
+    kesisim = len(set1 & set2) / len(union) if union else 0.0
+    # Soyadı kökenli esnek eşleşme (kaynakça biçimi için)
+    esnek = sum(
+        1 for a in set1 if any(_soyadi_kokenli_eslesme(a, b) for b in set2)
+    )
+    jaccard = max(kesisim, esnek / max(len(set1), len(set2)))
+    # İlk yazar eşleşmesi bonus
+    ilk_match = 1.0 if any(
+        _soyadi_kokenli_eslesme(norm1[0], b) for b in norm2[:3]
+    ) else 0.0
+    return 0.7 * jaccard + 0.3 * ilk_match
 
 
 def compare_years(year1: Any, year2: Any) -> float:
@@ -215,6 +237,22 @@ def compare_journals(journal1: str, journal2: str) -> float:
         return 1.0
     # Fuzzy matching
     return fuzz.ratio(j1, j2) / 100.0
+
+
+def _crossref_date_year(alan: Any) -> Optional[int]:
+    """Crossref tarih alanından (``{"date-parts": [[1973]]}``) yılı çıkar.
+
+    Alan eksik veya bozuksa ``None`` döner; zincirde bir sonraki alana
+    geçilir. Böylece okuyucu "okunamadı" ile "okundu ve tutmadı" durumlarını
+    ayırt edebilir.
+    """
+    if not isinstance(alan, dict):
+        return None
+    parcalar = alan.get("date-parts") or []
+    if not parcalar or not parcalar[0]:
+        return None
+    yil = parcalar[0][0]
+    return yil if isinstance(yil, int) and 1900 <= yil <= 2100 else None
 
 
 def compute_bibliographic_match(
@@ -271,20 +309,40 @@ def compute_bibliographic_match(
     author_score = compare_authors(source_authors, db_authors)
 
     # Yıl
+    # DİKKAT: Python'da koşul ifadesi `or`dan düşük önceliklidir.
+    # `a or b if cond else c` ifadesi `(a or b) if cond else c` olarak
+    # ayrıştırılır. Bu yüzden her zincir ayrı parantezlenmiştir; aksi
+    # hâlde "year" anahtarı taşıyan bir kayıtta bile yıl alanı düşer.
     source_year = source_record.get("year")
     db_year = (
-        db_record.get("year") or
-        db_record.get("publication_year") or
-        db_record.get("published-print", {}).get("date-parts", [[None]])[0][0] if db_record.get("published-print") else None
+        db_record.get("year")
+        or db_record.get("publication_year")
+        or _crossref_date_year(db_record.get("published-print"))
+        or _crossref_date_year(db_record.get("published-online"))
+        or _crossref_date_year(db_record.get("issued"))
     )
     year_score = compare_years(source_year, db_year)
 
-    # Dergi
+    # Dergi — aynı öncelik sorunu burada da geçerliydi.
     source_journal = source_record.get("journal", "") or ""
     db_journal = (
-        db_record.get("journal", "") or
-        db_record.get("container_title", [""])[0] if db_record.get("container_title") else "" or
-        db_record.get("host_venue", {}).get("display_name", "") if db_record.get("host_venue") else ""
+        db_record.get("journal", "")
+        or (
+            db_record.get("container_title", [""])[0]
+            if db_record.get("container_title") else ""
+        )
+        or (
+            db_record.get("container-title", [""])[0]
+            if db_record.get("container-title") else ""
+        )
+        or (
+            db_record.get("host_venue", {}).get("display_name", "")
+            if db_record.get("host_venue") else ""
+        )
+        or (
+            db_record.get("primary_location", {}).get("source", {}).get("display_name", "")
+            if db_record.get("primary_location") else ""
+        )
     )
     journal_score = compare_journals(source_journal, db_journal)
 

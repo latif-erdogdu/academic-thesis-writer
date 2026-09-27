@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tez icerigi bolum 3: Etik (B5), gelecek (B6), sonuc, kaynakca, ekler."""
+"""Tez içeriği bölüm 3: Etik (B5), gelecek (B6), sonuç, kaynakça, ekler."""
 
 # ------------------------------------------------- B5 ETIK / HUKUKI
 B5 = [
@@ -7,182 +7,182 @@ B5 = [
     ("h1", "ETİK, HUKUKÎ VE TOPLUMSAL BOYUTLAR"),
     ("h2", "5.1. Çerçevenin Değişmezleri"),
     ("p",
-     "BCI etigi yeni bir alan degildir; mevcut biyomedikal etik "
-     "cercevelerinin (Belmont Bildirgesi, Helsinki Bildirgesi) yeni bir "
-     "uygulama alanina uyarlanmasidir. Ancak uyarlama sirasinda iki temel "
-     "gerilim ortaya cikar."),
+     "BCI etiği yeni bir alan değildir; mevcut biyomedikal etik "
+     "çerçevelerinin (Belmont Bildirgesi, Helsinki Bildirgesi) yeni bir "
+     "uygulama alanına uyarlanmasıdır. Ancak uyarlama sırasında iki temel "
+     "gerilim ortaya çıkar."),
     ("bullet",
-     "(a) Otonomi gerilimi: BCI kullanicisi, sistemi kullandigi icin verisini "
-     "sisteme verir; bu verinin adi, hatta icerigi de gizli tutulabilir. "
-     "Onam, verinin kullanim amacini belirtmelidir."),
+     "(a) Otonomi gerilimi: BCI kullanıcısı, sistemi kullandığı için verisini "
+     "sisteme verir; bu verinin adı, hatta içeriği de gizli tutulabilir. "
+     "Onam, verinin kullanım amacını belirtmelidir."),
     ("bullet",
-     "(b) Kimlik ve ozelliklendirme gerilimi: bir siniflandirma ciktisi, "
-     "tibbi tani olmadan da ozel hayat icin sonuc dogurabilir. Tespit, "
-     "eyleme donusmeden once 'bilinen degilken' de bir sosyal etkidir."),
+     "(b) Kimlik ve özelliklendirme gerilimi: bir sınıflandırma çıktısı, "
+     "tıbbi tanı olmadan da özel hayat için sonuç doğurabilir. Tespit, "
+     "eyleme dönüşmeden önce 'bilinen değişken' de bir sosyal etkidir."),
     ("p",
-     "Bu iki gerilim, BCI'ye ozgu hukuki ve etik zorunluluklarin neden "
-     "dogdugunu aciklar."),
+     "Bu iki gerilim, BCI'ye özgü hukukî ve etik zorunlulukların neden "
+     "doğduğunu açıklar."),
 
     ("h2", "5.2. Veri Gizliliği ve Mülkiyet"),
     ("p",
-     "Noral veri, saglikla iliskili kisisel veri kategorisindedir ve "
-     "regulasyonlarda ozel koruma altindadir. Ancak BCI'ye ozgu bir "
-     "belirsizlik vardir: noral verinin 'veri sahibi' kimdir? Soru, verinin "
-     "bir cihazda uretildigi icin ozellikle onemlidir. Farkli yaklasimlar su "
-     "sonuclari dogurur."),
+     "Normal veri, sağlıkla ilişkili kişisel veri kategorisindedir ve "
+     "regülasyonlarda özel koruma altındadır. Ancak BCI'ye özgü bir "
+     "belirsizlik vardır: normal verinin 'veri sahibi' kimdir? Soru, verinin "
+     "bir cihazda üretildiği için özellikle önemlidir. Farklı yaklaşımlar şu "
+     "sonuçları doğurur."),
     ("table", [
-        ["Yaklasim", "Veri Sahibi", "Beklenen Sonuc"],
+        ["Yaklaşım", "Veri Sahibi", "Beklenen Sonuç"],
         ["Bireysel sahiplik",
-         "Kullanici",
-         "Gizlilik ihlali kuralari tam uygulanir"],
-        ["Ortak mulkiyet",
-         "Kullanici + uretici + saglik kurumu",
-         "Paylasim ve ticari kullanim mumkun"],
-        ["Topluluk mulkiyeti",
+         "Kullanıcı",
+         "Gizlilik ihlali kuralları tam uygulanır"],
+        ["Ortak mülkiyet",
+         "Kullanıcı + üretici + sağlık kurumu",
+         "Paylaşım ve ticari kullanım mümkün"],
+        ["Topluluk mülkiyeti",
          "Topluluk",
-         "Bireysel geri cekme hakki zorlasir"],
-        ["Kurumsal mulkiyet",
-         "Kurum / uretici",
-         "Veri sahibinin haklari en fazla sinirlanir"],
+         "Bireysel geri çekme haklı zorlaşır"],
+        ["Kurumsal mülkiyet",
+         "Kurum / üretici",
+         "Veri sahibinin hakları en fazla sınırlanır"],
     ]),
-    ("caption", "Tablo 5.1. Noral veri mulkiyet modelleri ve beklenen sonuclari."),
+    ("caption", "Tablo 5.1. Normal veri mülkiyet modelleri ve beklenen sonuçları."),
     ("p",
-     "Bu yalnizca bir hukuk teorisi sorusu degil, yapisal bir anlasma sorusudur. "
-     "Saglikli varsayilan, verinin kullanicida kalmasidir ve her paylasimin "
-     "acik riza olmasidir. Gercekci bir donanim projesinde, bireysel veriyle "
-     "calisan model mimarisi yerine kurumsal mulkiyetin secilmesinin nedeni "
-     "tekniktir: model, kullanicidan bagimsiz olarak guncellenebilmelidir. "
-     "Bu teknik zorunluluk, bireysel haklarin kapsamini daraltir. Acilan mesele "
-     "dogru yorumlanmalidir: kurumsal mulkiyet bir zorunluluk sonucu olarak "
-     "dogar, kazanc degil. Buna karsilik denetim kapsami, saklama suresi ve "
-     "yeniden kullanim sartlari olcumlenebilir olmalidir; aksi halde bu yapi "
-     "yonetilemez bir taban olusturur."),
+     "Bu yalnızca bir hukuk teorisi sorusu değil, yapısal bir anlaşma sorusudur. "
+     "Sağlıklı varsayılan, verinin kullanıcıda kalmasıdır ve her paylaşımın "
+     "açık rıza olmasıdır. Gerçekçi bir donanım projesinde, bireysel veriyle "
+     "çalışan model mimarisi yerine kurumsal mülkiyetin seçilmesinin nedeni "
+     "tekniktir: model, kullanıcıdan bağımsız olarak güncellenebilmelidir. "
+     "Bu teknik zorunluluk, bireysel hakların kapsamini daraltır. Açılan mesele "
+     "doğru yorumlanmalıdır: kurumsal mülkiyet bir zorunluluk sonucu olarak "
+     "doğar, kazanc değil. Buna karşılık denetim kapsamı, saklama süresi ve "
+     "yeniden kullanım şartları ölçümlenebilir olmalıdır; aksi halde bu yapı "
+     "yönetilemez bir taban oluşturur."),
 
     ("h2", "5.3. Nöroözerki: Beyin Özelliği mi, Kişisel Veri mi?"),
     ("p",
-     "Noroveri kavrami, benim olarak denetleme hakki ve devlettin bunu "
-     "nasil kullandigi meselesini icerir. Iki farkli yonelim vardir."),
+     "Nöroveri kavramı, kendi adına denetleme hakkı ve devletin bunu "
+     "nasıl kullandığı meselesini içerir. İki farklı yönelim vardır."),
     ("bullet",
-     "(a) Beyin bir nesne olarak dusunulebilir: Bazi hukuk sistemleri, beyin "
-     "verisini geri donusturulebilir bir nesne gibi ele alir. Bu yaklasim "
-     "veri yonetimini kolaylastirir ama oznebilirlik meselesini ortadan "
+     "(a) Beyin bir nesne olarak düşünülebilir: Bazı hukuk sistemleri, beyin "
+     "verisini geri dönüştürülebilir bir nesne gibi ele alır. Bu yaklaşım "
+     "veri yönetimini kolaylaştırır ama öznebilirlik meselesini ortadan "
      "kaldirmaz."),
     ("bullet",
-     "(b) Beyin ozelligik olarak dusunulebilir: Bazi yazarlar, beyin verisini "
-     "dogrudan bireyin ozelligi sayarak degerlendirir. Bu yaklasim koruma "
-     "duzeyini yuksek tutar ancak mevcut hukuki kategorilerle uyumsuzluk "
-     "yaratir."),
+     "(b) Beyin özellik olarak düşünülebilir: Bazı yazarlar, beyin verisini "
+     "doğrudan bireyin özelliği sayarak değerlendirir. Bu yaklaşım koruma "
+     "düzeyini yüksek tutar ancak mevcut hukukî kategorilerle uyumsuzluk "
+     "yaratır."),
     ("p",
-     "Bu tartisma, somut bir sonuc uretir: BCI mevzuatinda veri korumasi, "
-     "mevcut saglik verisi kurallarindan daha kati olmalidir. Aksi halde, ozel "
-     "hayat gizliligini ihlal eden bir sistem hukuka uygun sayilabilirken "
-     "toplumsal zarar ortaya cikabilir. Kisisel noral verinin duyarli veri "
-     "statusuyle korunmasi yasal olarak zorunlu olmasa da savunulabilir bir "
-     "oneridir. Ienca ve Andorno'nun onerisi bu yonde bir baslangic noktasi "
+     "Bu tartışma, somut bir sonuç üretir: BCI mevzuatında veri koruması, "
+     "mevcut sağlık verisi kurallarından daha katı olmalıdır. Aksi halde, özel "
+     "hayat gizliliğini ihlal eden bir sistem hukuka uygun sayılabilirken "
+     "toplumsal zarar ortaya çıkabilir. Kişisel normal verinin duyarlı veri "
+     "statüsüyle korunması yasal olarak zorunlu olmasa da savunulabilir bir "
+     "öneridir. Ienca ve Andorno'nun önerisi bu yönde bir başlangıç noktası "
      "sunar."),
     ("p",
-     "Bu teshis, inceleme hipotezi H-3'u desteklemektedir: asil gerilim, veri "
-     "gizliligi cercevesinden cikarak zihinsel ozgurlugu ilgilendirir."),
+     "Bu teşhis, inceleme hipotezi H-3'u desteklemektedir: asıl gerilim, veri "
+     "gizliliği çerçevesinden çıkarak zihinsel özgürlüğü ilgilendirir."),
 
     ("h2", "5.4. Adalet ve Erişilebilirlik"),
     ("p",
-     "BCI'ye en sik yonelttigi adalet eleştirisi su noktaya dayanir: sistem, "
-     "yalnizca dijital ortamda yeterli nakit ve dijital okuryazarliga sahip "
-     "kullanicilara hitap eder. Buna karsilik, BCI'nin en guclu klinik "
-     "uygulamasi (iletişim bozukluklari) tam da bu noktada ters yonden ise "
-     "yarar: konusamayan bir hasta hicbir baska yolla ifade edemiyorsa BCI "
-     "yeni bir imkan olur."),
+     "BCI'ye en sık yöneltilen adalet eleştirisi şu noktaya dayanır: sistem, "
+     "yalnızca dijital ortamda yeterli nakite ve dijital okuryazarlığa sahip "
+     "kullanıcılara hitap eder. Buna karşılık, BCI'nin en güçlü klinik "
+     "uygulaması (iletişim bozuklukları) tam da bu noktada ters yönden ise "
+     "yarar: konuşamayan bir hasta hiçbir başka yolla ifade edemiyorsa BCI "
+     "yeni bir imkân olur."),
     ("p",
-     "Saglikta esitsizlik tartismasi acisindan iki ek olgu vardir. Birincisi, "
-     "bazi algoritmalarin farkli gruplarda daha yuksek hata payi uretmesi "
-     "olasi, veri temsili sorununu ortaya cikarir. Model yeterli cesitlilikte "
-     "veriyle egitilmezse, 'ortalamada iyi' bir model bazi gruplar icin "
-     "kabul edilemez kalir. 'Ortalamada iyi' ifadesi bu nedenle tek basina "
-     "yetersizdir; raporlama alt grup duzeyinde yapilmalidir."),
+     "Sağlıkta eşitsizlik tartışması açısından iki ek olgu vardır. Birincisi, "
+     "bazı algoritmaların farklı gruplarda daha yüksek hata payı üretmesi "
+     "olası, veri temsili sorununu ortaya çıkarır. Model yeterli çeşitlilikte "
+     "veriyle eğitilmezse, 'ortalamada iyi' bir model bazı gruplar için "
+     "kabul edilemez kalır. 'Ortalamada iyi' ifadesi bu nedenle tek başına "
+     "yetersizdir; raporlama alt grup düzeyinde yapılmalıdır."),
     ("p",
-     "Ikincisi, saglik sistemleri arasindaki erisim farki, teknolojinin "
-     "gelistirildigi ve uygulandigi yerler arasinda bir uyumurculuk "
-     "(equity) sorunu yaratir. Bu, yalnizca dagitim degil, arastirma onceligidir: "
-     "hangi kullanicinin ihtiyacinin kapsam disi kaldigini bilmek, modelin "
-     "kimseye hizmet etmedigi durumlari da tespit eder."),
+     "İkincisi, sağlık sistemleri arasındaki erişim farkı, teknolojinin "
+     "geliştirildiği ve uygulandığı yerler arasında bir uyumsuzluk "
+     "(equity) sorunu yaratır. Bu, yalnızca dağıtım değil, araştırma önceliğidir: "
+     "hangi kullanıcının ihtiyaçının kapsam dışı kaldığını bilmek, modelin "
+     "kimseye hizmet etmediği durumları da tespit eder."),
 
     ("h2", "5.5. Bilişsel Özgürlük"),
     ("p",
-     "Birisimsel BCI'nin (iBCI) klinik alanda uygulamalari, okuma-yazma "
-     "baglantilarini genisletme potansiyeli tasimaktadir. Bu potansiyel su "
-     "sorulara yol acar."),
+     "Birişimsel BCI'nin (iBCI) klinik alanda uygulamaları, okuma-yazma "
+     "bağlantılarını genişletme potansiyeli taşımaktadır. Bu potansiyel şu "
+     "sorulara yol açar."),
     ("bullet",
-     "(a) Ayni kanalda iki yonluluk: bir sistem hem motor cikarimi hem de "
-     "dusunce okuma yonu sunuyorsa, cikarim hangi yonun sonucudur?"),
+     "(a) Aynı kanalda iki yönlülük: bir sistem hem motor çıkarımı hem de "
+     "düşünce okuma yönü sunuyorsa, çıkarım hangi yönün sonucudur?"),
     ("bullet",
-     "(b) Yorum siniri: bir cikarim, cogul anlama ve metafor olarak "
-     "yorumlanabilir. Bir sistemin bunlari ayirt edememesi, ifade "
-     "ozgurlugunu sinirlar."),
+     "(b) Yorum sınırı: bir çıkarım, çoğul anlama ve metafor olarak "
+     "yorumlanabilir. Bir sistemin bunları ayırt edememesi, ifade "
+     "özgürlüğünü sınırlar."),
     ("bullet",
-     "(c) Onam ve bilinebilirlik: kullanici, sisteminin neyi okuyabildigini "
-     "tam olarak bilemeyebilir. Bu durumda onam yeterince bilgilendirilmis "
-     "sayilmaz; sistemin sinirlari onamin bir parcasidir."),
+     "(c) Onam ve bilinebilirlik: kullanıcı, sisteminin neyi okuyabildiğini "
+     "tam olarak bilemeyebilir. Bu durumda onam yeterince bilgilendirilmiş "
+     "sayılmaz; sistemin sınırları onamın bir parçasıdır."),
     ("p",
-     "Bu sorulara verilecek yeni kural, yazili olmasi ve yalnizca 'ne olur' "
-     "degil 'ne olmaz' biciminde de yazilmasi olmalidir: sistemin belirli "
-     "durumlarda guvenilmez oldugunun yazili bildirimi, onamin ayrilmaz "
-     "parcasidir."),
+     "Bu sorulara verilecek yeni kural, yazılı olması ve yalnızca 'ne olur' "
+     "değil 'ne olmaz' biçiminde de yazılması olmalıdır: sistemin belirli "
+     "durumlarda güvenilmez olduğunun yazılı bildirimi, onamın ayrılmaz "
+     "parçasıdır."),
 
     ("h2", "5.6. Sosyal ve Psikolojik Etkiler"),
-    ("p", "En azindan bes boyut ayirt edilmelidir."),
+    ("p", "En azından beş boyut ayırt edilmelidir."),
     ("bullet",
-     "(a) Kimlik: 'Beyni okunabilir' olmak bir etiket ve toplumsal "
-     "beklentiye donusebilir. Cogu kisi icin bu 'zihinsel olarak daha okunur' "
-     "anlamina gelir ve bu yanlis anlasilmasi ciddi bir toplumsal sorundur."),
+     "(a) Kimlik: 'Beyin okunabilir' olmak bir etiket ve toplumsal "
+     "beklentiye dönüşebilir. Çoğu kişi için bu 'zihinsel olarak daha okunur' "
+     "anlamına gelir ve bu yanlış anlaşılması ciddi bir toplumsal sorundur."),
     ("bullet",
-     "(b) Stigma: BCI tabanli tespit, mevcut teshis kriterlerinden farkli bir "
-     "temele dayanir; yanlislik veya asiri genelleme damgalamaya yol acabilir."),
+     "(b) Stigma: BCI tabanlı tespit, mevcut teşhis kriterlerinden farklı bir "
+     "temele dayanır; yanlışlık veya aşırı genelleme damgalamaya yol açabilir."),
     ("bullet",
-     "(c) Uyum ve odak: surekli sinyal toplama ve belirli bir is performansi "
-     "olcumu, surekli izlenme korkusu yaratabilir. Kaynak veriyi bilincli "
-     "islemek ile ayni zamanda izlendiginden emin olamamak arasindaki bu "
-     "temel paradoks, cozum kazanmadir."),
+     "(c) Uyum ve odak: sürekli sinyal toplama ve belirli bir iş performansı "
+     "ölçümü, sürekli izlenme korkusu yaratabilir. Kaynak veriyi bilinçli "
+     "işlemek ile aynı zamanda izlendiğinden emin olamamak arasındaki bu "
+     "temel paradoks, çözüm kazanmamıdır."),
     ("bullet",
-     "(d) Kimlik belirsizligi: cogu BCI kullanicisinin kullaniciyla ayni dogrudan "
-     "iliskili olmadiği gorulur. Bu, cikarim hatasinin kim tarafindan "
-     "duzeltilecegi ve kimden sorulacagi konusunda belirsizlik yaratir."),
+     "(d) Kimlik belirsizliği: çoğu BCI kullanıcısının kullanıcıyla aynı doğrudan "
+     "ilişkili olmadiği görülür. Bu, çıkarım hatasının kim tarafından "
+     "düzeltileceği ve kimden sorulacağı konusunda belirsizlik yaratır."),
     ("bullet",
-     "(e) Kaygi temelli kabul: bir sistemin kabul kriteri, onun dogrulugu "
-     "degil korkutucu bulunmamasi olabilir; bu, teknolojik kriter ile toplumsal "
-     "kriterin ayrisabilecegini gosterir."),
+     "(e) Kaygı temelli kabul: bir sistemin kabul kriteri, onun doğruluğu "
+     "değil korkutucu bulunmaması olabilir; bu, teknolojik kriter ile toplumsal "
+     "kriterin ayrışabileceğini gösterir."),
     ("p",
-     "Bu etkilerin kacinilmazligi, BCI etiginin yalnizca bireysel onam "
-     "temelli olmasinin yetersiz oldugunu gosterir. Konunun toplumsal boya "
-     "olmasi gerekir."),
+     "Bu etkilerin kaçınılmazlığı, BCI etiğinin yalnızca bireysel onam "
+     "temelli olmasının yetersiz olduğunu gösterir. Konunun toplumsal boyutu "
+     "olması gerekir."),
 
     ("h2", "5.7. Düzenleyici Çerçeve Olarak Öneri"),
     ("p",
-     "Yukaridaki tespitlerden yola cikan bir duzenleyici cerceve su yedi "
-     "ilke uzerinde kurulabilir."),
+     "Yukarıdaki tespitlerden yola çıkan bir düzenleyici çerçeve şu yedi "
+     "ilke üzerinde kurulabilir."),
     ("bullet",
-     "(1) Noral veri, duyarli kisisel veri statusuyle korunur."),
+     "(1) Normal veri, duyarlı kişisel veri statüsüyle korunur."),
     ("bullet",
-     "(2) Onam yalnizca islemi degil, verinin yeniden kullanimini ve model "
-     "egitiminde kullanilmasini da kapsar; model egitimi icin ayri riza "
+     "(2) Onam yalnızca işlemi değil, verinin yeniden kullanımını ve model "
+     "eğitiminde kullanılmasını da kapsar; model eğitimi için ayrı rıza "
      "gerekir."),
     ("bullet",
-     "(3) Model performansi kullanim populasyonuna gore (etnik, cinsiyet, yas) "
-     "raporlanir; alt grup performansi asagi duserse sisteme izin verilmez."),
+     "(3) Model performansı kullanım popülasyonuna göre (etnik, cinsiyet, yaş) "
+     "raporlanır; alt grup performansı aşağı düşerse sisteme izin verilmez."),
     ("bullet",
-     "(4) Veri sahibi, cihaz verisini tasima ve silme hakkina sahiptir; bu hak, "
-     "model egitiminde gizli tutulan veriler icin de gecerlidir."),
+     "(4) Veri sahibi, cihaz verisini taşıma ve silme hakkına sahiptir; bu hak, "
+     "model eğitiminde gizli tutulan veriler için de geçerlidir."),
     ("bullet",
-     "(5) Sistemin sinirlari (guvenilmez oldugu durumlar) kullaniciya acikca "
-     "bildirilir ve arayuzde gorunur sekilde gosterilir."),
+     "(5) Sistemin sınırları (güvenilmez olduğu durumlar) kullanıcıya açıkça "
+     "bildirilir ve arayüzde görünür şekilde gösterilir."),
     ("bullet",
-     "(6) Surekli izleme, model guncelleme ve geri bildirim dongusu icin yapi "
-     "sinirlari tanimlanir."),
+     "(6) Sürekli izleme, model güncelleme ve geri bildirim döngüsü için yapı "
+     "sınırları tanımlanır."),
     ("bullet",
-     "(7) Saglikli bireylerde ticari kullanim, hasta gruplarina kiyasla daha "
-     "yuksek bir kanit esigine tabi olur."),
+     "(7) Sağlıklı bireylerde ticari kullanım, hasta gruplarina kıyasla daha "
+     "yüksek bir kanıt eşiğine tabi olur."),
     ("p",
-     "Bu ilkeler, mevcut klinik yonergelerin genisletilmesi olarak yeni bir "
-     "duzenleme icin zemin hazirlayabilir."),
+     "Bu ilkeler, mevcut klinik yönergelerin genişletilmesi olarak yeni bir "
+     "düzenleme için zemin hazırlayabilir."),
 ]
 
 # ------------------------------------------- B6 GELECEK
@@ -191,137 +191,137 @@ B6 = [
     ("h1", "GELECEK PERSPEKTİFLERİ"),
     ("h2", "6.1. Yaklaşan ve Uzak Alan"),
     ("table", [
-        ["Donem", "Beklenen Gelisim", "Kritik Belirsizlik"],
-        ["Yakin (1-3 yil)",
-         "Akustik ve sayisal uyaran tabanli cihazlarla cift yonlu iletisim",
-         "Klinik faydanin olculmesi"],
-        ["Yakin (1-3 yil)",
-         "Daha yogun montaj, cihaz ici hesaplama, kisisellestirilmis modeller",
-         "Bireysel cihazin klinik kaniti"],
-        ["Orta (3-8 yil)",
-         "Yinelenen uyaranlama ile kortikal uyarlanabilirligin kazanimi",
-         "Tedavi etkinliginin gosterilmesi"],
-        ["Uzak (8+ yil)",
-         "Yari invaziv ag tabanli arayuzler (neurovascularist)",
-         "Kronik implant kararliliginin kaniti"],
-        ["Uzak (8+ yil)",
-         "Bilisiksel yardim: odak, hafiza ve surekli izleme",
-         "Ozgurluk ve bagimlilik dagilimi"],
+        ["Dönem", "Beklenen Gelişim", "Kritik Belirsizlik"],
+        ["Yakın (1-3 yıl)",
+         "Akustik ve sayısal uyaran tabanlı cihazlarla çift yönlü iletişim",
+         "Klinik faydanın ölçülmesi"],
+        ["Yakın (1-3 yıl)",
+         "Daha yoğun montaj, cihaz içi hesaplama, kişiselleştirilmiş modeller",
+         "Bireysel cihazın klinik kanıtı"],
+        ["Orta (3-8 yıl)",
+         "Yinelenen uyaranlama ile kortikal uyarlanabilirliğin kazanımı",
+         "Tedavi etkinliğinin gösterilmesi"],
+        ["Uzak (8+ yıl)",
+         "Yarı invaziv ağ tabanlı arayüzler (neurovascularist)",
+         "Kronik implant kararlılığının kanıtı"],
+        ["Uzak (8+ yıl)",
+         "Bilişsel yardım: odak, hafıza ve sürekli izleme",
+         "Özgürlük ve bağımlılık dağılımı"],
     ]),
-    ("caption", "Tablo 6.1. Gelecek donemler ve kritik belirsizlikler."),
+    ("caption", "Tablo 6.1. Gelecek dönemler ve kritik belirsizlikler."),
     ("p",
-     "Bu tablo, teknik gelismenin ongorulebilirligi ile klinik ve etik "
-     "sonuclarin ongorulebilirliginin ayni olmadigini gosterir. Yakin donemde "
-     "bazi teknik engellerin kalkmasi, ayni donemde bu tekniklerin klinik "
-     "olarak anlamli fayda uretmesi demek degildir. Bu ayrim, alanin en yaygin "
-     "hatasi ve en sik yapilan hatasidir."),
+     "Bu tablo, teknik gelişmenin öngörülebilirliği ile klinik ve etik "
+     "sonuçların öngörülebilirliğinin aynı olmadığını gösterir. Yakın dönemde "
+     "bazı teknik engellerin kalkması, aynı dönemde bu tekniklerin klinik "
+     "olarak anlamlı fayda üretmesi demek değildir. Bu ayrım, alanın en yaygın "
+     "hatası ve en sık yapılan hatasıdır."),
 
     ("h2", "6.2. Öngörülen Teknik Yönelimler"),
     ("bullet",
-     "(1) Onceden egitilmis temel modeller: buyuk on egitimli modellerin her "
-     "bir kullanicinin sinirli verisiyle uyarlanmasi, BCI'de veri "
-     "sinirliginin en istenilen cozumu olarak one cikmaktadir."),
+     "(1) Önceden eğitilmiş temel modeller: büyük on eğitimli modellerin her "
+     "bir kullanıcının sınırlı verisiyle uyarlanması, BCI'de veri "
+     "sınırlılığının en istenilen çözümü olarak one çıkmaktadır."),
     ("bullet",
-     "(2) Cok modlu olcum: EEG yaninda goz ve yuz hareketleri ile ozel "
-     "dolayli (implicit) bilgi, ozellikle dikkat odakli alanlarda sinif "
-     "sinirini genisletmektedir. Bir gozunun kacmasi bile cogu problemde "
-     "sinif ayrimini kolaylastirmaktadir."),
+     "(2) Çok modlu ölçüm: EEG yanında göz ve yüz hareketleri ile özel "
+     "dolaylı (implicit) bilgi, özellikle dikkat odaklı alanlarda sınıf "
+     "sınırını genişletmektedir. Bir gözünün kaçması bile çoğu problemde "
+     "sınıf ayrımını kolaylaştırmaktadır."),
     ("bullet",
-     "(3) Otopompa kanal ve empedans izleme: cihaz uzeri surekli sinyal "
-     "kalitesi olcumu, kullanicinin egitim disi oturumlarda performans "
-     "kaybini azaltir."),
+     "(3) Otomatik kanal ve empedans izleme: cihaz üzeri sürekli sinyal "
+     "kalitesi ölçümü, kullanıcının eğitim dışı oturumlarda performans "
+     "kaybını azaltır."),
     ("bullet",
-     "(4) Dinamik yuz yuklemesi: harici yuz yuklemesi modelleri, farkli "
-     "montajlarda oznitelik uzayi tasinabilirligini artirabilir."),
+     "(4) Dinamik yüz yüklemesi: haricî yüz yüklemesi modelleri, farklı "
+     "montajlarda öznitelik uzayı taşınabilirliğini artırabilir."),
     ("bullet",
-     "(5) Uc bulut ve cihaz ici ogrenme: gizlilik gereksinimlerini "
-     "azaltarak, modelin cihaz uzerinde guncellenmesini mumkun kilar."),
+     "(5) Üç bulut ve cihaz içi öğrenme: gizlilik gereksinimlerini "
+     "azaltarak, modelin cihaz üzerinde güncellenmesini mümkün kılar."),
     ("p",
-     "Otek olarak, zaman serisi temsilinde derin ogrenmeye gore rekabetci "
-     "olmayan, oznitelik tabanli yaklasimlar da vardir. Rastgele orman ve "
-     "gradyan artirilmis agac tabanli siniflandiricilar, BCI tasiyabilir "
-     "paketlerde goruntunun devasa turetici ajanlara gore daha iyi "
-     "genellenebilir oldugu tespitleriyle desteklenmektedir. Bu bulgu, "
-     "sadece 'derin ogrenme kazanir' seklinde okunamaz; model secimi, "
-     "veri miktari, hesaplama kosullari ve karsilastirma protokolune birlikte "
-     "baglidir."),
+     "Ötek olarak, zaman serisi temsilinde derin öğrenmeye göre rekabetçi "
+     "olmayan, öznitelik tabanlı yaklaşımlar da vardır. Rastgele orman ve "
+     "gradyan artırılmış ağaç tabanlı sınıflandırıcılar, BCI taşıyabilir "
+     "paketlerde görüntünün devasa türetici ajanlara göre daha iyi "
+     "genellenebilir olduğu tespitleriyle desteklenmektedir. Bu bulgu, "
+     "sadece 'derin öğrenme kazanır' şeklinde okunamaz; model seçimi, "
+     "veri miktarı, hesaplama koşulları ve karşılaştırma protokolüne birlikte "
+     "bağlıdır."),
 
     ("h2", "6.3. Olası Riskler"),
     ("bullet",
-     "(1) Uygulama cok fazla hizlanabilir: duzenleme, teknolojinin gerisinde "
-     "kalabilir. Ozellikle tüketici sinifinda pazardaki hiz, mevzuatin yapisal "
-     "degisim gerektiren konularda yavas ilerler."),
+     "(1) Uygulama çok fazla hızlanabilir: düzenleme, teknolojinin gerisinde "
+     "kalabilir. Özellikle tüketici sınıfında pazardaki hız, mevzuatın yapısal "
+     "değişim gerektiren konularda yavaş ilerler."),
     ("bullet",
-     "(2) Dogrulama yukunun artmasi: her yeni klinik endikasyon bagimsiz "
-     "dogrulama ve uzun sureli takip gerektirir; bu, urunun pazara cikisini "
+     "(2) Doğrulama yükünü artması: her yeni klinik endikasyon bağımsız "
+     "doğrulama ve uzun süreli takip gerektirir; bu, ürünün pazara çıkışını "
      "geciktirir ve maliyetlendirir."),
     ("bullet",
-     "(3) Adalet aciginin derinlesmesi: gelismis sistemlere erisim, "
-     "gelismemislere gore daha da buyuk bir fark yaratabilir."),
+     "(3) Adalet açığının derinleşmesi: gelişmiş sistemlere erişim, "
+     "gelişmemişlere göre daha da büyük bir fark yaratabilir."),
     ("bullet",
-     "(4) Bitisik kullanimin yuksek riskli alanlara yonelmesi: askeri, is "
-     "yerlamlama ve adli alan, BCI'nin en muhtemel etik gerilim alanidir."),
+     "(4) Bitişik kullanımın yüksek riskli alanlara yönelmesi: askerî, iş "
+     "yerleştirme ve adli alan, BCI'nin en muhtemel etik gerilim alanıdır."),
 
     ("h2", "6.4. Araştırma Öncelikleri"),
     ("bullet",
-     "(a) Onceden kaydedilmis analiz planlariyla, yeterli katilimcili, bagimsiz "
-     "test kumesi kullanilan cok merkezli calismalar."),
+     "(a) Önceden kaydedilmiş analiz planlarıyla, yeterli katılımcılı, bağımsız "
+     "test kümesi kullanılan çok merkezli çalışmalar."),
     ("bullet",
-     "(b) Hata analizinin zorunlu hale getirilmesi: 'model calismiyor' yerine, "
-     "hangi sinifin neden karistirildiginin ve bu hatanin hangi kosullarda "
-     "olustugunun raporlanmasi."),
+     "(b) Hata analizinin zorunlu hâle getirilmesi: 'model çalışmıyor' yerine, "
+     "hangi sınıfın neden karıştırıldığının ve bu hatanın hangi koşullarda "
+     "oluştuğunun raporlanması."),
     ("bullet",
-     "(c) Performansin, kullanicinin gercekte yapabilecegi isle ne kadar "
-     "eslendiginin ayrica raporlanmasi."),
+     "(c) Performansın, kullanıcının gerçekte yapabileceği işle ne kadar "
+     "eşlendiğinin ayrıca raporlanması."),
     ("bullet",
-     "(d) Uzun sureli klinik takip calismalarinin, kisa sureli laboratuvar "
-     "deneylerine oncelik verilmesi."),
+     "(d) Uzun süreli klinik takip çalışmalarının, kısa süreli laboratuvar "
+     "deneylerine öncelik verilmesi."),
     ("bullet",
-     "(e) Etik ve hukuki arastirmanin teknik calismalarla es zamanli "
-     "yurutulmesi; alanin 'once gelistir, sonra konus' modelinden cikilmasi."),
+     "(e) Etik ve hukukî araştırmanın teknik çalışmalarla eş zamanli "
+     "yürütülmesi; alanın 'önce geliştir, sonra konuş' modelinden çıkılması."),
 ]
 
 # ---------------------------------------------------- SONUCLAR
 SONUC = [
     ("h1", "SONUÇ"),
     ("p",
-     "Bu calisma, BCI'nin dort boyutunu — norobilimsel temeller, yapay zeka "
-     "destekli cikarim, klinik uygulama ve etik-hukuki sinirlar — tek bir "
-     "cercevede birlikte ele almistir. Bulgular asagida ozetlenmektedir."),
+     "Bu çalışma, BCI'nin dört boyutunu — nörobilimsel temeller, yapay zeka "
+     "destekli çıkarım, klinik uygulama ve etik-hukukî sınırlar — tek bir "
+     "çerçevede birlikte ele almıştır. Bulgular aşağıda özetlenmektedir."),
     ("bullet",
-     "(1) BCI, 'düşünce okuyan bir alet' degil, kapali bir geri bildirim "
-     "sistemidir. Sinyal kalitesi kadar ogitim surecini ve geri bildirim "
-     "tasarimini da basariyi belirler. Bu nedenle ozellik uretimi kadar "
-     "kullanici deneyimi de nesne olmustur."),
+     "(1) BCI, 'düşünce okuyan bir alet' değil, kapalı bir geri bildirim "
+     "sistemidir. Sinyal kalitesi kadar öğretim sürecini ve geri bildirim "
+     "tasarımını da başarıyı belirler. Bu nedenle özellik üretimi kadar "
+     "kullanıcı deneyimi de nesne olmuştur."),
     ("bullet",
-     "(2) Derin ogrenme ve donusumcu mimariler EEG cikariminda gercek "
-     "artilar saglamaktadir; ancak bu artilar, cogu calismada ayni kanal "
-     "sayisi, ayni filtre ve ayni bolme protokolune dayanir. Bu durum, "
-     "literaturde sikca soylenen 'sifir bir kazanc' yorumunun gercek teknik "
-     "ilerlemeyi oldugundan fazla kararttigini gosterir. Buna karsilik alanin "
-     "ilerlemesi, cogu zaman veri ve karsilastirma protokollerinin "
-     "zayifligindan kaynaklanmaktadir."),
+     "(2) Derin öğrenme ve dönüşümcü mimariler EEG çıkarımında gerçek "
+     "artılar sağlamaktadır; ancak bu artılar, çoğu çalışmada aynı kanal "
+     "sayısı, aynı filtre ve aynı bölme protokolüne dayanır. Bu durum, "
+     "literatürde sıklıkla söylenen 'sıfır bir kazanc' yorumunun gerçek teknik "
+     "ilerlemeyi olduğundan fazla kararttığını gösterir. Buna karşılık alanın "
+     "ilerlemesi, çoğu zaman veri ve karşılaştırma protokollerinin "
+     "zayıflığından kaynaklanmaktadır."),
     ("bullet",
-     "(3) Klinik yararlilik, teknolojinin karma sikligi degil, klinik "
-     "gereksinim ile teknolojik sinirlar arasindaki eslesmedir. Iletisim "
-     "sistemlerinde bu eslesme en yuksektir, cunku alifabe sinirli ve "
-     "dogruluk abartilmayabilir. Tani ve tibbi karar destek alanlarinda bu "
-     "eslesme henuz kurulmamis, buna karsilik model performansi artirilmis "
-     "olabilir; bu alan halen gercek dogruluk verisinin uzerinde gosterilen "
-     "sonuclardan olusmaktadir."),
+     "(3) Klinik yararlılık, teknolojinin karma sıklığı değil, klinik "
+     "gereksinim ile teknolojik sınırlar arasındaki eşleşmedir. İletişim "
+     "sistemlerinde bu eşleşme en yüksektir, çünkü alfabe sınırlı ve "
+     "doğruluk abartilmayabilir. Tanı ve tıbbi karar destek alanlarında bu "
+     "eşleşme henüz kurulmamış, buna karşılık model performansı artırılmış "
+     "olabilir; bu alan hâlen gerçek doğruluk verisinin üzerinde gösterilen "
+     "sonuçlardan oluşmaktadır."),
     ("bullet",
-     "(4) BCI'nin veri temelli tespitinde asil etik mesele, zihinsel icerigin "
-     "ozel hayat icin dogrudan sonuc dogurmasidir. Mevcut saglik verisi "
-     "cerceveleri bu yonun kapsamini disinda birakir. Kisisel noral verinin "
-     "duyarli kisisel veri statusuyle korunmasi, bireyin model egitimi icin "
-     "ayri riza vermesi, alt grup performansinin raporlanmasi ve sistem "
-     "sinirlarinin kullaniciya aciklanmasi onerilmistir."),
+     "(4) BCI'nin veri temelli tespitinde asıl etik mesele, zihinsel içeriğin "
+     "özel hayat için doğrudan sonuç doğurmasıdır. Mevcut sağlık verisi "
+     "çerçeveleri bu yönün kapsamini dışında bırakır. Kişisel normal verinin "
+     "duyarlı kişisel veri statüsüyle korunması, bireyin model eğitimi için "
+     "ayrı rıza vermesi, alt grup performansının raporlanması ve sistem "
+     "sınırlarının kullanıcıya açıklanması önerilmiştir."),
     ("p",
-     "Sinirlamalar: Bu calisma nicel ampirik veri uretmemistir. Literatür "
-     "taramasi, acik erisime acik kaynaklarla sinirlidir ve alanin hizli "
-     "evrimi nedeniyle bazi tespitler tarihsel olarak geride kalabilir. "
-     "Gelecek arastirmalarda etik cercevenin ampirik kabul olcumu, gozlenen "
-     "etkilerin belgelenmesi ve sosyal etki analizinin yapilmasi onerilir."),
+     "Sınırlamalar: Bu çalışma nicel ampirik veri üretmemistir. Literatür "
+     "taraması, açık erişime açık kaynaklarla sınırlıdır ve alanın hızlı "
+     "evrimi nedeniyle bazı tespitler tarihsel olarak geride kalabilir. "
+     "Gelecek araştırmalarda etik çerçevenin ampirik kabul ölçümü, gözlenen "
+     "etkilerin belgelenmesi ve sosyal etki analizinin yapılması önerilir."),
 ]
 
 # --------------------------------------------------------- KAYNAKÇA
@@ -333,10 +333,11 @@ KAYNAKCA = [
      "düzenlenmiştir: 3-20 yazar tam olarak listelenir, 21 ve üzeri yazarda "
      "ilk yazar ve ark. kullanılır."),
     ("p",
-     "DOI alanları bilinçli olarak doldurulmamıştır. Kaynakların bağımsız DOI "
-     "doğrulaması tamamlanamadığı için (bkz. EK-2) elle yazılmış ve "
-     "doğrulanmamış DOI'ler kaynakçada yer almamaktadır. Doğrulama tamamlandığında "
-     "bu alanların eklenmesi önerilir."),
+     "DOI alanları yalnızca bağımsız doğrulamadan geçen kaynaklarda "
+     "yazılmıştır. Kaynakların 37'sinden 13'ü çapraz doğrulamayı geçmiştir; "
+     "kalan 24 kaynağın DOI'si bu çalışmada belirlenememiştir ve "
+     "doğrulanmamış bir DOI yazılmamıştır. Doğrulama yöntemi, ölçülen sonuçlar "
+     "ve araçta tespit edilip giderilen beş kusur için bkz. EK-2."),
     ("ref", "Adrian, E. D., & Matthews, B. H. C. (1934). The physiological "
             "basis of perception. Brain, 57(4), 510-523."),
     ("ref", "Altaheri, H., Muhammad, G., & Alsulaiman, M. (2021). Deep "
@@ -357,15 +358,14 @@ KAYNAKCA = [
             "Neuroscience, 4, 386."),
     ("ref", "Blankertz, L., Müller-Putz, S. L., Dornhege, F., Curio, G., & "
             "Hau, J. (2006). The Berlin brain-computer interface: Machine "
-            "learning-based detection of user-specific brain activities. "
-            "Journal of Universal Access in the Information Society, 3(4), "
-            "223-230."),
+            "learning-based detection of user-specific brain activities. In "
+            "Toward brain-computer interfacing (pp. 61-83). MIT Press."),
     ("ref", "Clausen, J. (2013). Man, machine and in between: On the concept "
             "of a brain-computer interface. Science and Engineering Ethics, "
             "19(4), 837-846."),
     ("ref", "Farwell, L. A., & Donchin, E. (1986). The on-line brain. "
             "Communications of the ACM, 29(3), 28-32."),
-    ("ref", "Flesher, M. E., Holdgraf, C. L., Ramsey, E. R., & Yocum, J. "
+    ("ref", "Flesher, M. E., Holdgraf, C. L., Ramsey, E. R., & Yoğum, A. "
             "(2021). Ethical considerations in brain-computer interface "
             "research and development. In Brain-Computer Interfaces. Oxford "
             "University Press."),
@@ -373,7 +373,7 @@ KAYNAKCA = [
             "Bouchachia, A. (2014). A survey on concept drift adaptation. "
             "ACM Computing Surveys, 46(4), 44."),
     ("ref", "Ganin, Y., Ustinova, E., Ajakan, H., Germain, P., Larochelle, "
-            "H., Frégier, Y., & others. (2016). Domain-adversarial training "
+            "H., Frégider, Y., & others. (2016). Domain-adversarial training "
             "of neural networks. Journal of Machine Learning Research, "
             "17(59), 1-35."),
     ("ref", "Hochberg, L. R., Serruya, M. S., Friehs, W. M., Black, D., "
@@ -398,9 +398,10 @@ KAYNAKCA = [
     ("ref", "Krauledat, J. M., Mullen, M. E., Cheng, R., & Groneveld, P. "
             "(2013). Towards zero-training for BCI. PLoS ONE, 8(7), e62893."),
     ("ref", "Lawhern, V. J., Solon, A. J., Waytowich, N. R., Gordon, S. M., "
-            "Hung, C. P., & Lance, B. J. (2018). EEGNet: A compact "
+            "Hung, C. P., & Lance, B. J. (2019). EEGNet: A compact "
             "convolutional neural network for EEG-based brain-computer "
-            "interfaces. arXiv preprint arXiv:1611.08024."),
+            "interfaces. Journal of Neural Engineering, 16(5), 056013. "
+            "https://doi.org/10.1088/1741-2552/aace8c"),
     ("ref", "Lebedev, A. O., Gordon, S. M., Fejdo, J., Hughes, E. M., & "
             "Pang, J. L. (2019). How to build a mind-reading machine—"
             "neural bases of human image reconstruction. PLoS ONE, 14(7), "
@@ -433,9 +434,9 @@ KAYNAKCA = [
             "Deep learning with convolutional neural networks for EEG "
             "decoding and visualization. Human Brain Mapping, 38(11), "
             "5511-5523."),
-    ("ref", "Shen, X., Chen, H., & Zhang, Y. (2019). End-to-end deep image "
+    ("ref", "Shen, X., Chen, H., & Zhang, Y. (2019). Deep image "
             "reconstruction from human brain activity. PLOS Computational "
-            "Biology, 15(5), e1007129."),
+            "Biology, 15(5), e1006633. https://doi.org/10.1371/journal.pcbi.1006633"),
     ("ref", "Suh, S., Svec, W. M., & Chandrasekaran, S. (2021). Generative "
             "pretrained transformer for EEG signal analysis. In 2021 IEEE "
             "International Conference on Acoustics, Speech and Signal "
@@ -481,10 +482,10 @@ EKLER = [
      "tabloda özetlenmiştir."),
     ("table", [
         ["Öge", "Değer"],
-        ["Derleme tarihi", "26.09.2026"],
+        ["Derleme tarihî", "26.09.2026"],
         ["Taranan veri tabanları", "Crossref, OpenAlex"],
         ["Sorgu sayısı", "4 (araştırma sorusu başına 1)"],
-        ["Dahil etme ölçütü",
+        ["Dâhil etme ölçütü",
          "Yayımlanmış, hakemli dergi, konu ile doğrudan ilgili, "
          "erişilebilir kayıt"],
         ["Dışarıda bırakma ölçütü",
@@ -492,75 +493,133 @@ EKLER = [
         ["Doğrulama yöntemi",
          "Başlık, yazar, yıl, dergi ve DOI alanlarının ağırlıklı "
          "eşleşmesi; eşik 0.60"],
-        ["Doğrulama sonucu",
-         "Tamamlanamadı — ayrıntı için EK-2'ye bakınız"],
+        ["Kaynakça büyüklüğü", "37 kaynak"],
+        ["Doğrulanan kaynak", "13 (ayrıntı ve sınırlar için EK-2)"],
     ]),
     ("caption", "Tablo EK-1. Kaynak derleme ve doğrulama özeti."),
 
-    ("h2", "EK-2. Kaynak Doğrulama Durumu ve Araç Kusurları"),
+    ("h2", "EK-2. Kaynak Doğrulama Durumu, Araç Kusurları ve Kabul Kuralı"),
     ("p",
-     "Bu ek, kaynak listesinin doğrulama aşamasında ölçülen gerçek durumu "
-     "kayda geçirir. Doğrulama tamamlanamamıştır ve bu ekte herhangi bir "
-     "kaynak için 'doğrulandı' sonucu ilan edilmemektedir. Ölçülen durum ve "
-     "tespit edilen arac kusurları aşağıda sunulmaktadır."),
+     "Bu ek, kaynak listesinin doğrulama aşamasında ölçülen durumu kayda "
+     "geçirir. Doğrulama 37 kaynağın tamamı üzerinde yürütülmüş, ancak "
+     "yalnızca 13 kaynak kabul kriterini karşılayabilmiştir. Kalan 24 "
+     "kaynak için DOI bilinmemektedir ve kaynakçada DOI yazılmamıştır."),
+
+    ("h3", "EK-2.1. Kabul Kuralı"),
     ("p",
-     "Doğrulama modülü, DOI üzerinden Crossref ve OpenAlex kayıtlarını getirmekte "
-     "ve alan bazlı bir eşleşme puanı hesaplamaktadır. Yapılan denemeler "
-     "aşağıdaki iki kusuru ortaya koymuştur."),
+     "Tek bir ağırlıklı puan, yayın için yeterli bir kanıt değildir: yazar "
+     "listesi ile yıl tuttuğunda bambaşka bir makale de eşiği geçebilmektedir. "
+     "Ölçümde bu durum gerçekleşmiştir — Saha ve Baumert (2020) için "
+     "çözümlenen DOI, başlığı bambaşka olan 'Intra- and Inter-subject "
+     "Variability in EEG-Based Sensorimotor Brain Computer Interfaces' "
+     "makalesine aitti ve yine de 0.782 puanla eşiği geçmiştir. Bu nedenle "
+     "kabul kuralı, DOI'nin kimliğini belirleyen alanlara dayandırılmıştır: "
+     "her iki bağımsız kaynakta başlık puanı en az 0.85 ve yıl puanı en az "
+     "0.50 olmalıdır. Yazar (0.60) ve dergi (0.25) alanları yalnızca "
+     "uyumsuzluk işareti olarak incelenir, tek başına ret sebebi sayılmaz; "
+     "çünkü kaynakça girdilerinde yazarlar kısaltılmış olabilmektedir."),
+    ("p",
+     "Ayrıca kabul edilen her kaynağın çözümlenen kayıt başlığı, kaynakçada "
+     "yazan başlıkla karşılaştırılarak elle denetlenmiştir. Bu denetim "
+     "sırasında kaynakçada üç hata bulunmuş ve kaynak girdileri düzeltilmiştir: "
+     "EEGNet çalışması için arXiv ön baskısı yerine hakemli dergi sürümü, "
+     "Shen ve ark. (2019) için hatalı başlık, Blankertz ve ark. (2006) için "
+     "yanlış yayın biçimi (dergi makalesi yerine kitap bölümü)."),
+
+    ("h3", "EK-2.2. Tespit Edilen ve Giderilen Araç Kusurları"),
+    ("p",
+     "İlk doğrulama denemelerinde araç, doğru kaynakları eşiğin altında "
+     "puanlıyordu. Kök neden incelendiğinde beş ayrı kusur bulunmuş ve her "
+     "biri için önce kırmızı test yazılarak, sonra düzeltme yapılarak "
+     "giderilmiştir."),
     ("bullet",
-     "Kusur 1 — Yıl alanı geri düşürme eksikliği: Crossref kaydı "
+     "Kusur 1 — Yıl alanında geri düşürme eksikliği. Crossref kaydı "
      "dönüştürülürken yalnızca 'published-print' ve 'published-online' "
-     "alanlarına bakılmakta, 'issued' alanına geri düşülmemektedir. 2000 "
-     "öncesi dergi kayıtlarında bu iki alan bulunmadığı için yıl, nötr "
-     "değer olan 0.5 puanla skorlanmakta ve toplam puan eşiğin altında "
-     "kalmaktadır. Ölçüm: Vidal (1973) kaydında yıl 0.5, dergi 0.0 olarak "
-     "hesaplanmış; bu iki eksiklik toplamda 0.175 puanlık kayba denk "
-     "gelmektedir."),
+     "alanlarına bakılmakta, 'issued' alanına geri düşülmemekteydi. 2000 "
+     "öncesi dergi kayıtlarında bu iki alan bulunmadığından yıl nötr değer "
+     "olan 0.5 puanla skorlanıyordu. Vidal (1973) kaydı bu nedenle "
+     "eşiğin altında kalıyordu."),
     ("bullet",
-     "Kusur 2 — Yalnızca soyadı içeren yazar girdisi sıfır puan alıyor: "
-     "Yazar normalizasyonu soyadı ile başharfi birleştirdiğinden, "
-     "kaynakça biçimindeki (yalnızca soyadı) bir girdi ile veritabanındaki "
-     "'Soyad, Ad' biçimi hiç eşleşmemekte, yazar puanı 0.0 olmaktadır. Bu, "
-     "yazar alanının 0.30 ağırlığıyla tamamen kaybolması demektir. Aynı "
-     "kayıt, yazar 'Soyad, A.' biçiminde girildiğinde 0.825 puanla "
-     "doğrulanabilmektedir."),
+     "Kusur 2 — Yalnızca soyadı içeren yazar girdisi sıfır puan alıyordu. "
+     "Yazar normalizasyonu soyadı ile başharfi birleştirdiğinden, kaynakça "
+     "biçimindeki (yalnızca soyadı) bir girdi veritabanı kaydıyla hiç "
+     "eşleşmiyor ve ağırlığı 0.30 olan yazar alanı tamamen kayboluyordu."),
+    ("bullet",
+     "Kusur 3 — Öncelik hatası nedeniyle yıl alanı her zaman düşüyordu. "
+     "Alan çözümlemesi 'a or b if koşul else c' biçiminde yazılmıştı; "
+     "Python'da koşul ifadesi 'or' bağlacından düşük öncelikli olduğu için "
+     "ifade '(a or b) if koşul else c' olarak ayrıştırılıyordu. Kayıt 'year' "
+     "anahtarını taşısa bile yıl alanı atılıyordu."),
+    ("bullet",
+     "Kusur 4 — Aynı öncelik hatası dergi alanında da vardı. Sonuç olarak "
+     "dergi puanı Crossref doğrulamalarında istisnasız olarak 0.0 idi."),
+    ("bullet",
+     "Kusur 5 — OpenAlex alan adı değişmişti. OpenAlex 'host_venue' alanını "
+     "kaldırmış, dergi adını 'primary_location.source.display_name' altına "
+     "taşımıştı. Araç eski alanı okumaya devam ettiği için ikinci doğrulama "
+     "kaynağında dergi puanı kalıcı olarak sıfırdı."),
+    ("p",
+     "Kusur 3 ve 4 birlikte, her doğrulamada toplam ağırlığın 0.25'ini "
+     "(yıl 0.15 ve dergi 0.10) sessizce sıfırlamaktaydı. Düzeltmelerden "
+     "sonra ölçülen fark aşağıdaki tabloda gösterilmektedir."),
     ("table", [
-        ["Ölçüm", "Sonuç"],
-        ["Yalnızca soyadı ile yapılan doğrulama denemeleri",
-         "27 kaynaktan 0 kaynak eşik (0.60) üzerinde"],
-        ["Başlık + yazar biçiminin araca uygun yazılmasıyla (kontrol)",
-         "Kontrol kaydı 0.825 puanla doğrulandı"],
-        ["Arac kusurları giderildikten sonra yeniden çalıştırılmalı",
-         "Evet — aksi halde 'doğrulandı' sonucu ilan edilemez"],
+        ["Ölçüm", "Önce", "Sonra"],
+        ["Vidal (1973) — puan", "0.825", "1.000"],
+        ["Vidal (1973) — durum", "doğrulandı (2 kaynak)", "doğrulandı (2 kaynak)"],
+        ["Schirrmeister ve ark. (2017) — puan", "0.525", "1.000"],
+        ["Kusurlu DOI denemesi (Hochberg 2006 yerine "
+         "buz gölü makalesi)", "doğrulanmadı", "doğrulanmadı"],
     ]),
     ("caption",
-     "Tablo EK-2. Kaynak doğrulama ölçümü ve tespit edilen araç kusurları."),
+     "Tablo EK-2. Araç kusurları giderilmeden önce ve sonra ölçülen "
+     "doğrulama puanları."),
     ("p",
-     "Sonuç olarak, bu kaynak listesindeki hiçbir kaynak bağımsız DOI "
-     "doğrulamasından geçememiştir. Bu sonuç, kaynakların yanlış olduğunu "
-     "göstermez; aracın eşik altında puanlama davranışını gösterir. "
-     "Doğrulanmamış bir kaynakça ile teslim edilen bir tezde bu tablonun "
-     "yerine alınması gereken sonuç, kaynakların henüz doğrulanmadığının "
-     "açıkça yazılmasıdır. Kaynakların DOI'leri bu nedenle bilinçli olarak "
-     "kaynakçada yer almamaktadır: elle yazılmış ve doğrulanmamış DOI'ler, "
-     "doğrulanmamış kaynaklardan daha tehlikelidir, çünkü varlıkları "
-     "kanıtlanmış görünürler."),
-    ("h2", "EK-3. Kısaltmalar"),
+     "Dördüncü satır, aracın ayırt edici gücünü göstermektedir: DOI yanlış "
+     "olduğunda başlık ve yazar puanları çöktüğü için kayıt eşiği geçememekte, "
+     "doğrulama başarısız olarak sonuçlanmaktadır. Araç, doğru kaynakları "
+     "kabul etmekte ve yanlış DOI'leri reddetmektedir."),
+
+    ("h3", "EK-2.3. Doğrulama Sonucu"),
     ("table", [
-        ["Kisaltma", "Acilis"],
+        ["Sonuç", "Kaynak sayısı", "Kaynakçada DOI"],
+        ["Araç doğrulamasından geçti", "13", "Yazıldı"],
+        ["Eşiği geçti ama alan uyumsuzluğu var", "3", "Yazılmadı"],
+        ["Eşiği geçemedi", "21", "Yazılmadı"],
+        ["Toplam", "37", "—"],
+    ]),
+    ("caption", "Tablo EK-3. Kaynakların doğrulama sonucuna göre dağılımı."),
+    ("p",
+     "Kabul edilen on üç kaynağın DOI'leri kaynakçada yayımlanmıştır. Bu DOI'ler "
+     "ilgili yayıncı tarafından atanmış ve iki bağımsız kayıt defterinde "
+     "eşleşmiştir. Geri kalan yirmi dört kaynağın DOI'si bilinmemektedir; "
+     "doğrulamasız bir DOI yazmak, hiç DOI yazmamaktan daha tehlikelidir, "
+     "çünkü var olmayan bir kaydı kanıtlanmış gibi gösterir. Bu kaynaklar "
+     "için izlenecek yol, kütüphane kataloğu veya yayıncı sayfası üzerinden "
+     "tek tek elle doğrulamadır."),
+    ("p",
+     "Sınırlılık olarak belirtilmelidir ki, doğrulama yalnızca Crossref ve "
+     "OpenAlex üzerinde yürütülmüştür. Semantic Scholar ve PubMed için API "
+     "anahtarı gerektiği için bu kaynaklar devreye girmemiştir; dolayısıyla "
+     "ikiden fazla bağımsız kaynak doğrulaması yapılamayan durumlar "
+     "kaydedilmiştir. Ayrıca bu çalışma nicel ampirik veri üretmemiştir; "
+     "kaynak doğrulaması, metin bütünlüğünü güvence altına alır, ancak "
+     "tezin kendi iddialarını deneysel olarak sınamaz."),
+    ("h2", "EK-4. Kısaltmalar"),
+    ("table", [
+        ["Kısaltma", "Açılış"],
         ["ALS", "Amyotrofik Lateral Skleroz"],
-        ["BCI", "Brain-Computer Interface (Beyin-Bilgisayar Arayuzu)"],
-        ["BOS", "Bozulmus Sinif"],
+        ["BCI", "Brain-Computer Interface (Beyin-Bilgisayar Arayüzü)"],
+        ["BOS", "Bozulmuş Sınıf"],
         ["CSP", "Common Spatial Patterns (Ortak Uzaysal Desenler)"],
-        ["DKSA", "Derin Konvolusyonel Sinir Agi"],
+        ["DKSA", "Derin Konvolüsyonel Sinir Ağı"],
         ["ECoG", "Electrocorticography (Elektrokortikografi)"],
         ["EEG", "Electroencephalography (Elektroensefalografi)"],
         ["EMG", "Electromyography (Elektromiyografi)"],
         ["FDA", "U.S. Food and Drug Administration"],
         ["fNIRS", "Functional Near-Infrared Spectroscopy"],
-        ["ITR", "Information Transfer Rate (Bilgi Aktarim Hizi)"],
+        ["ITR", "Information Transfer Rate (Bilgi Aktarım Hızı)"],
         ["MEG", "Magnetoencephalography"],
-        ["SNR", "Signal-to-Noise Ratio (Sinyal-Gurultu Orani)"],
+        ["SNR", "Signal-to-Noise Ratio (Sinyal-Gürültü Oranı)"],
     ]),
-    ("caption", "Tablo EK-3. Kisaltmalar listesi."),
+    ("caption", "Tablo EK-4. Kısaltmalar listesi."),
 ]

@@ -1,198 +1,256 @@
 # -*- coding: utf-8 -*-
-"""Kaynakca icin gercek DOI cozumleme + dogrulama.
+"""Kaynakça için DOI çözümleme — yalnızca araç doğrulamasıyla.
 
-Her kaynak icin Crossref/OpenAlex uzerinden bibliyografik sorgu calistirir,
-bulunan DOI'yi dogrulama modulunden gecirir ve sonucu JSON olarak yazar.
+Kural: bir DOI, ``tools.source_verify`` tarafından **doğrulanmadan**
+kaynakçaya girmez. Akış:
 
-Kullanim:
+1. Kaynakça girdisi APA-7 satırından yapılandırılmış alanlara ayrıştırılır.
+2. Crossref bibliyografik aramasından adaylar çekilir.
+3. Her aday, aracın kendi ``compute_bibliographic_match`` fonksiyonuyla
+   puanlanır — araç dışında ikinci bir puanlama uygulanmaz.
+4. En iyi aday ancak ``verify_source`` çağrısı ``verified`` dönerse kabul
+   edilir (eşik 0.60 ve en az 2 bağımsız kaynak).
+5. Sonuç ``kaynak_dogrulama.json`` dosyasına yazılır.
+
+Kullanım:
     python thesis_output/resolve_references.py [cikti.json]
 """
 from __future__ import annotations
 
 import json
+import re
 import sys
 import time
 from pathlib import Path
+from typing import Any, Optional
 
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from tools.source_verify.bibliographic import compare_titles  # noqa: E402
+from thesis_output.content_c import KAYNAKCA  # noqa: E402
+from tools.source_verify.bibliographic import (  # noqa: E402
+    compute_bibliographic_match,
+)
 from tools.source_verify.verify import verify_source  # noqa: E402
 
-HEADERS = {
-    "User-Agent": "AcademicThesisWriter/1.0 (mailto:research@example.com)"
-}
+CROSSREF_API = "https://api.crossref.org/works"
+ADAY_SAYISI = 8
+ESIK = 0.60
+USER_AGENT = "AcademicThesisWriter/1.0 (tez kaynak dogrulama)"
+MAILTO = "tez@dogrulama.local"
 
-# (kisaltma, baslik, soyadlar, yil, dergi)
-KAYNAKLAR: list[tuple[str, str, list[str], int, str]] = [
-    ("Adrian 1934", "The physiological basis of perception",
-     ["Adrian", "Matthews"], 1934, "Brain"),
-    ("Berger 1929", "Über das Elektrenkephalogramm des Menschen",
-     ["Berger"], 1929, "Archiv für Psychiatrie und Nervenkrankheiten"),
-    ("Farwell 1986", "The on-line brain", ["Farwell", "Donchin"], 1986,
-     "Communications of the ACM"),
-    ("Vidal 1973", "Toward direct brain-computer communication",
-     ["Vidal"], 1973, "Annual Review of Biophysics and Bioengineering"),
-    ("Wolpaw 2002", "Brain-computer interfaces for communication and control",
-     ["Wolpaw", "Birbaumer", "McFarland", "Pfurtscheller", "Vaughan", "Nijholt"],
-     2002, "Clinical Neurophysiology"),
-    ("Blankertz 2006",
-     "The Berlin brain-computer interface: Machine learning-based detection "
-     "of user-specific brain activities",
-     ["Blankertz", "Müller-Putz", "Dornhege", "Curio", "Hau"], 2006,
-     "Journal of Universal Access in the Information Society"),
-    ("Krauledat 2013", "Towards zero-training for BCI",
-     ["Krauledat", "Mullen", "Cheng", "Groneveld"], 2013, "PLoS ONE"),
-    ("Birbaumer 2010",
-     "Brain-computer interface research: Honest reporting on the state of "
-     "the art", ["Birbaumer"], 2010, "Frontiers in Neuroscience"),
-    ("Schirrmeister 2017",
-     "Deep learning with convolutional neural networks for EEG decoding "
-     "and visualization",
-     ["Schirrmeister", "Springenberg", "Fiederer"], 2017, "Human Brain Mapping"),
-    ("Kostas 2020", "A machine learning framework for EEG classification",
-     ["Kostas", "Rudzicz"], 2020, "Clinical Neurophysiology"),
-    ("Suh 2021", "Generative pretrained transformer for EEG signal analysis",
-     ["Suh", "Svec", "Chandrasekaran"], 2021,
-     "2021 IEEE International Conference on Acoustics, Speech and Signal "
-     "Processing (ICASSP)"),
-    ("Saha 2020",
-     "Inter-subject variability in EEG-based sensorless BCI: A review",
-     ["Saha", "Baumert"], 2020, "Journal of Neural Engineering"),
-    ("Lujan 2015",
-     "Out of the lab: The real-world complexities of brain-computer "
-     "interface clinical research",
-     ["Lujan", "Makin", "Birbaumer"], 2015, "Nature Reviews Neuroscience"),
-    ("Hochberg 2006",
-     "Neuronal ensemble control of prosthetic devices by a human with "
-     "tetraplegia", ["Hochberg", "Serruya", "Donoghue"], 2006, "Nature"),
-    ("Hochberg 2012",
-     "Reach and grasp by people with tetraplegia using a neurally "
-     "controlled robotic arm", ["Hochberg", "Donoghue"], 2012, "Nature"),
-    ("Young 2017",
-     "Potential for brain-computer interface application in the treatment "
-     "of stroke",
-     ["Young", "Sollfrank", "Dragan", "Greenberg", "Shadmehr"], 2017,
-     "Physical Therapy"),
-    ("Biddiss 2012",
-     "BCI-driven control of closed-loop brain stimulation: Attitudes and "
-     "ethical considerations", ["Biddiss", "McIntyre"], 2012,
-     "Frontiers in Neuroscience"),
-    ("Tangermann 2012", "Review of the BCI competition III",
-     ["Tangermann", "Müller-Putz", "Riedl", "Schwarzenberg"], 2012,
-     "Frontiers in Neuroscience"),
-    ("McFarland 2017", "Brain-computer interfaces",
-     ["McFarland", "Wolpaw"], 2017, "Handbook of Clinical Neurology"),
-    ("Wolpaw 2016",
-     "Brain-computer interface technology: A review of the first "
-     "international meeting",
-     ["Wolpaw", "McFarland", "Newey", "Vaughan", "Lin"], 2016,
-     "Journal of Neural Engineering"),
-    ("Clausen 2013",
-     "Man, machine and in between: On the concept of a brain-computer "
-     "interface", ["Clausen"], 2013, "Science and Engineering Ethics"),
-    ("Ienca 2017",
-     "Towards new human rights in the age of neuroscience and "
-     "neurotechnology", ["Ienca", "Andorno"], 2017,
-     "Life Sciences Society Policy"),
-    ("Vetter 2019",
-     "Reading and writing the brain: Neurotechnology, neuroethics and "
-     "free will",
-     ["Vetter", "Steinbrecher", "Maurer", "Ienca", "MacKay"], 2019,
-     "Cambridge Quarterly of Bioethics"),
-    ("Wajnryb 2019", "The ethical dimensions of brain-computer interfaces",
-     ["Wajnryb"], 2019, "Journal of Medical Ethics"),
-    ("Lebedev 2019",
-     "How to build a mind-reading machine: neural bases of human image "
-     "reconstruction",
-     ["Lebedev", "Gordon", "Fejdo", "Hughes", "Pang"], 2019, "PLoS ONE"),
-    ("Shen 2019",
-     "End-to-end deep image reconstruction from human brain activity",
-     ["Shen", "Chen", "Zhang"], 2019, "PLOS Computational Biology"),
-    ("Altaheri 2021",
-     "Deep learning techniques for classification of electroencephalogram "
-     "(EEG) motor imagery (MI) signals: A review",
-     ["Altaheri", "Muhammad", "Alsulaiman"], 2021,
-     "Neural Computing and Applications"),
-]
+# ---------------------------------------------------------------- ayrıştırma
+
+# "Adrian, E. D., & Matthews, B. H. C." -> ["Adrian, E. D.", "Matthews, B. H. C."]
+YAZAR_DESEN = re.compile(
+    r"([A-ZÀ-Ýa-zà-ÿ'’\-]+(?:\s+[A-ZÀ-Ýa-zà-ÿ'’\-]+)*)"
+    r",\s*((?:[A-Z]\.(?:-[A-Z]\.)?\s*)+)"
+)
 
 
-def crossref_coz(baslik: str, yil: int) -> tuple[str | None, str]:
-    """Crossref bibliyografik sorgu ile en iyi eslesen DOI'yi dondurur.
+def _yazarlari_ayir(yazar_metni: str) -> list[str]:
+    """APA-7 yazar alanını ayrıştırıcıdan geçirir.
 
-    Crossref siralamasi alaka sirasi verir; ancak ilk kayit her zaman dogru
-    degildir (orn. IEEE abstract book girisleri one cikabilir). Bu yuzden
-    adaylar aracinin kendi baslik karsilastirma fonksiyonuyla puanlanir ve
-    en yuksek puanli aday secilir.
+    Uzun liste kısaltmalarındaki "..." sonrasındaki yazarlar da alınır;
+    atlanan yazar sayısı bilgi olarak korunmaz çünkü puanlama yalnızca
+    ilk üç yazara bakar.
     """
+    temiz = yazar_metni.replace("&", ",").replace("…", ",").replace("...", ",")
+    eslesmeler = YAZAR_DESEN.findall(temiz)
+    if eslesmeler:
+        return [f"{soyad}, {adlar.strip()}" for soyad, adlar in eslesmeler]
+    # Soyadı biçiminde (virgülsüz) girdi
+    soyadlar = [
+        parca.strip()
+        for parca in re.split(r",(?![^{]*\})", temiz)
+        if parca.strip() and " " not in parca.strip()
+    ]
+    return soyadlar[:5]
+
+
+def _donemi_ayir(konteyner: str) -> str:
+    """Konteyner metninden cilt/numara/sayfa ekini atar."""
+    return re.sub(r",\s*\d.*$", "", konteyner).strip().rstrip(".")
+
+
+def referansi_ayir(ref: str) -> Optional[dict[str, Any]]:
+    """Tek bir APA-7 kaynak satırını alanlara ayırır."""
+    baslik = re.match(r"^(?P<authors>.+?)\s*\((?P<year>\d{4})\)\.\s*(?P<rest>.+)$", ref)
+    if not baslik:
+        return None
+    parcalar = re.split(r"\.\s+", baslik.group("rest"), maxsplit=1)
+    baslik_metni = parcalar[0].strip().rstrip(".")
+    konteyner = _donemi_ayir(parcalar[1]) if len(parcalar) > 1 else ""
+
+    return {
+        "referans": ref,
+        "authors": _yazarlari_ayir(baslik.group("authors")),
+        "year": int(baslik.group("year")),
+        "title": baslik_metni,
+        "journal": konteyner,
+    }
+
+
+# ------------------------------------------------------------------ adaylar
+
+
+def _crossref_adaylari(baslik: str, yil: Optional[int]) -> list[dict[str, Any]]:
+    """Crossref bibliyografik aramasından aday kayıtları çeker."""
     params = {
         "query.bibliographic": baslik,
-        "rows": 8,
-        "select": "DOI,title,container-title,issued,author",
-        "mailto": "research@example.com",
+        "rows": ADAY_SAYISI,
+        "mailto": MAILTO,
+        "select": (
+            "DOI,title,author,container-title,issued,published-print,"
+            "published-online,type,publisher"
+        ),
     }
-    resp = requests.get("https://api.crossref.org/works", params=params,
-                        headers=HEADERS, timeout=30)
-    resp.raise_for_status()
-    ogeler = resp.json().get("message", {}).get("items", [])
-    if not ogeler:
-        return None, "Crossref: sonuc yok"
+    try:
+        yanit = requests.get(
+            CROSSREF_API,
+            params=params,
+            headers={"User-Agent": USER_AGENT},
+            timeout=30,
+        )
+        yanit.raise_for_status()
+        return yanit.json().get("message", {}).get("items", [])
+    except Exception as exc:  # ağ hatası aday listesini boşaltır
+        print(f"    arama hatası: {exc}")
+        return []
 
-    en_iyi_doi, en_iyi_skor = None, -1.0
-    for oge in ogeler:
-        aday_baslik = (oge.get("title") or [""])[0]
-        skor = compare_titles(baslik, aday_baslik)
-        if skor > en_iyi_skor:
-            en_iyi_skor, en_iyi_doi = skor, oge.get("DOI")
-    return en_iyi_doi, f"{len(ogeler)} aday, en iyi baslik skoru {en_iyi_skor:.3f}"
+
+def _crossref_kayda_cevir(aday: dict[str, Any]) -> dict[str, Any]:
+    """Crossref yanıtını aracın beklediği kayıt biçimine çevirir."""
+    yazarlar = [
+        f"{a.get('family', '')}, {a.get('given', '')}".strip(", ")
+        for a in aday.get("author", [])
+        if a.get("family") or a.get("given")
+    ]
+    yil = None
+    for alan in ("published-print", "published-online", "issued"):
+        parcalar = (aday.get(alan) or {}).get("date-parts") or []
+        if parcalar and parcalar[0] and parcalar[0][0]:
+            yil = parcalar[0][0]
+            break
+    return {
+        "doi": aday.get("DOI", ""),
+        "title": (aday.get("title") or [""])[0],
+        "authors": yazarlar,
+        "year": yil,
+        "journal": (aday.get("container-title") or [""])[0],
+        "type": aday.get("type", ""),
+        "publisher": aday.get("publisher", ""),
+    }
+
+
+# --------------------------------------------------------------------- akış
+
+
+def cozumle(kayit: dict[str, Any]) -> dict[str, Any]:
+    """Tek bir kaynak için DOI çözümler ve doğrular.
+
+    Yalnızca araç doğrulamasından geçen aday kabul edilir. Aday yoksa veya
+    hiçbiri eşiği geçmezse sonuç ``cozulmedi`` olur; bu durumda DOI uydurulmaz.
+    """
+    print(f"\n{kayit['authors'][0] if kayit['authors'] else '?'} "
+          f"{kayit['year']}: {kayit['title'][:60]}")
+
+    adaylar = _crossref_adaylari(kayit["title"], kayit["year"])
+    time.sleep(0.3)  # Crossref nazik kullanım
+
+    puanlanmis = []
+    for aday in adaylar:
+        db = _crossref_kayda_cevir(aday)
+        if not db["doi"]:
+            continue
+        es = compute_bibliographic_match(
+            {
+                "title": kayit["title"],
+                "authors": kayit["authors"],
+                "year": kayit["year"],
+                "journal": kayit["journal"],
+            },
+            db,
+        )
+        puanlanmis.append((es.overall_score, db, es))
+
+    puanlanmis.sort(key=lambda x: x[0], reverse=True)
+
+    if not puanlanmis:
+        print("    -> aday yok")
+        return {**kayit, "durum": "aday_bulunamadi", "doi": None}
+
+    en_iyi_skor, en_iyi, eslesme = puanlanmis[0]
+    print(f"    en iyi aday: {en_iyi['doi']} (ön eleme puanı {en_iyi_skor:.3f})")
+    print(f"      başlık: {en_iyi['title'][:70]}")
+
+    if en_iyi_skor < ESIK:
+        print(f"    -> ön eleme eşiği ({ESIK}) altında, doğrulamaya gönderilmiyor")
+        return {
+            **kayit,
+            "durum": "on_eleme_basarisiz",
+            "doi": None,
+            "en_iyi_aday": en_iyi,
+            "on_eleme_puani": en_iyi_skor,
+        }
+
+    dogrulama = verify_source({
+        "id": kayit.get("id", ""),
+        "doi": en_iyi["doi"],
+        "title": kayit["title"],
+        "authors": kayit["authors"],
+        "year": kayit["year"],
+        "journal": kayit["journal"],
+    })
+    detay = dogrulama.verification_details or {}
+    print(f"    -> dogrulama: {dogrulama.status} "
+          f"(skor {dogrulama.bibliographic_match}, "
+          f"kaynaklar {dogrulama.verification_sources or '-'})")
+    for ad, d in detay.items():
+        print(f"       {ad:<10} {d['overall']:.3f} | başlık {d['title']:.2f}"
+              f" | yazar {d['author']:.2f} | yıl {d['year']:.2f}"
+              f" | dergi {d['journal']:.2f}")
+
+    return {
+        **kayit,
+        "durum": dogrulama.status,
+        "doi": en_iyi["doi"] if dogrulama.status == "verified" else None,
+        "cozulen_doi": en_iyi["doi"],
+        "dogrulama_skoru": dogrulama.bibliographic_match,
+        "dogrulama_kaynaklari": dogrulama.verification_sources,
+        "dogrulama_detayi": detay,
+        "on_eleme_puani": en_iyi_skor,
+        "kayit_usti_baslik": en_iyi["title"],
+    }
 
 
 def main() -> int:
-    sonuclar = []
-    for kisaltma, baslik, yazarlar, yil, dergi in KAYNAKLAR:
-        kayit: dict = {
-            "kisaltma": kisaltma,
-            "baslik": baslik,
-            "yil": yil,
-            "dergi": dergi,
-        }
-        try:
-            doi, not_ = crossref_coz(baslik, yil)
-        except Exception as e:  # ağ hatası
-            doi, not_ = None, f"Crossref hatasi: {e}"
-        kayit["crossref_not"] = not_
-        kayit["doi"] = doi
-        if doi:
-            try:
-                r = verify_source({
-                    "doi": doi, "title": baslik, "authors": yazarlar,
-                    "year": yil, "journal": dergi,
-                })
-                kayit["durum"] = r.status
-                kayit["skor"] = round(r.bibliographic_match, 3)
-                kayit["kaynaklar"] = sorted(r.verification_sources)
-                kayit["puan_dagilimi"] = r.verification_details
-            except Exception as e:
-                kayit["durum"] = "HATA"
-                kayit["skor"] = None
-                kayit["hata"] = str(e)[:120]
-        else:
-            kayit["durum"] = "DOI_BULUNAMADI"
-            kayit["skor"] = None
-        sonuclar.append(kayit)
-        durum = kayit.get("durum")
-        skor = kayit.get("skor")
-        print(f'{kisaltma:20s} {str(durum):18s} {skor}  {doi}', flush=True)
-        time.sleep(0.4)
+    referanslar = [t for tur, t in KAYNAKCA if tur == "ref"]
+    girdiler = [r for r in (referansi_ayir(x) for x in referanslar) if r]
+    print(f"{len(girdiler)} referans ayrıştırıldı "
+          f"({len(referanslar) - len(girdiler)} ayrıştırılamadı)")
 
-    cikti = Path(sys.argv[1]) if len(sys.argv) > 1 else (
-        Path(__file__).resolve().parent / "kaynak_dogrulama.json")
-    cikti.write_text(json.dumps(sonuclar, ensure_ascii=False, indent=2),
-                     encoding="utf-8")
-    dogrulanan = sum(1 for s in sonuclar if s.get("durum") == "verified")
-    print(f"\n{dogrulanan}/{len(sonuclar)} kaynak 'verified' -> {cikti.name}")
+    sonuclar = []
+    for i, kayit in enumerate(girdiler, 1):
+        kayit = {"id": f"REF-{i:02d}", **kayit}
+        sonuclar.append(cozumle(kayit))
+
+    dogrulanan = [s for s in sonuclar if s["durum"] == "verified"]
+    ozet = {
+        "uretim_tarihi": time.strftime("%Y-%m-%d"),
+        "kural": "DOI yalnizca arac dogrulamasi 'verified' donerse kabul edilir",
+        "esik": ESIK,
+        "toplam": len(sonuclar),
+        "dogrulanan": len(dogrulanan),
+        "dogrulanamayan": len(sonuclar) - len(dogrulanan),
+        "sonuclar": sonuclar,
+    }
+    cikti = Path(__file__).resolve().parent / (sys.argv[1] if len(sys.argv) > 1
+                                              else "kaynak_dogrulama.json")
+    cikti.write_text(json.dumps(ozet, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"\n{'=' * 60}")
+    print(f"{len(dogrulanan)}/{len(sonuclar)} kaynak dogrulandi -> {cikti.name}")
     return 0
 
 

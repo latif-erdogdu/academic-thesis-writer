@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tez icerigi bolum 4: Turkce ozet, Ingilizce abstract, icindekiler, tesekkur."""
+"""Tez içeriği bölüm 4: Türkçe özet, İngilizce abstract, içindekiler, teşekkür."""
 
 OZET_TR = [
     ("h1", "ÖZET"),
@@ -9,9 +9,10 @@ OZET_TR = [
      "yapay zekâ destekli çıkarım, klinik uygulamalar ve etik-hukukî sınırlar. "
      "Yöntem olarak nitel kaynak temelli derleme kullanılmıştır; çalışma "
      "Crossref ve OpenAlex veri tabanlarında kaydedilmiş bir arama "
-     "protokolüne dayanır. Kaynakların bağımsız DOI doğrulaması bu "
-     "sürümde tamamlanamamış olup tespit edilen araç kusurları EK-2'de "
-     "belgelenmiştir; bu nedenle kaynakça DOI'siz bırakılmıştır."),
+     "protokolüne dayanır. Kaynakların 37'sinden 13'ü iki bağımsız kayıt "
+     "defteri arasında doğrulanmıştır; kalan 24 kaynak doğrulanamadığı için "
+     "DOI'leri kaynakçada verilmemiştir. Doğrulama sırasında tespit edilip "
+     "giderilen araç kusurları EK-2'de belgelenmiştir."),
     ("p",
      "Bulgular şu başlıklar altında özetlenmiştir. Birincisi, beyin-bilgisayar "
      "arayüzü (BCI) bir algılama aracı değil, kapalı bir geri bildirim "
@@ -50,10 +51,11 @@ ABSTRACT_EN = [
      "foundations, artificial-intelligence-assisted inference, clinical "
      "applications, and ethical-legal limits. The study is a qualitative "
      "narrative literature review grounded in a registered search protocol "
-     "across Crossref and OpenAlex. Independent DOI verification of the cited "
-     "works could not be completed in this version; the tool defects "
-     "encountered are documented in Appendix 2, and the reference list is "
-     "therefore left without DOIs."),
+     "across Crossref and OpenAlex. Of the 37 references listed, 13 were "
+     "verified against two independent registries and carry a DOI; the "
+     "remaining 24 could not be verified and are therefore given without "
+     "DOIs. Five tool defects encountered during verification are documented "
+     "in Appendix 2."),
     ("p",
      "The findings are summarised as follows. First, a brain-computer "
      "interface (BCI) is not a perception device but a closed feedback system: "
@@ -71,15 +73,21 @@ ABSTRACT_EN = [
      "privacy and concerns cognitive liberty."),
     ("p",
      "The thesis proposes a seven-principle regulatory framework: treating "
-     "personal neural data as sensitive personal data, requiring separate "
-     "consent for model training, reporting performance across subgroups, "
-     "and disclosing system limitations to users. The study does not generate "
+     "personal neural data as sensitive personal data; extending consent to "
+     "reuse and model training, with separate consent for the latter; reporting "
+     "performance across user subgroups; granting data subjects rights of "
+     "access, portability, and erasure, including for data withheld from model "
+     "training; disclosing the system's reliability limits to users; setting "
+     "structural boundaries on continuous monitoring, model updating, and "
+     "feedback loops; and holding commercial use in healthy users to a higher "
+     "evidence threshold than use in patient groups. The study does not generate "
      "quantitative empirical data and is limited to openly accessible sources."),
     ("table", [
         ["Keywords", ""],
         ["Brain-computer interface, EEG, deep learning, artificial "
          "intelligence, neuroethics, data privacy, motor imagery", ""],
     ]),
+    ("caption", "Tablo 0.2. Anahtar kelimeler."),
 ]
 
 ICINDEKILER = [

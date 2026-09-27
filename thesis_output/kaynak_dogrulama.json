@@ -1,723 +1,1443 @@
-[
-  {
-    "kisaltma": "Adrian 1934",
-    "baslik": "The physiological basis of perception",
-    "yil": 1934,
-    "dergi": "Brain",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.794",
-    "doi": "10.1007/978-3-642-46354-9_3",
-    "durum": "unverified",
-    "skor": 0.453,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.453,
-        "title": 0.794,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+{
+  "uretim_tarihi": "2026-09-27",
+  "kural": "DOI yalnizca arac dogrulamasi 'verified' donerse kabul edilir",
+  "esik": 0.6,
+  "toplam": 37,
+  "dogrulanan": 14,
+  "dogrulanamayan": 23,
+  "sonuclar": [
+    {
+      "id": "REF-01",
+      "referans": "Adrian, E. D., & Matthews, B. H. C. (1934). The physiological basis of perception. Brain, 57(4), 510-523.",
+      "authors": [
+        "Adrian, E. D.",
+        "Matthews, B. H. C."
+      ],
+      "year": 1934,
+      "title": "The physiological basis of perception",
+      "journal": "Brain",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1007/978-3-642-46354-9_3",
+        "title": "Physiological Basis of Motion Perception",
+        "authors": [
+          "Sekuler, Robert",
+          "Pantle, Allan",
+          "Levinson, Eugene"
+        ],
+        "year": 1978,
+        "journal": "Perception",
+        "type": "book-chapter",
+        "publisher": "Springer Berlin Heidelberg"
       },
-      "openalex": {
-        "overall": 0.453,
-        "title": 0.794,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Berger 1929",
-    "baslik": "Über das Elektrenkephalogramm des Menschen",
-    "yil": 1929,
-    "dergi": "Archiv für Psychiatrie und Nervenkrankheiten",
-    "crossref_not": "8 aday, en iyi baslik skoru 1.000",
-    "doi": "10.1055/s-0028-1130334",
-    "durum": "unverified",
-    "skor": 0.525,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.525,
-        "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+      "on_eleme_puani": 0.318,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-02",
+      "referans": "Altaheri, H., Muhammad, G., & Alsulaiman, M. (2021). Deep learning techniques for classification of electroencephalogram (EEG) motor imagery (MI) signals: A review. Neural Computing and Applications, 33(4), 1079-1103.",
+      "authors": [
+        "Altaheri, H.",
+        "Muhammad, G.",
+        "Alsulaiman, M."
+      ],
+      "year": 2021,
+      "title": "Deep learning techniques for classification of electroencephalogram (EEG) motor imagery (MI) signals: A review",
+      "journal": "Neural Computing and Applications",
+      "durum": "verified",
+      "doi": "10.1007/s00521-021-06352-5",
+      "cozulen_doi": "10.1007/s00521-021-06352-5",
+      "dogrulama_skoru": 1.0,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 0.925,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 0.5,
+          "journal": 1.0,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 1.0,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        }
       },
-      "openalex": {
-        "overall": 0.525,
+      "on_eleme_puani": 0.825,
+      "kayit_usti_baslik": "Deep learning techniques for classification of electroencephalogram (EEG) motor imagery (MI) signals: a review",
+      "sinif": "KATTI",
+      "en_zayif_alan": {
         "title": 1.0,
-        "author": 0.0,
+        "author": 1.0,
         "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Farwell 1986",
-    "baslik": "The on-line brain",
-    "yil": 1986,
-    "dergi": "Communications of the ACM",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.282",
-    "doi": "10.5040/9798216008927.0008",
-    "durum": "unverified",
-    "skor": 0.274,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.274,
-        "title": 0.282,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+        "journal": 1.0
       },
-      "openalex": {
-        "overall": 0.274,
-        "title": 0.282,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+      "celisen_alanlar": [],
+      "crossref_ust_veri": {
+        "baslik": "Deep learning techniques for classification of electroencephalogram (EEG) motor imagery (MI) signals: a review",
+        "dergi": "Neural Computing and Applications",
+        "yil": "2023"
       }
-    }
-  },
-  {
-    "kisaltma": "Vidal 1973",
-    "baslik": "Toward direct brain-computer communication",
-    "yil": 1973,
-    "dergi": "Annual Review of Biophysics and Bioengineering",
-    "crossref_not": "Crossref hatasi: 429 Client Error: Too Many Requests for url: https://api.crossref.org/works?query.bibliographic=Toward+direct+brain-computer+communication&rows=8&select=DOI%2Ctitle%2Ccontainer-title%2Cissued%2Cauthor&mailto=research%40example.com",
-    "doi": null,
-    "durum": "DOI_BULUNAMADI",
-    "skor": null
-  },
-  {
-    "kisaltma": "Wolpaw 2002",
-    "baslik": "Brain-computer interfaces for communication and control",
-    "yil": 2002,
-    "dergi": "Clinical Neurophysiology",
-    "crossref_not": "8 aday, en iyi baslik skoru 1.000",
-    "doi": "10.3389/conf.fnins.2010.05.00007",
-    "durum": "unverified",
-    "skor": 0.525,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.525,
-        "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+    },
+    {
+      "id": "REF-03",
+      "referans": "Bardes, A., Zaki, A. A., & Ravandi, A. (2021). VICReg: Variance-invariance-covariance regularization for self-supervised learning. In Proceedings of the 38th International Conference on Machine Learning (ICML'19) (pp. 9594-9603).",
+      "authors": [
+        "Bardes, A.",
+        "Zaki, A. A.",
+        "Ravandi, A."
+      ],
+      "year": 2021,
+      "title": "VICReg: Variance-invariance-covariance regularization for self-supervised learning",
+      "journal": "In Proceedings of the 38th International Conference on Machine Learning (ICML'19) (pp. 9594-9603)",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.32470/ccn.2022.1075-0",
+        "title": "Variance-Invariance-Covariance Regularization with Local Self-Supervised Learning Improves Hippocampus Segmentation with Fewer Labels",
+        "authors": [
+          "Kunanbayev, Kassymzhomart",
+          "Jang, Donggon",
+          "Lee, Jeongwon",
+          "Kim, Dae-Shik"
+        ],
+        "year": 2022,
+        "journal": "2022 Conference on Cognitive Computational Neuroscience",
+        "type": "proceedings-article",
+        "publisher": "Cognitive Computational Neuroscience"
       },
-      "openalex": {
-        "overall": 0.525,
+      "on_eleme_puani": 0.344,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-04",
+      "referans": "Berger, H. (1929). Über das Elektrenkephalogramm des Menschen. Archiv für Psychiatrie und Nervenkrankheiten, 87, 527-570.",
+      "authors": [
+        "Berger, H."
+      ],
+      "year": 1929,
+      "title": "Über das Elektrenkephalogramm des Menschen",
+      "journal": "Archiv für Psychiatrie und Nervenkrankheiten",
+      "durum": "verified",
+      "doi": "10.1007/bf01797193",
+      "cozulen_doi": "10.1007/bf01797193",
+      "dogrulama_skoru": 1.0,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 1.0,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 0.957,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 0.574,
+          "doi_match": true
+        }
+      },
+      "on_eleme_puani": 0.9,
+      "kayit_usti_baslik": "Über das Elektrenkephalogramm des Menschen",
+      "sinif": "KATTI",
+      "en_zayif_alan": {
         "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+        "author": 1.0,
+        "year": 1.0,
+        "journal": 0.574
+      },
+      "celisen_alanlar": [],
+      "crossref_ust_veri": {
+        "baslik": "Über das Elektrenkephalogramm des Menschen",
+        "dergi": "Archiv für Psychiatrie und Nervenkrankheiten",
+        "yil": "1929"
       }
-    }
-  },
-  {
-    "kisaltma": "Blankertz 2006",
-    "baslik": "The Berlin brain-computer interface: Machine learning-based detection of user-specific brain activities",
-    "yil": 2006,
-    "dergi": "Journal of Universal Access in the Information Society",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.870",
-    "doi": "10.7551/mitpress/7493.003.0008",
-    "durum": "unverified",
-    "skor": 0.48,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.48,
+    },
+    {
+      "id": "REF-05",
+      "referans": "Biddiss, E. A., & McIntyre, A. (2012). BCI-driven control of closed-loop brain stimulation: Attitudes and ethical considerations. Frontiers in Neuroscience, 6, 39.",
+      "authors": [
+        "Biddiss, E. A.",
+        "McIntyre, A."
+      ],
+      "year": 2012,
+      "title": "BCI-driven control of closed-loop brain stimulation: Attitudes and ethical considerations",
+      "journal": "Frontiers in Neuroscience",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1080/2326263x.2016.1207497",
+        "title": "Brain-computer interface-based control of closed-loop brain stimulation: attitudes and ethical considerations",
+        "authors": [
+          "Klein, Eran",
+          "Goering, Sara",
+          "Gagne, Josh",
+          "Shea, Conor V.",
+          "Franklin, Rachel",
+          "Zorowitz, Samuel",
+          "Dougherty, Darin D.",
+          "Widge, Alik S."
+        ],
+        "year": 2016,
+        "journal": "Brain-Computer Interfaces",
+        "type": "journal-article",
+        "publisher": "Informa UK Limited"
+      },
+      "on_eleme_puani": 0.288,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-06",
+      "referans": "Birbaumer, N. (2010). Brain-computer interface research: Honest reporting on the state of the art. Frontiers in Neuroscience, 4, 386.",
+      "authors": [
+        "Birbaumer, N."
+      ],
+      "year": 2010,
+      "title": "Brain-computer interface research: Honest reporting on the state of the art",
+      "journal": "Frontiers in Neuroscience",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1007/978-3-030-60460-8_1",
+        "title": "Brain-Computer Interface Research: A State-of-the-Art Summary 9",
+        "authors": [
+          "Guger, Christoph",
+          "Tangermann, Michael",
+          "Allison, Brendan Z."
+        ],
+        "year": 2021,
+        "journal": "SpringerBriefs in Electrical and Computer Engineering",
+        "type": "book-chapter",
+        "publisher": "Springer International Publishing"
+      },
+      "on_eleme_puani": 0.265,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-07",
+      "referans": "Blankertz, L., Müller-Putz, S. L., Dornhege, F., Curio, G., & Hau, J. (2006). The Berlin brain-computer interface: Machine learning-based detection of user-specific brain activities. Journal of Universal Access in the Information Society, 3(4), 223-230.",
+      "authors": [
+        "Blankertz, L.",
+        "Müller-Putz, S. L.",
+        "Dornhege, F.",
+        "Curio, G.",
+        "Hau, J."
+      ],
+      "year": 2006,
+      "title": "The Berlin brain-computer interface: Machine learning-based detection of user-specific brain activities",
+      "journal": "Journal of Universal Access in the Information Society",
+      "durum": "verified",
+      "doi": "10.7551/mitpress/7493.003.0008",
+      "cozulen_doi": "10.7551/mitpress/7493.003.0008",
+      "dogrulama_skoru": 0.794,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 0.794,
+          "title": 0.87,
+          "author": 0.767,
+          "year": 0.8,
+          "journal": 0.391,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 0.784,
+          "title": 0.87,
+          "author": 0.767,
+          "year": 0.8,
+          "journal": 0.297,
+          "doi_match": true
+        }
+      },
+      "on_eleme_puani": 0.694,
+      "kayit_usti_baslik": "The Berlin Brain-Computer Interface: Machine Learning-Based Detection of User Specific Brain States",
+      "sinif": "KATTI",
+      "en_zayif_alan": {
         "title": 0.87,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+        "author": 0.767,
+        "year": 0.8,
+        "journal": 0.297
       },
-      "openalex": {
-        "overall": 0.48,
-        "title": 0.87,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+      "celisen_alanlar": [],
+      "crossref_ust_veri": {
+        "baslik": "The Berlin Brain-Computer Interface: Machine Learning-Based Detection of User Specific Brain States",
+        "dergi": "Toward Brain-Computer Interfacing",
+        "yil": "2007"
       }
-    }
-  },
-  {
-    "kisaltma": "Krauledat 2013",
-    "baslik": "Towards zero-training for BCI",
-    "yil": 2013,
-    "dergi": "PLoS ONE",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.320",
-    "doi": "10.1515/bmt-2013-4439",
-    "durum": "unverified",
-    "skor": 0.287,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.287,
-        "title": 0.32,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+    },
+    {
+      "id": "REF-08",
+      "referans": "Clausen, J. (2013). Man, machine and in between: On the concept of a brain-computer interface. Science and Engineering Ethics, 19(4), 837-846.",
+      "authors": [
+        "Clausen, J."
+      ],
+      "year": 2013,
+      "title": "Man, machine and in between: On the concept of a brain-computer interface",
+      "journal": "Science and Engineering Ethics",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1159/000393828",
+        "title": "The Man-Machine Interface",
+        "authors": [
+          "Gifford, R. P."
+        ],
+        "year": null,
+        "journal": "Man and Computer",
+        "type": "book-chapter",
+        "publisher": "S. Karger AG"
       },
-      "openalex": {
-        "overall": 0.287,
-        "title": 0.32,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Birbaumer 2010",
-    "baslik": "Brain-computer interface research: Honest reporting on the state of the art",
-    "yil": 2010,
-    "dergi": "Frontiers in Neuroscience",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.648",
-    "doi": "10.1007/978-3-030-60460-8_1",
-    "durum": "unverified",
-    "skor": 0.402,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.402,
-        "title": 0.648,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+      "on_eleme_puani": 0.275,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-09",
+      "referans": "Farwell, L. A., & Donchin, E. (1986). The on-line brain. Communications of the ACM, 29(3), 28-32.",
+      "authors": [
+        "Farwell, L. A.",
+        "Donchin, E."
+      ],
+      "year": 1986,
+      "title": "The on-line brain",
+      "journal": "Communications of the ACM",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.5040/9798216008927.0008",
+        "title": "Right Brain Leadership Leader’s Line of SITE",
+        "authors": [],
+        "year": 2008,
+        "journal": "Right Brain/Left Brain Leadership",
+        "type": "other",
+        "publisher": "Praeger"
       },
-      "openalex": {
-        "overall": 0.402,
-        "title": 0.648,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Schirrmeister 2017",
-    "baslik": "Deep learning with convolutional neural networks for EEG decoding and visualization",
-    "yil": 2017,
-    "dergi": "Human Brain Mapping",
-    "crossref_not": "8 aday, en iyi baslik skoru 1.000",
-    "doi": "10.1002/hbm.23730",
-    "durum": "unverified",
-    "skor": 0.525,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.525,
+      "on_eleme_puani": 0.13,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-10",
+      "referans": "Flesher, M. E., Holdgraf, C. L., Ramsey, E. R., & Yocum, J. (2021). Ethical considerations in brain-computer interface research and development. In Brain-Computer Interfaces. Oxford University Press.",
+      "authors": [
+        "Flesher, M. E.",
+        "Holdgraf, C. L.",
+        "Ramsey, E. R.",
+        "Yocum, J."
+      ],
+      "year": 2021,
+      "title": "Ethical considerations in brain-computer interface research and development",
+      "journal": "In Brain-Computer Interfaces. Oxford University Press",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.47611/jsrhs.v14i1.8906",
+        "title": "The Ethical Considerations of Brain-Computer Interfaces",
+        "authors": [
+          "Goedhuis, Ondine"
+        ],
+        "year": 2025,
+        "journal": "Journal of Student Research",
+        "type": "journal-article",
+        "publisher": "rScroll"
+      },
+      "on_eleme_puani": 0.25,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-11",
+      "referans": "Gama, J., Žliobaitė, I., Bifet, A., Pechenizkiy, M., & Bouchachia, A. (2014). A survey on concept drift adaptation. ACM Computing Surveys, 46(4), 44.",
+      "authors": [
+        "Gama, J.",
+        "Bifet, A.",
+        "Pechenizkiy, M.",
+        "Bouchachia, A."
+      ],
+      "year": 2014,
+      "title": "A survey on concept drift adaptation",
+      "journal": "ACM Computing Surveys",
+      "durum": "verified",
+      "doi": "10.1145/2523813",
+      "cozulen_doi": "10.1145/2523813",
+      "dogrulama_skoru": 0.93,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 0.93,
+          "title": 1.0,
+          "author": 0.767,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 0.93,
+          "title": 1.0,
+          "author": 0.767,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        }
+      },
+      "on_eleme_puani": 0.83,
+      "kayit_usti_baslik": "A survey on concept drift adaptation",
+      "sinif": "KATTI",
+      "en_zayif_alan": {
         "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+        "author": 0.767,
+        "year": 1.0,
+        "journal": 1.0
       },
-      "openalex": {
-        "overall": 0.525,
+      "celisen_alanlar": [],
+      "crossref_ust_veri": {
+        "baslik": "A survey on concept drift adaptation",
+        "dergi": "ACM Computing Surveys",
+        "yil": "2014"
+      }
+    },
+    {
+      "id": "REF-12",
+      "referans": "Ganin, Y., Ustinova, E., Ajakan, H., Germain, P., Larochelle, H., Frégier, Y., & others. (2016). Domain-adversarial training of neural networks. Journal of Machine Learning Research, 17(59), 1-35.",
+      "authors": [
+        "Ganin, Y.",
+        "Ustinova, E.",
+        "Ajakan, H.",
+        "Germain, P.",
+        "Larochelle, H.",
+        "Frégier, Y."
+      ],
+      "year": 2016,
+      "title": "Domain-adversarial training of neural networks",
+      "journal": "Journal of Machine Learning Research",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1109/tnnls.2020.3025954",
+        "title": "Incremental Unsupervised Domain-Adversarial Training of Neural Networks",
+        "authors": [
+          "Gallego, Antonio-Javier",
+          "Calvo-Zaragoza, Jorge",
+          "Fisher, Robert B."
+        ],
+        "year": 2021,
+        "journal": "IEEE Transactions on Neural Networks and Learning Systems",
+        "type": "journal-article",
+        "publisher": "Institute of Electrical and Electronics Engineers (IEEE)"
+      },
+      "on_eleme_puani": 0.304,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-13",
+      "referans": "Hochberg, L. R., Serruya, M. S., Friehs, W. M., Black, D., Schenider, J., Konrad, A., & Donoghue, J. P. (2006). Neuronal ensemble control of prosthetic devices by a human with tetraplegia. Nature, 442(7101), 37-42.",
+      "authors": [
+        "Hochberg, L. R.",
+        "Serruya, M. S.",
+        "Friehs, W. M.",
+        "Black, D.",
+        "Schenider, J.",
+        "Konrad, A.",
+        "Donoghue, J. P."
+      ],
+      "year": 2006,
+      "title": "Neuronal ensemble control of prosthetic devices by a human with tetraplegia",
+      "journal": "Nature",
+      "durum": "verified",
+      "doi": "10.1038/nature04970",
+      "cozulen_doi": "10.1038/nature04970",
+      "dogrulama_skoru": 1.0,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 1.0,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 1.0,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        }
+      },
+      "on_eleme_puani": 0.9,
+      "kayit_usti_baslik": "Neuronal ensemble control of prosthetic devices by a human with tetraplegia",
+      "sinif": "KATTI",
+      "en_zayif_alan": {
         "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Kostas 2020",
-    "baslik": "A machine learning framework for EEG classification",
-    "yil": 2020,
-    "dergi": "Clinical Neurophysiology",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.597",
-    "doi": "10.26650/d3ai.1854748",
-    "durum": "unverified",
-    "skor": 0.384,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.384,
-        "title": 0.597,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+        "author": 1.0,
+        "year": 1.0,
+        "journal": 1.0
       },
-      "openalex": {
-        "overall": 0.384,
-        "title": 0.597,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+      "celisen_alanlar": [],
+      "crossref_ust_veri": {
+        "baslik": "Neuronal ensemble control of prosthetic devices by a human with tetraplegia",
+        "dergi": "Nature",
+        "yil": "2006"
       }
-    }
-  },
-  {
-    "kisaltma": "Suh 2021",
-    "baslik": "Generative pretrained transformer for EEG signal analysis",
-    "yil": 2021,
-    "dergi": "2021 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.555",
-    "doi": "10.1109/icmnwc60182.2023.10435984",
-    "durum": "unverified",
-    "skor": 0.369,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.369,
-        "title": 0.555,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+    },
+    {
+      "id": "REF-14",
+      "referans": "Hochberg, L. R., Bhad, T., Black, D., Jarrell, K., Quand, J., Simeral, J., Sox, D., Berenstein, L., Melles, M., ... Donoghue, J. P. (2012). Reach and grasp by people with tetraplegia using a neurally controlled robotic arm. Nature, 485(7398), 739-742.",
+      "authors": [
+        "Hochberg, L. R.",
+        "Bhad, T.",
+        "Black, D.",
+        "Jarrell, K.",
+        "Quand, J.",
+        "Simeral, J.",
+        "Sox, D.",
+        "Berenstein, L.",
+        "Melles, M.",
+        "Donoghue, J. P."
+      ],
+      "year": 2012,
+      "title": "Reach and grasp by people with tetraplegia using a neurally controlled robotic arm",
+      "journal": "Nature",
+      "durum": "verified",
+      "doi": "10.1038/nature11076",
+      "cozulen_doi": "10.1038/nature11076",
+      "dogrulama_skoru": 0.86,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 0.86,
+          "title": 1.0,
+          "author": 0.533,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 0.86,
+          "title": 1.0,
+          "author": 0.533,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        }
       },
-      "openalex": {
-        "overall": 0.369,
-        "title": 0.555,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+      "on_eleme_puani": 0.76,
+      "kayit_usti_baslik": "Reach and grasp by people with tetraplegia using a neurally controlled robotic arm",
+      "sinif": "SUPHELI",
+      "en_zayif_alan": {
+        "title": 1.0,
+        "author": 0.533,
+        "year": 1.0,
+        "journal": 1.0
+      },
+      "celisen_alanlar": [
+        "author"
+      ]
+    },
+    {
+      "id": "REF-15",
+      "referans": "Ienca, A., & Andorno, D. (2017). Towards new human rights in the age of neuroscience and neurotechnology. Life Sciences Society Policy, 10, 1125411W7710.",
+      "authors": [
+        "Ienca, A.",
+        "Andorno, D."
+      ],
+      "year": 2017,
+      "title": "Towards new human rights in the age of neuroscience and neurotechnology",
+      "journal": "Life Sciences Society Policy",
+      "durum": "verified",
+      "doi": "10.1186/s40504-017-0050-1",
+      "cozulen_doi": "10.1186/s40504-017-0050-1",
+      "dogrulama_skoru": 0.993,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 0.993,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 0.933,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 0.993,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 0.933,
+          "doi_match": true
+        }
+      },
+      "on_eleme_puani": 0.893,
+      "kayit_usti_baslik": "Towards new human rights in the age of neuroscience and neurotechnology",
+      "sinif": "KATTI",
+      "en_zayif_alan": {
+        "title": 1.0,
+        "author": 1.0,
+        "year": 1.0,
+        "journal": 0.933
+      },
+      "celisen_alanlar": [],
+      "crossref_ust_veri": {
+        "baslik": "Towards new human rights in the age of neuroscience and neurotechnology",
+        "dergi": "Life Sciences, Society and Policy",
+        "yil": "2017"
       }
-    }
-  },
-  {
-    "kisaltma": "Saha 2020",
-    "baslik": "Inter-subject variability in EEG-based sensorless BCI: A review",
-    "yil": 2020,
-    "dergi": "Journal of Neural Engineering",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.545",
-    "doi": "10.3389/fncom.2019.00087",
-    "durum": "unverified",
-    "skor": 0.366,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.366,
+    },
+    {
+      "id": "REF-16",
+      "referans": "Kairouz, P., McMahan, H. B., Avent, B., Bagels, P., Bellet, A., Biran, K., Bonawitz, K., ... Ramage, D. (2021). Advances and open problems in federated learning. Foundations and Trends in Machine Learning, 14(1-2), 1-210.",
+      "authors": [
+        "Kairouz, P.",
+        "McMahan, H. B.",
+        "Avent, B.",
+        "Bagels, P.",
+        "Bellet, A.",
+        "Biran, K.",
+        "Bonawitz, K.",
+        "Ramage, D."
+      ],
+      "year": 2021,
+      "title": "Advances and open problems in federated learning",
+      "journal": "Foundations and Trends in Machine Learning",
+      "durum": "verified",
+      "doi": "10.1561/2200000083",
+      "cozulen_doi": "10.1561/2200000083",
+      "dogrulama_skoru": 0.97,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 0.93,
+          "title": 1.0,
+          "author": 0.767,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 0.97,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 0.8,
+          "journal": 1.0,
+          "doi_match": true
+        }
+      },
+      "on_eleme_puani": 0.83,
+      "kayit_usti_baslik": "Advances and Open Problems in Federated Learning",
+      "sinif": "KATTI",
+      "en_zayif_alan": {
+        "title": 1.0,
+        "author": 0.767,
+        "year": 0.8,
+        "journal": 1.0
+      },
+      "celisen_alanlar": [],
+      "crossref_ust_veri": {
+        "baslik": "Advances and Open Problems in Federated Learning",
+        "dergi": "Foundations and Trends® in Machine Learning",
+        "yil": "2021"
+      }
+    },
+    {
+      "id": "REF-17",
+      "referans": "Kostas, D., & Rudzicz, F. (2020). A machine learning framework for EEG classification. Clinical Neurophysiology, 130(11), 2448-2456.",
+      "authors": [
+        "Kostas, D.",
+        "Rudzicz, F."
+      ],
+      "year": 2020,
+      "title": "A machine learning framework for EEG classification",
+      "journal": "Clinical Neurophysiology",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1002/9781119386957.ch14",
+        "title": "EEG‐Based Emotion Recognition and Classification",
+        "authors": [],
+        "year": 2021,
+        "journal": "EEG Signal Processing and Machine Learning",
+        "type": "other",
+        "publisher": "Wiley"
+      },
+      "on_eleme_puani": 0.276,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-18",
+      "referans": "Krauledat, J. M., Mullen, M. E., Cheng, R., & Groneveld, P. (2013). Towards zero-training for BCI. PLoS ONE, 8(7), e62893.",
+      "authors": [
+        "Krauledat, J. M.",
+        "Mullen, M. E.",
+        "Cheng, R.",
+        "Groneveld, P."
+      ],
+      "year": 2013,
+      "title": "Towards zero-training for BCI",
+      "journal": "PLoS ONE",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1515/bmt-2013-4439",
+        "title": "Zero Training for BCI – Reality for BCI Systems Based on Event-Related Potentials",
+        "authors": [
+          "Tangermann, Michael",
+          "Kindermans, Pieter-Jan",
+          "Schreuder, Martijn",
+          "Schrauwen, Benjamin",
+          "Müller, Klaus-Robert"
+        ],
+        "year": 2013,
+        "journal": "Biomedical Engineering / Biomedizinische Technik",
+        "type": "journal-article",
+        "publisher": "Walter de Gruyter GmbH"
+      },
+      "on_eleme_puani": 0.28,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-19",
+      "referans": "Lawhern, V. J., Solon, A. J., Waytowich, N. R., Gordon, S. M., Hung, C. P., & Lance, B. J. (2018). EEGNet: A compact convolutional neural network for EEG-based brain-computer interfaces. arXiv preprint arXiv:1611.08024.",
+      "authors": [
+        "Lawhern, V. J.",
+        "Solon, A. J.",
+        "Waytowich, N. R.",
+        "Gordon, S. M.",
+        "Hung, C. P.",
+        "Lance, B. J."
+      ],
+      "year": 2018,
+      "title": "EEGNet: A compact convolutional neural network for EEG-based brain-computer interfaces",
+      "journal": "arXiv preprint arXiv:1611.08024",
+      "durum": "verified",
+      "doi": "10.1088/1741-2552/aace8c",
+      "cozulen_doi": "10.1088/1741-2552/aace8c",
+      "dogrulama_skoru": 0.927,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 0.927,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 0.267,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 0.927,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 0.267,
+          "doi_match": true
+        }
+      },
+      "on_eleme_puani": 0.827,
+      "kayit_usti_baslik": "EEGNet: a compact convolutional neural network for EEG-based brain–computer interfaces",
+      "sinif": "KATTI",
+      "en_zayif_alan": {
+        "title": 1.0,
+        "author": 1.0,
+        "year": 1.0,
+        "journal": 0.267
+      },
+      "celisen_alanlar": [],
+      "crossref_ust_veri": {
+        "baslik": "EEGNet: a compact convolutional neural network for EEG-based brain–computer interfaces",
+        "dergi": "Journal of Neural Engineering",
+        "yil": "2018"
+      }
+    },
+    {
+      "id": "REF-20",
+      "referans": "Lebedev, A. O., Gordon, S. M., Fejdo, J., Hughes, E. M., & Pang, J. L. (2019). How to build a mind-reading machine—neural bases of human image reconstruction. PLoS ONE, 14(7), e0218128.",
+      "authors": [
+        "Lebedev, A. O.",
+        "Gordon, S. M.",
+        "Fejdo, J.",
+        "Hughes, E. M.",
+        "Pang, J. L."
+      ],
+      "year": 2019,
+      "title": "How to build a mind-reading machine—neural bases of human image reconstruction",
+      "journal": "PLoS ONE",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1093/oso/9780198801634.003.0024",
+        "title": "Mind and Machine",
+        "authors": [
+          "Parrington, John"
+        ],
+        "year": 2021,
+        "journal": "Mind Shift",
+        "type": "book-chapter",
+        "publisher": "Oxford University PressOxford"
+      },
+      "on_eleme_puani": 0.173,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-21",
+      "referans": "Lujan, M., Makin, J. E., & Birbaumer, N. (2015). Out of the lab: The real-world complexities of brain-computer interface clinical research. Nature Reviews Neuroscience, 16(2), 103-112.",
+      "authors": [
+        "Lujan, M.",
+        "Makin, J. E.",
+        "Birbaumer, N."
+      ],
+      "year": 2015,
+      "title": "Out of the lab: The real-world complexities of brain-computer interface clinical research",
+      "journal": "Nature Reviews Neuroscience",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1016/s0079-6123(16)x0005-2",
+        "title": "Brain-Computer Interfaces: Lab Experiments to Real-World Applications",
+        "authors": [],
+        "year": 2016,
+        "journal": "Progress in Brain Research",
+        "type": "book",
+        "publisher": "Elsevier"
+      },
+      "on_eleme_puani": 0.305,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-22",
+      "referans": "Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. In Advances in Neural Information Processing Systems 30 (pp. 4765-4774).",
+      "authors": [
+        "Lundberg, S. M.",
+        "Lee, S.-I."
+      ],
+      "year": 2017,
+      "title": "A unified approach to interpreting model predictions",
+      "journal": "In Advances in Neural Information Processing Systems 30 (pp. 4765-4774)",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.4324/9781315789439-7",
+        "title": "Unified Model of Knowledge Acquisition and Experimental Predictions",
+        "authors": [
+          "Schmalhofer, Franz"
+        ],
+        "year": 2019,
+        "journal": "Constructive Knowledge Acquisition",
+        "type": "book-chapter",
+        "publisher": "Routledge"
+      },
+      "on_eleme_puani": 0.253,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-23",
+      "referans": "McFarland, D. J., & Wolpaw, J. R. (2017). Brain–computer interfaces. In Handbook of Clinical Neurology (Vol. 168, pp. 349-367). Elsevier.",
+      "authors": [
+        "McFarland, D. J.",
+        "Wolpaw, J. R."
+      ],
+      "year": 2017,
+      "title": "Brain–computer interfaces",
+      "journal": "In Handbook of Clinical Neurology (Vol. 168, pp. 349-367). Elsevier",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1080/2326263x.2016.1210989",
+        "title": "Neuroethics and brain-computer interfaces (BCIs)",
+        "authors": [
+          "Klein, Eran",
+          "Nam, C.S."
+        ],
+        "year": 2016,
+        "journal": "Brain-Computer Interfaces",
+        "type": "journal-article",
+        "publisher": "Informa UK Limited"
+      },
+      "on_eleme_puani": 0.371,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-24",
+      "referans": "Mitchell, S., Wu, M., Zalevski, A., Barnes, V., Vasserman, L., Hutchinson, B., Smith, B., Samek, H., & Keutzer, K. (2019). Model cards for model reporting. In Proceedings of the Conference on Fairness, Accountability, and Transparency (FAT*'19) (pp. 2203-2212).",
+      "authors": [
+        "Mitchell, S.",
+        "Wu, M.",
+        "Zalevski, A.",
+        "Barnes, V.",
+        "Vasserman, L.",
+        "Hutchinson, B.",
+        "Smith, B.",
+        "Samek, H.",
+        "Keutzer, K."
+      ],
+      "year": 2019,
+      "title": "Model cards for model reporting",
+      "journal": "In Proceedings of the Conference on Fairness, Accountability, and Transparency (FAT*'19) (pp. 2203-2212)",
+      "durum": "verified",
+      "doi": "10.1145/3287560.3287596",
+      "cozulen_doi": "10.1145/3287560.3287596",
+      "dogrulama_skoru": 0.916,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 0.916,
+          "title": 1.0,
+          "author": 0.767,
+          "year": 1.0,
+          "journal": 0.864,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 0.857,
+          "title": 1.0,
+          "author": 0.767,
+          "year": 1.0,
+          "journal": 0.267,
+          "doi_match": true
+        }
+      },
+      "on_eleme_puani": 0.816,
+      "kayit_usti_baslik": "Model Cards for Model Reporting",
+      "sinif": "KATTI",
+      "en_zayif_alan": {
+        "title": 1.0,
+        "author": 0.767,
+        "year": 1.0,
+        "journal": 0.267
+      },
+      "celisen_alanlar": [],
+      "crossref_ust_veri": {
+        "baslik": "Model Cards for Model Reporting",
+        "dergi": "Proceedings of the Conference on Fairness, Accountability, and Transparency",
+        "yil": "2019"
+      }
+    },
+    {
+      "id": "REF-25",
+      "referans": "Niedermeyer, E., & Lopes da Silva, F. H. (2005). Electroencephalography: Basic principles, clinical applications, and related fields (3rd ed.). Oxford University Press.",
+      "authors": [
+        "Niedermeyer, E.",
+        "Lopes da Silva, F. H."
+      ],
+      "year": 2005,
+      "title": "Electroencephalography: Basic principles, clinical applications, and related fields (3rd ed.)",
+      "journal": "Oxford University Press",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1016/0013-4694(94)90172-4",
+        "title": "Electroencephalography. Basic principles, clinical applications, and related fields, 3rd edition",
+        "authors": [
+          "Pedley, Timothy A."
+        ],
+        "year": 1994,
+        "journal": "Electroencephalography and Clinical Neurophysiology",
+        "type": "journal-article",
+        "publisher": "Elsevier BV"
+      },
+      "on_eleme_puani": 0.33,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-26",
+      "referans": "Sample, M., & Racine, E. (2017). Mind the gap: Ethics and human technologies. Philosophy & Technology, 30(1), 9-28.",
+      "authors": [
+        "Sample, M.",
+        "Racine, E."
+      ],
+      "year": 2017,
+      "title": "Mind the gap: Ethics and human technologies",
+      "journal": "Philosophy & Technology",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1177/0162243914557950",
+        "title": "Mind the Gap",
+        "authors": [
+          "Smith-Doerr, Laurel",
+          "Vardi, Itai"
+        ],
+        "year": 2015,
+        "journal": "Science, Technology, &amp; Human Values",
+        "type": "journal-article",
+        "publisher": "SAGE Publications"
+      },
+      "on_eleme_puani": 0.256,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-27",
+      "referans": "Saha, S., & Baumert, M. (2020). Inter-subject variability in EEG-based sensorless BCI: A review. Journal of Neural Engineering, 17(1), 010301.",
+      "authors": [
+        "Saha, S.",
+        "Baumert, M."
+      ],
+      "year": 2020,
+      "title": "Inter-subject variability in EEG-based sensorless BCI: A review",
+      "journal": "Journal of Neural Engineering",
+      "durum": "verified",
+      "doi": "10.3389/fncom.2019.00087",
+      "cozulen_doi": "10.3389/fncom.2019.00087",
+      "dogrulama_skoru": 0.782,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 0.782,
+          "title": 0.545,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 0.412,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 0.782,
+          "title": 0.545,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 0.412,
+          "doi_match": true
+        }
+      },
+      "on_eleme_puani": 0.682,
+      "kayit_usti_baslik": "Intra- and Inter-subject Variability in EEG-Based Sensorimotor Brain Computer Interface: A Review",
+      "sinif": "SUPHELI",
+      "en_zayif_alan": {
         "title": 0.545,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+        "author": 1.0,
+        "year": 1.0,
+        "journal": 0.412
       },
-      "openalex": {
-        "overall": 0.366,
-        "title": 0.545,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Lujan 2015",
-    "baslik": "Out of the lab: The real-world complexities of brain-computer interface clinical research",
-    "yil": 2015,
-    "dergi": "Nature Reviews Neuroscience",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.518",
-    "doi": "10.31525/ct1-nct04026581",
-    "durum": "unverified",
-    "skor": 0.356,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.356,
-        "title": 0.518,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+      "celisen_alanlar": []
+    },
+    {
+      "id": "REF-28",
+      "referans": "Schirrmeister, R. T., Springenberg, J. T., Fiederer, L. D. F., Glasstetter, M., Tangermann, M., Hutter, F., & Ball, T. (2017). Deep learning with convolutional neural networks for EEG decoding and visualization. Human Brain Mapping, 38(11), 5511-5523.",
+      "authors": [
+        "Schirrmeister, R. T.",
+        "Springenberg, J. T.",
+        "Fiederer, L. D. F.",
+        "Glasstetter, M.",
+        "Tangermann, M.",
+        "Hutter, F.",
+        "Ball, T."
+      ],
+      "year": 2017,
+      "title": "Deep learning with convolutional neural networks for EEG decoding and visualization",
+      "journal": "Human Brain Mapping",
+      "durum": "verified",
+      "doi": "10.1002/hbm.23730",
+      "cozulen_doi": "10.1002/hbm.23730",
+      "dogrulama_skoru": 1.0,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 1.0,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 1.0,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        }
       },
-      "openalex": {
-        "overall": 0.356,
-        "title": 0.518,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Hochberg 2006",
-    "baslik": "Neuronal ensemble control of prosthetic devices by a human with tetraplegia",
-    "yil": 2006,
-    "dergi": "Nature",
-    "crossref_not": "Crossref hatasi: 429 Client Error: Too Many Requests for url: https://api.crossref.org/works?query.bibliographic=Neuronal+ensemble+control+of+prosthetic+devices+by+a+human+with+tetraplegia&rows=8&select=DOI%2Ctitle%2Ccontainer-title%2Cissued%2Cauthor&mailto=research%40example.com",
-    "doi": null,
-    "durum": "DOI_BULUNAMADI",
-    "skor": null
-  },
-  {
-    "kisaltma": "Hochberg 2012",
-    "baslik": "Reach and grasp by people with tetraplegia using a neurally controlled robotic arm",
-    "yil": 2012,
-    "dergi": "Nature",
-    "crossref_not": "8 aday, en iyi baslik skoru 1.000",
-    "doi": "10.1038/nature11076",
-    "durum": "unverified",
-    "skor": 0.525,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.525,
+      "on_eleme_puani": 0.9,
+      "kayit_usti_baslik": "Deep learning with convolutional neural networks for EEG decoding and visualization",
+      "sinif": "KATTI",
+      "en_zayif_alan": {
         "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+        "author": 1.0,
+        "year": 1.0,
+        "journal": 1.0
       },
-      "openalex": {
-        "overall": 0.525,
+      "celisen_alanlar": [],
+      "crossref_ust_veri": {
+        "baslik": "Deep learning with convolutional neural networks for EEG decoding and visualization",
+        "dergi": "Human Brain Mapping",
+        "yil": "2017"
+      }
+    },
+    {
+      "id": "REF-29",
+      "referans": "Shen, X., Chen, H., & Zhang, Y. (2019). End-to-end deep image reconstruction from human brain activity. PLOS Computational Biology, 15(5), e1007129.",
+      "authors": [
+        "Shen, X.",
+        "Chen, H.",
+        "Zhang, Y."
+      ],
+      "year": 2019,
+      "title": "End-to-end deep image reconstruction from human brain activity",
+      "journal": "PLOS Computational Biology",
+      "durum": "verified",
+      "doi": "10.1371/journal.pcbi.1006633",
+      "cozulen_doi": "10.1371/journal.pcbi.1006633",
+      "dogrulama_skoru": 0.822,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 0.822,
+          "title": 0.891,
+          "author": 0.533,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 0.822,
+          "title": 0.891,
+          "author": 0.533,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        }
+      },
+      "on_eleme_puani": 0.722,
+      "kayit_usti_baslik": "Deep image reconstruction from human brain activity",
+      "sinif": "SUPHELI",
+      "en_zayif_alan": {
+        "title": 0.891,
+        "author": 0.533,
+        "year": 1.0,
+        "journal": 1.0
+      },
+      "celisen_alanlar": [
+        "author"
+      ]
+    },
+    {
+      "id": "REF-30",
+      "referans": "Suh, S., Svec, W. M., & Chandrasekaran, S. (2021). Generative pretrained transformer for EEG signal analysis. In 2021 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) (pp. 1-5).",
+      "authors": [
+        "Suh, S.",
+        "Svec, W. M.",
+        "Chandrasekaran, S."
+      ],
+      "year": 2021,
+      "title": "Generative pretrained transformer for EEG signal analysis",
+      "journal": "In 2021 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) (pp. 1-5)",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1109/icmnwc60182.2023.10435984",
+        "title": "Chat Generative Pretrained Transformer (ChatGPT) for Data Analysis",
+        "authors": [
+          "M, Niranjanamurthy",
+          "V, Kantharaju",
+          "Satish, Sirisha",
+          "Umashankar, Nidhi",
+          "V, Raviram"
+        ],
+        "year": 2023,
+        "journal": "2023 3rd International Conference on Mobile Networks and Wireless Communications (ICMNWC)",
+        "type": "proceedings-article",
+        "publisher": "IEEE"
+      },
+      "on_eleme_puani": 0.328,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-31",
+      "referans": "Tangermann, M., Müller-Putz, S. L., Riedl, S., & Schwarzenberg, G. (2012). Review of the BCI competition III. Frontiers in Neuroscience, 6, 55.",
+      "authors": [
+        "Tangermann, M.",
+        "Müller-Putz, S. L.",
+        "Riedl, S.",
+        "Schwarzenberg, G."
+      ],
+      "year": 2012,
+      "title": "Review of the BCI competition III",
+      "journal": "Frontiers in Neuroscience",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.7717/peerj-cs.374/table-4",
+        "title": "Table 4: Performance comparison of data-1 (BCI Competition III, Dataset 1).",
+        "authors": [],
+        "year": null,
+        "journal": "",
+        "type": "component",
+        "publisher": "PeerJ"
+      },
+      "on_eleme_puani": 0.194,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-32",
+      "referans": "Vetter, D. S., Steinbrecher, S. P., Maurer, H., Ienca, A., & MacKay, D. J. (2019). Reading and writing the brain: Neurotechnology, neuroethics and free will. Cambridge Quarterly of Bioethics, 36(1), 30-50.",
+      "authors": [
+        "Vetter, D. S.",
+        "Steinbrecher, S. P.",
+        "Maurer, H.",
+        "Ienca, A.",
+        "MacKay, D. J."
+      ],
+      "year": 2019,
+      "title": "Reading and writing the brain: Neurotechnology, neuroethics and free will",
+      "journal": "Cambridge Quarterly of Bioethics",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1093/oso/9780198786832.003.0031",
+        "title": "Neuroethics and neurotechnology: Instrumentality and human rights",
+        "authors": [
+          "Fins, Joseph J."
+        ],
+        "year": 2017,
+        "journal": "Oxford Scholarship Online",
+        "type": "edited-book",
+        "publisher": "Oxford University Press"
+      },
+      "on_eleme_puani": 0.209,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-33",
+      "referans": "Vidal, J. J. (1973). Toward direct brain-computer communication. Annual Review of Biophysics and Bioengineering, 2(1), 157-180.",
+      "authors": [
+        "Vidal, J. J."
+      ],
+      "year": 1973,
+      "title": "Toward direct brain-computer communication",
+      "journal": "Annual Review of Biophysics and Bioengineering",
+      "durum": "verified",
+      "doi": "10.1146/annurev.bb.02.060173.001105",
+      "cozulen_doi": "10.1146/annurev.bb.02.060173.001105",
+      "dogrulama_skoru": 1.0,
+      "dogrulama_kaynaklari": [
+        "crossref",
+        "openalex"
+      ],
+      "dogrulama_detayi": {
+        "crossref": {
+          "overall": 1.0,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        },
+        "openalex": {
+          "overall": 1.0,
+          "title": 1.0,
+          "author": 1.0,
+          "year": 1.0,
+          "journal": 1.0,
+          "doi_match": true
+        }
+      },
+      "on_eleme_puani": 0.9,
+      "kayit_usti_baslik": "Toward Direct Brain-Computer Communication",
+      "sinif": "KATTI",
+      "en_zayif_alan": {
         "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Young 2017",
-    "baslik": "Potential for brain-computer interface application in the treatment of stroke",
-    "yil": 2017,
-    "dergi": "Physical Therapy",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.737",
-    "doi": "10.54254/2753-8818/2025.ld25936",
-    "durum": "unverified",
-    "skor": 0.433,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.433,
-        "title": 0.737,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+        "author": 1.0,
+        "year": 1.0,
+        "journal": 1.0
       },
-      "openalex": {
-        "overall": 0.433,
-        "title": 0.737,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+      "celisen_alanlar": [],
+      "crossref_ust_veri": {
+        "baslik": "Toward Direct Brain-Computer Communication",
+        "dergi": "Annual Review of Biophysics and Bioengineering",
+        "yil": "1973"
       }
-    }
-  },
-  {
-    "kisaltma": "Biddiss 2012",
-    "baslik": "BCI-driven control of closed-loop brain stimulation: Attitudes and ethical considerations",
-    "yil": 2012,
-    "dergi": "Frontiers in Neuroscience",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.685",
-    "doi": "10.1080/2326263x.2016.1207497",
-    "durum": "unverified",
-    "skor": 0.415,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.415,
-        "title": 0.685,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+    },
+    {
+      "id": "REF-34",
+      "referans": "Wajnryb, P. (2019). The ethical dimensions of brain-computer interfaces. Journal of Medical Ethics, 45(2), 135-139.",
+      "authors": [
+        "Wajnryb, P."
+      ],
+      "year": 2019,
+      "title": "The ethical dimensions of brain-computer interfaces",
+      "journal": "Journal of Medical Ethics",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1080/2326263x.2019.1655837",
+        "title": "Increasing brain-computer interface media depictions: pressing ethical concerns",
+        "authors": [
+          "Gilbert, F",
+          "Pham, C",
+          "Viaña, Jnm",
+          "Gillam, W."
+        ],
+        "year": 2019,
+        "journal": "Brain-Computer Interfaces",
+        "type": "journal-article",
+        "publisher": "Informa UK Limited"
       },
-      "openalex": {
-        "overall": 0.415,
-        "title": 0.685,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Tangermann 2012",
-    "baslik": "Review of the BCI competition III",
-    "yil": 2012,
-    "dergi": "Frontiers in Neuroscience",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.341",
-    "doi": "10.1109/tbme.2008.915728",
-    "durum": "unverified",
-    "skor": 0.294,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.294,
-        "title": 0.341,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+      "on_eleme_puani": 0.312,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-35",
+      "referans": "Wolpaw, J. R., Birbaumer, N., McFarland, D. J., Pfurtscheller, G., Vaughan, T. M., & Nijholt, A. (2002). Brain-computer interfaces for communication and control. Clinical Neurophysiology, 113(2), 169-183.",
+      "authors": [
+        "Wolpaw, J. R.",
+        "Birbaumer, N.",
+        "McFarland, D. J.",
+        "Pfurtscheller, G.",
+        "Vaughan, T. M.",
+        "Nijholt, A."
+      ],
+      "year": 2002,
+      "title": "Brain-computer interfaces for communication and control",
+      "journal": "Clinical Neurophysiology",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.3389/conf.fnins.2010.05.00007",
+        "title": "Brain Computer Interfaces for communication and control",
+        "authors": [
+          "Fabio, Babiloni"
+        ],
+        "year": 1900,
+        "journal": "Frontiers in Neuroscience",
+        "type": "journal-article",
+        "publisher": "Frontiers Media SA"
       },
-      "openalex": {
-        "overall": 0.294,
-        "title": 0.341,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "McFarland 2017",
-    "baslik": "Brain-computer interfaces",
-    "yil": 2017,
-    "dergi": "Handbook of Clinical Neurology",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.670",
-    "doi": "10.1080/2326263x.2015.1100514",
-    "durum": "unverified",
-    "skor": 0.409,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "openalex": {
-        "overall": 0.409,
-        "title": 0.67,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Wolpaw 2016",
-    "baslik": "Brain-computer interface technology: A review of the first international meeting",
-    "yil": 2016,
-    "dergi": "Journal of Neural Engineering",
-    "crossref_not": "8 aday, en iyi baslik skoru 1.000",
-    "doi": "10.1109/tre.2000.847807",
-    "durum": "unverified",
-    "skor": 0.525,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "openalex": {
-        "overall": 0.525,
-        "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Clausen 2013",
-    "baslik": "Man, machine and in between: On the concept of a brain-computer interface",
-    "yil": 2013,
-    "dergi": "Science and Engineering Ethics",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.640",
-    "doi": "10.1049/tpe.1970.0024",
-    "durum": "unverified",
-    "skor": 0.399,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.399,
-        "title": 0.64,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+      "on_eleme_puani": 0.391,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-36",
+      "referans": "Wolpaw, J. R., McFarland, D. J., Newey, C., Vaughan, T. M., & Lin, Z. (2016). Brain-computer interface technology: A review of the first international meeting. Journal of Neural Engineering, 13(1), 010201.",
+      "authors": [
+        "Wolpaw, J. R.",
+        "McFarland, D. J.",
+        "Newey, C.",
+        "Vaughan, T. M.",
+        "Lin, Z."
+      ],
+      "year": 2016,
+      "title": "Brain-computer interface technology: A review of the first international meeting",
+      "journal": "Journal of Neural Engineering",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.1109/tre.2000.847807",
+        "title": "Brain-computer interface technology: a review of the first international meeting",
+        "authors": [
+          "Wolpaw, J.R.",
+          "Birbaumer, N.",
+          "Heetderks, W.J.",
+          "McFarland, D.J.",
+          "Peckham, P.H.",
+          "Schalk, G.",
+          "Donchin, E.",
+          "Quatrano, L.A.",
+          "Robinson, C.J.",
+          "Vaughan, T.M."
+        ],
+        "year": 2000,
+        "journal": "IEEE Transactions on Rehabilitation Engineering",
+        "type": "journal-article",
+        "publisher": "Institute of Electrical and Electronics Engineers (IEEE)"
       },
-      "openalex": {
-        "overall": 0.399,
-        "title": 0.64,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Ienca 2017",
-    "baslik": "Towards new human rights in the age of neuroscience and neurotechnology",
-    "yil": 2017,
-    "dergi": "Life Sciences Society Policy",
-    "crossref_not": "8 aday, en iyi baslik skoru 1.000",
-    "doi": "10.1186/s40504-017-0050-1",
-    "durum": "unverified",
-    "skor": 0.525,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.525,
-        "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
+      "on_eleme_puani": 0.565,
+      "sinif": "RED"
+    },
+    {
+      "id": "REF-37",
+      "referans": "Young, R. M., Sollfrank, H., Dragan, D., Greenberg, I. M., & Shadmehr, S. (2017). Potential for brain–computer interface application in the treatment of stroke. Physical Therapy, 97(1), S27-S40.",
+      "authors": [
+        "Young, R. M.",
+        "Sollfrank, H.",
+        "Dragan, D.",
+        "Greenberg, I. M.",
+        "Shadmehr, S."
+      ],
+      "year": 2017,
+      "title": "Potential for brain–computer interface application in the treatment of stroke",
+      "journal": "Physical Therapy",
+      "durum": "on_eleme_basarisiz",
+      "doi": null,
+      "en_iyi_aday": {
+        "doi": "10.3724/sp.j.1329.2016.05059",
+        "title": "Application of Brain-computer Interface System in Stroke Patients",
+        "authors": [
+          "LU, Rongrong",
+          "WU, Yi"
+        ],
+        "year": 2016,
+        "journal": "Rehabilitation Medicine",
+        "type": "journal-article",
+        "publisher": "China Science Publishing & Media Ltd."
       },
-      "openalex": {
-        "overall": 0.525,
-        "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
+      "on_eleme_puani": 0.351,
+      "sinif": "RED"
     }
-  },
-  {
-    "kisaltma": "Vetter 2019",
-    "baslik": "Reading and writing the brain: Neurotechnology, neuroethics and free will",
-    "yil": 2019,
-    "dergi": "Cambridge Quarterly of Bioethics",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.354",
-    "doi": "10.1007/978-3-031-26801-4_1",
-    "durum": "unverified",
-    "skor": 0.299,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "openalex": {
-        "overall": 0.299,
-        "title": 0.354,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Wajnryb 2019",
-    "baslik": "The ethical dimensions of brain-computer interfaces",
-    "yil": 2019,
-    "dergi": "Journal of Medical Ethics",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.730",
-    "doi": "10.1002/9781119332428.ch15",
-    "durum": "unverified",
-    "skor": 0.43,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.43,
-        "title": 0.73,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      },
-      "openalex": {
-        "overall": 0.43,
-        "title": 0.73,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Lebedev 2019",
-    "baslik": "How to build a mind-reading machine: neural bases of human image reconstruction",
-    "yil": 2019,
-    "dergi": "PLoS ONE",
-    "crossref_not": "8 aday, en iyi baslik skoru 0.358",
-    "doi": "10.1126/science.340.6128.21",
-    "durum": "unverified",
-    "skor": 0.3,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.3,
-        "title": 0.358,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      },
-      "openalex": {
-        "overall": 0.3,
-        "title": 0.358,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Shen 2019",
-    "baslik": "End-to-end deep image reconstruction from human brain activity",
-    "yil": 2019,
-    "dergi": "PLOS Computational Biology",
-    "crossref_not": "8 aday, en iyi baslik skoru 1.000",
-    "doi": "10.1101/272518",
-    "durum": "unverified",
-    "skor": 0.525,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.525,
-        "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      },
-      "openalex": {
-        "overall": 0.525,
-        "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
-    }
-  },
-  {
-    "kisaltma": "Altaheri 2021",
-    "baslik": "Deep learning techniques for classification of electroencephalogram (EEG) motor imagery (MI) signals: A review",
-    "yil": 2021,
-    "dergi": "Neural Computing and Applications",
-    "crossref_not": "8 aday, en iyi baslik skoru 1.000",
-    "doi": "10.1007/s00521-021-06352-5",
-    "durum": "unverified",
-    "skor": 0.525,
-    "kaynaklar": [],
-    "puan_dagilimi": {
-      "crossref": {
-        "overall": 0.525,
-        "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      },
-      "openalex": {
-        "overall": 0.525,
-        "title": 1.0,
-        "author": 0.0,
-        "year": 0.5,
-        "journal": 0.0,
-        "doi_match": true
-      }
+  ],
+  "kabul": {
+    "kural": "verified + baslik>=0.85 + yil>=0.50 + yazar>=0.60 + dergi>=0.25",
+    "katti_doi": [
+      "10.1007/s00521-021-06352-5",
+      "10.1007/bf01797193",
+      "10.7551/mitpress/7493.003.0008",
+      "10.1145/2523813",
+      "10.1038/nature04970",
+      "10.1186/s40504-017-0050-1",
+      "10.1561/2200000083",
+      "10.1088/1741-2552/aace8c",
+      "10.1145/3287560.3287596",
+      "10.1002/hbm.23730",
+      "10.1146/annurev.bb.02.060173.001105"
+    ],
+    "ozet": {
+      "katti": 11,
+      "supheli": 3,
+      "red": 23
     }
   }
-]
+}

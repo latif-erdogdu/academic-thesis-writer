@@ -25,6 +25,7 @@ import content_a as A  # noqa: E402
 import content_b as B  # noqa: E402
 import content_c as C  # noqa: E402
 import content_d as D  # noqa: E402
+import verified_dois  # noqa: E402
 
 # ------------------------------------------------------------- SABI SABIT
 FONT_BODY = "Times New Roman"
@@ -177,7 +178,7 @@ def _baslik_ekle(doc: Document, metin: str, seviye: int) -> None:
             return
         doc.add_heading(metin, level=1)
     else:
-        doc.add_heading(metin, level=2)
+        doc.add_heading(metin, level=min(seviye, 3))
 
 
 def _ogeleri_isle(doc: Document, ogeler: list) -> None:
@@ -191,6 +192,8 @@ def _ogeleri_isle(doc: Document, ogeler: list) -> None:
             _baslik_ekle(doc, ogeler_i[1], 1)
         elif tur == "h2":
             _baslik_ekle(doc, ogeler_i[1], 2)
+        elif tur == "h3":
+            _baslik_ekle(doc, ogeler_i[1], 3)
         elif tur in ("baslik", "altbaslik", "tur"):
             p = doc.add_paragraph()
             p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -212,12 +215,18 @@ def _ogeleri_isle(doc: Document, ogeler: list) -> None:
             run.font.size = SIZE_SMALL
             run.font.italic = True
         elif tur == "ref":
+            metin = ogeler_i[1]
+            # Yalnizca arac dogrulamasindan gecen kaynaklara DOI eklenir.
+            # Dogrulanmayan kaynaklarint DOI'si bilincli olarak yazilmaz.
+            doi = verified_dois.doi_al(metin)
+            if doi and "doi.org" not in metin:
+                metin = f"{metin.rstrip()} https://doi.org/{doi}"
             p = doc.add_paragraph()
             p.paragraph_format.left_indent = Cm(1.25)
             p.paragraph_format.first_line_indent = Cm(-1.25)
             p.paragraph_format.line_spacing = 1.0
             p.paragraph_format.space_after = Pt(8)
-            run = p.add_run(ogeler_i[1])
+            run = p.add_run(metin)
             run.font.size = Pt(11)
         elif tur == "toc":
             for baslik, sayfa in ogeler_i[1]:
