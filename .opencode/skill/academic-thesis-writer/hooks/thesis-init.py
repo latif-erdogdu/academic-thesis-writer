@@ -1,26 +1,51 @@
 #!/usr/bin/env python3
-"""Hook: Yeni tez başlatıldığında thesis_state.json şablonu kopyala."""
+"""Hook: Yeni tez başlatıldığında thesis_state.json oluştur.
+
+DURUMUN TEK KAYNAĞI: boş durum, tools.atw.state.empty_state() ile üretilir.
+Daha önce bu betik `schemas/thesis_state.json` dosyasını kopyalıyordu; ancak o
+dosya bir JSON *şema* (draft 2020-12), bir durum örneği değil. Kopyalanan dosya
+`$schema`, `$id`, `properties`, `required` anahtarlarıyla bir şema olarak
+kalıyordu: doğrulanabilir bir tez durumu değil, 7 onay kapısının hiçbiri yok.
+"""
 from __future__ import annotations
 
-import shutil
+import json
+import sys
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[3]  # .opencode/skill/.../hooks -> repo root
+sys.path.insert(0, str(REPO_ROOT))
 
-def main():
-    repo_root = Path(__file__).resolve().parents[3]  # .opencode/skill/.../hooks -> repo root
-    thesis_state = repo_root / "thesis_state.json"
-    template = repo_root / "schemas" / "thesis_state.json"
+from tools.atw.state import empty_state  # noqa: E402
 
-    if thesis_state.exists():
-        print(f"⏭  thesis_state.json zaten mevcut: {thesis_state}")
+
+def main(state_path: Path | str | None = None) -> int:
+    """thesis_state.json dosyasini olusturur; varsa dokunmaz.
+
+    state_path verilmezse depo kokundeki thesis_state.json kullanilir.
+    Test edilebilirlik icin parametre alir; hook olarak cagrilirken verilmez.
+    """
+    hedef = Path(state_path) if state_path is not None else REPO_ROOT / "thesis_state.json"
+
+    if hedef.exists():
+        print(f"⏭  thesis_state.json zaten mevcut: {hedef}")
         return 0
 
-    if not template.exists():
-        print(f"❌ Şablon bulunamadı: {template}")
+    durum = empty_state("THESIS-2026-001", "Yeni Tez")
+    durum.pop("updated_at", None)  # henüz yazılmadı; zaman damgası anlamsız
+
+    try:
+        hedef.parent.mkdir(parents=True, exist_ok=True)
+        hedef.write_text(
+            json.dumps(durum, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+    except OSError as hata:
+        print(f"❌ thesis_state.json yazılamadı: {hedef} — {hata}")
         return 1
 
-    shutil.copy2(template, thesis_state)
-    print(f"✅ thesis_state.json oluşturuldu: {thesis_state}")
+    onay_kapilari = sorted(durum["human_approvals"])
+    print(f"✅ thesis_state.json oluşturuldu: {hedef}")
+    print(f"   {len(onay_kapilari)} onay kapısı kapalı başladı: {', '.join(onay_kapilari)}")
     return 0
 
 

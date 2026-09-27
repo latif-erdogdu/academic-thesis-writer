@@ -73,7 +73,10 @@ agents:
     description: "Uydurma kaynak, kanıtsız iddia, retraksiyon, kopuk atıf — 5 aşamalı denetim"
     file: "agents/integrity-auditor.md"
 
-# Araç tanımları (her biri tools/ altında)
+# Araç tanımları.
+# DİKKAT: file yolları DEPO KÖKÜNE göre çözümlenir, skill dizinine göre değil
+# (skill dizininde tools/ klasörü yoktur). Araç kodu CLI ile paylaşılır ve
+# depo kökünde durur.
 tools:
   - name: source_search
     description: "Crossref, OpenAlex, Semantic Scholar, PubMed, Google Scholar üzerinden kaynak keşfi"
@@ -97,28 +100,28 @@ hooks:
   - name: thesis-init
     event: "session_start"
     condition: "not exists(thesis_state.json)"
-    command: "cp schemas/thesis_state.json thesis_state.json"
+    command: "python .opencode/skill/academic-thesis-writer/hooks/thesis-init.py"
     description: "Yeni tez için thesis_state.json şablonu oluştur"
 
   # Her yazım oturumunda Evidence Gate kontrolü
   - name: evidence-gate
     event: "pre_write"
     condition: "matches(path, '.*chapter.*\\.md$')"
-    command: "python -m tools.atw.cli check-evidence --file {file}"
+    command: "python .opencode/skill/academic-thesis-writer/hooks/evidence_gate.py {file}"
     description: "Bölüm yazımından önce kanıt kapısı kontrolü"
 
   # Atıf ekleme sonrası Writing Gate kontrolü
   - name: writing-gate
     event: "post_write"
     condition: "matches(path, '.*citation.*\\.json$')"
-    command: "python -m tools.atw.cli check-citations --file {file}"
+    command: "python .opencode/skill/academic-thesis-writer/hooks/writing_gate.py {file}"
     description: "Atıf ekleme sonrası format/bütünlük kontrolü"
 
   # Otomatik kaynak doğrulama (source.json değiştiğinde)
   - name: auto-verify-source
     event: "post_write"
     condition: "matches(path, '.*source\\.json$')"
-    command: "python -m tools.atw.cli verify-source --file {file}"
+    command: "python .opencode/skill/academic-thesis-writer/hooks/auto_verify.py {file}"
     description: "Yeni kaynak eklendiğinde otomatik DOI/bibliyografik doğrulama"
 
 # Komutlar (OpenCode slash command olarak kayıtlı)
@@ -126,12 +129,12 @@ commands:
   - name: thesis:new
     description: "Yeni tez başlat — thesis_state.json oluştur, araştırma sorusu tanımla"
     usage: "/thesis:new <tez_id> <başlık>"
-    handler: "python -m tools.atw.cli new-thesis --id {args[0]} --title {args[1]}"
+    handler: "python -m tools.atw.cli new {args[0]} {args[1]}"
 
   - name: thesis:search
     description: "Araştırma sorusu için sistematik kaynak arama başlat"
     usage: "/thesis:search <RQ-ID> [--databases crossref,openalex,pubmed]"
-    handler: "python -m tools.atw.cli search --rq {args[0]} --databases {options.databases}"
+    handler: "python -m tools.atw.cli search {args[0]} --databases {options.databases}"
 
   - name: thesis:verify
     description: "Kaynak adaylarını DOI/bibliyografik doğrula (en az 2 kaynak)"
@@ -141,12 +144,12 @@ commands:
   - name: thesis:extract
     description: "Doğrulanmış PDF'lerden kanıt çıkar (claim-evidence linking)"
     usage: "/thesis:extract <SRC-ID> --claim <CLM-ID>"
-    handler: "python -m tools.atw.cli extract --source {args[0]} --claim {options.claim}"
+    handler: "python -m tools.atw.cli extract {args[0]} --claim {options.claim} --pdf {options.pdf}"
 
   - name: thesis:write
     description: "Doğrulanmış girdilerle bölüm yaz (Evidence Gate → Writing Gate)"
     usage: "/thesis:write <CHAPTER-ID> --rq <RQ-ID>"
-    handler: "python -m tools.atw.cli write --chapter {args[0]} --rq {options.rq}"
+    handler: "python -m tools.atw.cli write {args[0]} --rq {options.rq}"
 
   - name: thesis:audit
     description: "Tam tez denetimi (5 aşama: yapısal, atıf, metodoloji, tutarlılık, yazım)"
@@ -202,6 +205,7 @@ test_requirements:
   - pytest>=8.0.0
   - pytest-cov>=5.0.0
   - jsonschema>=4.22.0
+  - pyyaml>=6.0.0
 
 # Python sürümü
 python_version: ">=3.9"

@@ -223,7 +223,15 @@ def cmd_export(args) -> int:
     return 0
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
+    """CLI argüman ayrıştırıcısını kurar.
+
+    Ayrı bir fabrika olarak tutulur çünkü sözleşme testleri (bkz.
+    tests/contract_tests/test_skill_yaml_contracts.py) skill.yaml'da ilan
+    edilen her alt komutun gercekten kayitli oldugunu bu parser'a bakarak
+    dogrulamak zorunda. main() icinde gizli kalsaydi, ilan edilen bir
+    komutun yok olmasi hicbir testte yakalanamazdi.
+    """
     parser = argparse.ArgumentParser(prog="thesis", description="Akademik tez yazım CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
@@ -275,7 +283,11 @@ def main() -> int:
     p_export.add_argument("--format", choices=["md", "docx", "pdf"], default="md")
     p_export.set_defaults(func=cmd_export)
 
-    args = parser.parse_args()
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
     return args.func(args)
 
 
