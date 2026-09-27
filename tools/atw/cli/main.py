@@ -455,6 +455,104 @@ def cmd_write(args, durum) -> int:
 
 
 @_durum_gerekir
+def cmd_approve(args, durum) -> int:
+    """Onay kapısını aç, kapat ya da akışı göster.
+
+    Neden bu komut ayrı bir birim
+    --------------------------
+    `tools.atw/approval.py` `onay_ver`/`onay_geri_al` uygular ve 7 kapının
+    adını bilir. Ama `human_approvals` alanını DOLDURAN hiçbir komut yoktu:
+    `empty_state()` hepsini `False` üretiyor, `cmd_status` yalnızca
+    gösteriyordu. Kapı hiçbir yoldan açılamadığı için `cmd_write` ve
+    `cmd_export` hiçbir koşulda ilerleyemiyordu.
+
+    İki denetim ayrıdır
+    -------------------
+      1. SIRA   — `onay_ver` önceki kapıların onaylı olmasını ister
+         (atlanmış akış).
+      2. HAZIRLIK — `approval.hazirlik_engelleri` o aşamanın verisinin
+         gerçekten üretilmiş olmasını ister. Kapı boş bir belgeye
+         verilmez.
+
+    `hazirlik_engelleri` `--revoke` yolunda BİLEREK sorulmaz: onay geri
+    almak veri üretmekten kolaydır, yoksa geri alınamayan kapılar birikir.
+    """
+    from tools.atw.approval import (
+        OnayHatasi,
+        acik_olanlar,
+        hazirlik_engelleri,
+        onay_geri_al,
+        onay_ver,
+        ozet,
+    )
+
+    if getattr(args, "list", False):
+        print("🔐 Onay kapıları (PRISMA):")
+        for kapi, acik_mi, engeller in ozet(durum):
+            isaret = "✅" if acik_mi else "⬜"
+            print(f"   {isaret} {kapi}")
+            # TÜM engeller, ilki değil. `thesis:status` özet (tek engel)
+            # gösterir; `--list` niyeti teşhistir: "neden açılmıyor?"
+            # sorusunun cevabı ikinci engelde olabilir.
+            for engel in engeller:
+                print(f"       • {engel}")
+        print(f"   → {len(acik_olanlar(durum))}/{len(durum.get('human_approvals') or {})} aşama onaylı")
+        return CIKIS_OK
+
+    kapi = getattr(args, "kapi", None)
+    if not kapi:
+        print("❌ Kapı adı gerekli. Örnek: approve methodology")
+        print(f"   Akışı görmek için: approve --list")
+        return CIKIS_SORUN
+
+    if kapi not in durum.get("human_approvals", {}):
+        # `onay_ver` de ValueError fırlatır; ama burada liste kullanıcıya
+        # gösterilir, yazım hatası sessizce geçmez.
+        gecerli = ", ".join(durum.get("human_approvals") or {})
+        print(f"❌ Bilinmeyen onay kapısı: {kapi}")
+        print(f"   Geçerli kapılar: {gecerli}")
+        return CIKIS_SORUN
+
+    if getattr(args, "revoke", False):
+        kapanan = [
+            k
+            for k, acik_mi, _ in ozet(durum)
+            if acik_mi and _kapi_sirasi(k) > _kapi_sirasi(kapi)
+        ]
+        onay_geri_al(durum, kapi)
+        save_state(durum)
+        print(f"🔒 '{kapi}' kapısı geri alındı.")
+        if kapanan:
+            print(f"   Bağımlı olduğu kapılar da kapatıldı: {', '.join(kapanan)}")
+        return CIKIS_OK
+
+    engeller = hazirlik_engelleri(durum, kapi)
+    if engeller:
+        print(f"🚧 '{kapi}' kapısı açılamaz — hazırlık eksik:")
+        for engel in engeller:
+            print(f"   • {engel}")
+        print("   Önce bu veriyi üret, sonra kapıyı aç.")
+        return CIKIS_SORUN
+
+    try:
+        onay_ver(durum, kapi)
+    except OnayHatasi as hata:
+        print(f"🚧 {hata}")
+        return CIKIS_SORUN
+
+    save_state(durum)
+    print(f"✅ '{kapi}' kapısı açıldı.")
+    return CIKIS_OK
+
+
+def _kapi_sirasi(kapi: str) -> int:
+    """Kapının akış sırasındaki yeri. Bilinmeyen ad sona konur."""
+    from tools.atw.state import APPROVAL_GATES
+
+    return APPROVAL_GATES.index(kapi) if kapi in APPROVAL_GATES else len(APPROVAL_GATES)
+
+
+@_durum_gerekir
 def cmd_audit(args, durum) -> int:
     """Tez denetimi.
 
@@ -646,6 +744,26 @@ def build_parser() -> argparse.ArgumentParser:
         help="Brifingi JSON olarak bas (ajanın okuması için)",
     )
     p_write.set_defaults(func=cmd_write)
+
+    # thesis:approve
+    p_approve = sub.add_parser("approve", help="Onay kapısı aç/kapat")
+    p_approve.add_argument(
+        "kapi",
+        nargs="?",
+        help="Kapı adı (research_question, search_strategy, source_set, "
+             "research_gap, methodology, findings, final_thesis)",
+    )
+    p_approve.add_argument(
+        "--revoke",
+        action="store_true",
+        help="Kapıyı kapat; ona dayanan kapılar da kapanır",
+    )
+    p_approve.add_argument(
+        "--list",
+        action="store_true",
+        help="Akışı ve engelleri göster; durumu değiştirmez",
+    )
+    p_approve.set_defaults(func=cmd_approve)
 
     # thesis:audit
     p_audit = sub.add_parser("audit", help="Tez denetimi")

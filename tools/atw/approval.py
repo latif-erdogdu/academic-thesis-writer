@@ -179,6 +179,25 @@ def kapali_olanlar(durum: dict[str, Any]) -> list[str]:
     return [k for k in APPROVAL_GATES if not kapi_acik_mi(durum, k)]
 
 
+def hazirlik_engelleri(durum: dict[str, Any], kapi: str) -> list[str]:
+    """Yalnizca VERI HAZIRLIĞI denetimi; onay sorulmaz.
+
+    `kontrol_yaz` iki şeyi birleştirir: "insan onayı var mı" ve "onayı
+    uygulayacak veri var mı". Onay vermekten once yalniz ikincisi
+    sorulmalıdır — birincisi zaten verilmeyecek, o sorulacaksa kapı
+    hicbir zaman acilmaz.
+
+    Hazirlik denetimi tasimayan kapilarda liste bos doner. `methodology`
+    ve `final_thesis` boyledir: `methodology` ciktilari `chapters` bu
+    kapinin arkasinda yazildigi icin, `final_thesis` ise butunluk
+    denetimini `cmd_export` yolunda zaten yapiyor.
+    """
+    if kapi not in GATE_ASAMALARI:
+        raise ValueError(f"bilinmeyen onay kapisi: {kapi}")
+    denetim = GATE_HAZIRLIK.get(kapi)
+    return list(denetim(durum)) if denetim is not None else []
+
+
 def kontrol_yaz(durum: dict[str, Any], kapi: str) -> list[str]:
     """Yazim/ihracat icin kapinin acik ve verinin hazir olup olmadigini doner.
 

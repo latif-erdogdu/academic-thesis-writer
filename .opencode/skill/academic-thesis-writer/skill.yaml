@@ -161,6 +161,11 @@ commands:
     usage: "/thesis:write <CHAPTER-ID> --rq <RQ-ID> [--file <BÖLÜM.json>]"
     handler: "python -m tools.atw.cli write {args[0]} --rq {options.rq} --file {options.file}"
 
+  - name: thesis:approve
+    description: "PRISMA onay kapısı aç/kapat. Hazırlığı olmayan kapı açılmaz; kapıyı açan başka komut yoktur — bu olmadan yazım ve ihracat hiçbir koşulda ilerlemez"
+    usage: "/thesis:approve <KAPI> [--revoke] | /thesis:approve --list"
+    handler: "python -m tools.atw.cli approve {args[0]} --revoke {options.revoke} --list {options.list}"
+
   - name: thesis:audit
     description: "Tam tez denetimi (5 aşama: yapısal, atıf, metodoloji, tutarlılık, yazım)"
     usage: "/thesis:audit [--type citation|methodology|consistency|integrity|all]"
