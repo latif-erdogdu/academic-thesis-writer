@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import sys
 from datetime import datetime, timezone
@@ -14,13 +15,88 @@ from tools.atw.state import empty_state
 
 REPO_ROOT = Path(__file__).resolve().parents[3]  # tools/atw/cli -> repo root
 
+# Cikis kodlari. Ucuncu ayri bir kod, cunku "calistim ve sorun buldum" ile
+# "hic baslayamadim" ayni sey degildir.
+CIKIS_OK = 0
+CIKIS_SORUN = 1
+CIKIS_BASLAMADI = 2
+
+
+class TezYok(FileNotFoundError):
+    """thesis_state.json hic olusmamis: tez baslatilmamis.
+
+    ``FileNotFoundError`` alt sinifi: bu hatayi yakalamak isteyen JENERIK
+    kodun (ornegin bir arac zincirinin hata ayiklayicisi) degismemesi icin.
+    """
+
+
+class BozukTezDurumu(ValueError):
+    """thesis_state.json var ama okunamıyor: JSON bozuk ya da duzey degil.
+
+    ``TezYok`` ile AYRI tutulur cunku kullaniciya verilecek tavsiye tam
+    tersidir:
+
+      TezYok           -> "thesis:new calistir"        (veri kaybi yok)
+      BozukTezDurumu   -> "dosyayi ONAR, thesis:new CALISTIRMA" (veri silinir)
+
+    Ikisi birlestirilseydi, bozuk dosyasi olan bir kullaniciya verisini
+    silen bir komut onerilirdi.
+    """
+
 
 def load_state() -> dict:
-    """thesis_state.json yükle."""
+    """thesis_state.json yukler.
+
+    Dosya yoksa ``TezYok``, okunamıyorsa ``BozukTezDurumu`` firlatir.
+
+    Daha once dosya yoksa ``empty_state(...)`` donduruyordu. Bu, "tez var
+    ama 0 kaynak" ile "tez dosyasi hic yok" durumlarini ayirt edilemez
+    hale getiriyordu; `cmd_audit` bu hayali durumu diske de yaziyordu.
+    """
     state_file = REPO_ROOT / "thesis_state.json"
     if not state_file.exists():
-        return empty_state("THESIS-2026-001", "Yeni Tez")
-    return json.loads(state_file.read_text(encoding="utf-8"))
+        raise TezYok(
+            f"thesis_state.json bulunamadı: {state_file}. "
+            f'Henüz tez başlatılmamış. Başlatmak için: thesis:new <ID> "<Başlık>"'
+        )
+    try:
+        durum = json.loads(state_file.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as hata:
+        raise BozukTezDurumu(
+            f"thesis_state.json bozuk ({state_file}): {hata}. "
+            f"Dosyadaki veri kurtarılabilir — silmeyin."
+        ) from hata
+    if not isinstance(durum, dict):
+        raise BozukTezDurumu(
+            f"thesis_state.json beklenen biçimde değil ({state_file}): "
+            f"nesne yerine {type(durum).__name__} bulundu."
+        )
+    return durum
+
+
+def _durum_gerekir(fn):
+    """Durum dosyası gerektiren komutları sarmalar.
+
+    Sarmalayıcı, gövde çalışmadan ÖNCE durumu yükler. Böylece hem
+    dosya yoksa erken çıkılır (gereksiz iş yapılmaz, `cmd_search`'in
+    pahalı içe aktarmaları dahil), hem de dosya yokken hiçbir komut
+    `thesis_state.json` YAZAMAZ.
+    """
+
+    @functools.wraps(fn)
+    def sarmalayici(args):
+        try:
+            durum = load_state()
+        except TezYok as hata:
+            print(f"❌ {hata}")
+            return CIKIS_BASLAMADI
+        except BozukTezDurumu as hata:
+            print(f"❌ {hata}")
+            print("   ⚠️  Dosyayı elle onarın veya yedekten geri yükleyin.")
+            return CIKIS_BASLAMADI
+        return fn(args, durum)
+
+    return sarmalayici
 
 
 def save_state(state: dict) -> None:
@@ -40,11 +116,10 @@ def cmd_new(args) -> int:
     return 0
 
 
-def cmd_search(args) -> int:
+@_durum_gerekir
+def cmd_search(args, durum) -> int:
     """Kaynak arama başlat."""
     from tools.source_search import run_systematic_search, PICO, parse_pico
-
-    state = load_state()
 
     # RQ'den PICO oluştur veya state'den al
     pico = None
@@ -53,7 +128,7 @@ def cmd_search(args) -> int:
     elif args.rq:
         # State'den RQ'yi bul ve PICO'ya çevir
         rq_id = args.rq
-        for rq in state.get("research_questions", []):
+        for rq in durum.get("research_questions", []):
             if rq.get("id") == rq_id:
                 # RQ metninden PICO parse et
                 pico = parse_pico(rq.get("text", ""))
@@ -78,35 +153,34 @@ def cmd_search(args) -> int:
     print(f"   Dahil edilen: {len(result.included_source_ids)}")
 
     # State'e kaydet
-    state["search_runs"].append(result.to_dict())
+    durum["search_runs"].append(result.to_dict())
     for db_result in result.database_results:
         for record in db_result.records:
             if "id" in record and record["id"]:
-                state["sources"].append(record)
-    save_state(state)
+                durum["sources"].append(record)
+    save_state(durum)
 
     return 0
 
 
-def cmd_verify(args) -> int:
+@_durum_gerekir
+def cmd_verify(args, durum) -> int:
     """Kaynak doğrulama."""
-    state = load_state()
     print("🔍 Kaynak doğrulama başlatılıyor...")
     print("⚠️  Henüz implemente edilmedi (tools/source_verify)")
     return 0
 
 
-def cmd_extract(args) -> int:
+@_durum_gerekir
+def cmd_extract(args, durum) -> int:
     """PDF'ten kanıt çıkar."""
     from tools.pdf_extract import find_evidence_for_claim
 
-    state = load_state()
-
-    if _kayit_bul(state.get("sources", []), args.source) is None:
+    if _kayit_bul(durum.get("sources", []), args.source) is None:
         print(f"❌ Kaynak bulunamadı: {args.source}")
         return 1
 
-    iddia = _kayit_bul(state.get("claims_registry", []), args.claim)
+    iddia = _kayit_bul(durum.get("claims_registry", []), args.claim)
     if iddia is None:
         print(f"❌ İddia bulunamadı: {args.claim}")
         return 1
@@ -129,15 +203,15 @@ def cmd_extract(args) -> int:
         print(f"⚠️  {args.claim} iddiasını destekleyen kanıt bulunamadı ({pdf_yolu.name})")
         return 1
 
-    sira = _sonraki_kanit_sirasi(state.get("evidence_registry", []))
+    sira = _sonraki_kanit_sirasi(durum.get("evidence_registry", []))
     for bulgu in bulgular:
         kayit = _kanit_kaydi(bulgu, args.source, args.claim, sira)
-        state["evidence_registry"].append(kayit)
+        durum["evidence_registry"].append(kayit)
         konum = f"s.{kayit['location']['page']}" if kayit["location"]["page"] else "s.?"
         print(f"   {kayit['id']}  {konum}  ({kayit['strength']})")
         sira += 1
 
-    save_state(state)
+    save_state(durum)
     print(f"✅ {len(bulgular)} kanıt eklendi → evidence_registry")
     print(f"   Kanıtlar 'verified: false' olarak işaretlendi — elle doğrulama gerekli.")
     return 0
@@ -204,22 +278,23 @@ def _kapi_raporu(durum: dict, kapi: str) -> bool:
     return False
 
 
-def cmd_write(args) -> int:
+@_durum_gerekir
+def cmd_write(args, durum) -> int:
     """Bölüm yaz.
 
     Önce 'methodology' kapısı sorulur: yazım yöntem onayından geçmeden
     yapılırsa, sonradan yöntem değişince tüm bölümler geçersiz olur.
     """
-    durum = load_state()
     if not _kapi_raporu(durum, "methodology"):
-        return 1
+        return CIKIS_SORUN
 
     print(f"✍️  Bölüm yazımı: Chapter={args.chapter}, RQ={args.rq}")
     print("⚠️  Henüz implemente edilmedi (agent/writer)")
     return 0
 
 
-def cmd_audit(args) -> int:
+@_durum_gerekir
+def cmd_audit(args, durum) -> int:
     """Tez denetimi.
 
     Denetim kayitlari audit_registry'ye yazilir. En az bir 'critical' bulgusu
@@ -229,13 +304,12 @@ def cmd_audit(args) -> int:
     Sahte bir denetim yazmak, denetimi olmayan bir alani denetlenmis
     gostermekten kotudur.
     """
-    durum = load_state()
     tur = args.type or "all"
 
     if tur in UYARILACAK_TURLER:
         print(f"⚠️  '{tur}' denetimi bu CLI'de YOK — skill.yaml'daki "
               f"{tur}-auditor ajanının işidir. Atlandı.")
-        return 0
+        return CIKIS_OK
 
     kayitlar = tum_denetimler(durum, [tur])
     denetim_kimligi_ata(durum, kayitlar)
@@ -261,13 +335,14 @@ def cmd_audit(args) -> int:
     print(f"\n✅ {len(kayitlar)} denetim kaydı → audit_registry")
     if kritik_toplam:
         print(f"🔴 {kritik_toplam} kritik bulgu — tez onaya hazır değil.")
-        return 1
-    return 0
+        return CIKIS_SORUN
+    return CIKIS_OK
 
 
-def cmd_status(args) -> int:
+@_durum_gerekir
+def cmd_status(args, durum) -> int:
     """Tez durumu özeti."""
-    state = load_state()
+    state = durum
     print(f"📋 Tez: {state.get('thesis_id')} — {state.get('title')}")
     print(f"   Araştırma Soruları: {len(state.get('research_questions', []))}")
     print(f"   Hipotezler: {len(state.get('hypotheses', []))}")
@@ -297,16 +372,16 @@ def cmd_status(args) -> int:
     return 0
 
 
-def cmd_export(args) -> int:
+@_durum_gerekir
+def cmd_export(args, durum) -> int:
     """Tez dışa aktar.
 
     Dışa aktarma, tezin İNSAN ONAYLI bitmiş halini paylaşmak demektir.
     Bu yüzden en katı kapı sorulur: 'final_thesis' — bütünlük, kanıtsız
     iddia ve retraksiyon denetimi de burada devreye girer.
     """
-    durum = load_state()
     if not _kapi_raporu(durum, "final_thesis"):
-        return 1
+        return CIKIS_SORUN
 
     fmt = args.format or "md"
     print(f"📤 Dışa aktarma: format={fmt}")
