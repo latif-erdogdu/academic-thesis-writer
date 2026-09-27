@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://academic-thesis-writer/schemas/chapter.json",
+  "title": "Chapter",
+  "type": "object",
+  "required": ["id", "title", "level", "order", "content_refs", "status", "created_at", "updated_at"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^CH-\\d{2}$" },
+    "title": { "type": "string", "minLength": 1 },
+    "level": { "type": "integer", "enum": [1, 2, 3] },
+    "order": { "type": "integer", "minimum": 1 },
+    "content_refs": { "type": "array", "items": { "type": "string" }, "minItems": 0 },
+    "status": { "type": "string", "enum": ["draft", "reviewed", "approved", "final"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}
