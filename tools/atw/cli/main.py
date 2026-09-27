@@ -108,7 +108,30 @@ def save_state(state: dict) -> None:
 
 
 def cmd_new(args) -> int:
-    """Yeni tez başlat."""
+    """Yeni tez başlat.
+
+    Var olan bir tez durumu ÜZERİNE YAZILMAZ. `save_state` düz `write_text`
+    ile yazdığı için, eski davranışta `thesis:new` mevcut tezi sessizce
+    eziyordu: kaynaklar, iddialar, atıflar ve onay kayıtları kalıcı olarak
+    gidiyordu. `thesis_state.json` izlenen bir dosya olmadığından geri alma
+    yolu da yoktu.
+
+    Ezmeyi kast eden kullanıcı `--force` verir; o zaman kayıp bilinçlidir.
+    Bozuk dosya da ezilmez: bozukluğu gidermek veriyi silmekten iyidir.
+    """
+    state_file = REPO_ROOT / "thesis_state.json"
+    if state_file.exists() and not getattr(args, "force", False):
+        print(f"❌ Mevcut tez durumu bulundu, üzerine yazılmadı: {state_file}")
+        try:
+            mevcut = json.loads(state_file.read_text(encoding="utf-8"))
+            print(f"   Mevcut tez: {mevcut.get('thesis_id', '?')} — {mevcut.get('title', '?')}")
+            print(f"   Kaynak sayısı: {len(mevcut.get('sources', []))}")
+        except json.JSONDecodeError:
+            print("   Dosya bozuk görünüyor. Bozukluğu gidermek için dosyayı elle incele;")
+            print("   thesis:new çalıştırmak veriyi siler.")
+        print("   Yine de sıfırlamak istiyorsan: --force")
+        return 1
+
     state = empty_state(args.id, args.title)
     save_state(state)
     print(f"✅ Yeni tez oluşturuldu: {args.id} — {args.title}")
@@ -405,6 +428,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_new = sub.add_parser("new", help="Yeni tez başlat")
     p_new.add_argument("id", help="Tez ID (örn: THESIS-2026-001)")
     p_new.add_argument("title", help="Tez başlığı")
+    p_new.add_argument(
+        "--force",
+        action="store_true",
+        help="Var olan tez durumunun ÜZERİNE yaz (veri kaybı yapar)",
+    )
     p_new.set_defaults(func=cmd_new)
 
     # thesis:search
