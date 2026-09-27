@@ -1,6 +1,24 @@
 # Python 3.9+ gerekir. 3.11 ve altinda PEP 701 f-string'leri (ic ice
 # tirnak) ayristirilamaz; bu paket 3.12'ye bagimli olmaktan cikarildi.
+
+# --- dogrulama / test ---
 jsonschema>=4.22.0
 pytest>=8.0.0
 pytest-cov>=5.0.0
 pyyaml>=6.0.0
+
+# --- disa aktarma (thesis:export) ---
+# python-docx: Word (.docx) uretimi. Turkce karakter sorunu yok; OOXML
+#   Unicode'tur.
+# fpdf2: PDF uretimi. Saf Python'dir, sistem bagimliligi (pango/cairo)
+#   yoktur.
+#   DIKKAT: fpdf2'nin gomulu 'latin-1' core fontu cp1252 kodlamasini
+#   kullanir ve Turkcenin harflerinden yalnizca c/o/u (ve buyukleri)
+#   kapsar; g, i, s ve buyukleri (cekimli/dotsuz i) cp1252'de YOKTUR.
+#   Bu yuzden tools/atw/export.py sistemdeki bir Unicode TTF yazi tipini
+#   kaydeder; bulunamazsa sessizce '?' basmak yerine acik hata verir.
+#   Alternatif (LibreOffice/pandoc) dis sistem gerektirdiginden tek
+#   dosyalik kurulumda calismaz.
+python-docx>=1.1.0
+fpdf2>=2.7.0
+

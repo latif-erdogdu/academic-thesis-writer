@@ -437,19 +437,52 @@ def cmd_status(args, durum) -> int:
 
 @_durum_gerekir
 def cmd_export(args, durum) -> int:
-    """Tez dışa aktar.
+    """Tezi md / docx / pdf olarak dışa aktarır.
 
     Dışa aktarma, tezin İNSAN ONAYLI bitmiş halini paylaşmak demektir.
     Bu yüzden en katı kapı sorulur: 'final_thesis' — bütünlük, kanıtsız
     iddia ve retraksiyon denetimi de burada devreye girer.
+
+    Çıktı dizini varsayılan olarak veri kökünün kendisidir; `--out` ile
+    başka bir dizin verilebilir. Dizin yoksa oluşturulur.
     """
+    from tools.atw.export import (
+        DESTEKLENEN_BICIMLER,
+        ExportHatasi,
+        disa_aktar,
+    )
+
     if not _kapi_raporu(durum, "final_thesis"):
         return CIKIS_SORUN
 
     fmt = args.format or "md"
-    print(f"📤 Dışa aktarma: format={fmt}")
-    print("⚠️  Henüz implemente edilmedi")
-    return 0
+    if fmt not in DESTEKLENEN_BICIMLER:
+        # argparse `choices` zaten eler; bu yol programatik cagri icin.
+        print(
+            "✗ Desteklenmeyen biçim: {0}. Desteklenen: {1}".format(
+                fmt, ", ".join(sorted(DESTEKLENEN_BICIMLER))
+            )
+        )
+        return CIKIS_SORUN
+
+    dizin = _cozumle(args.out) if getattr(args, "out", None) else veri_koku()
+
+    try:
+        dizin.mkdir(parents=True, exist_ok=True)
+        yol, notlar = disa_aktar(durum, fmt, dizin)
+    except ExportHatasi as hata:
+        # Disa aktarim hicbir dosya yazmadan once reddedilir; yarim dosya
+        # birakilmaz.
+        print("✗ {0}".format(hata))
+        return CIKIS_SORUN
+    except OSError as hata:
+        print("✗ Dosya yazılamadı: {0}".format(hata))
+        return CIKIS_SORUN
+
+    print("📤 Dışa aktarıldı: {0}".format(yol))
+    for not_ in notlar:
+        print("   - {0}".format(not_))
+    return CIKIS_OK
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -517,6 +550,10 @@ def build_parser() -> argparse.ArgumentParser:
     # thesis:export
     p_export = sub.add_parser("export", help="Tez dışa aktar")
     p_export.add_argument("--format", choices=["md", "docx", "pdf"], default="md")
+    p_export.add_argument(
+        "--out",
+        help="Çıktı dizini (varsayılan: tez durumunun bulunduğu dizin)",
+    )
     p_export.set_defaults(func=cmd_export)
 
     return parser

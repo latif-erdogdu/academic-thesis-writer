@@ -172,9 +172,9 @@ commands:
     handler: "python -m tools.atw.cli status"
 
   - name: thesis:export
-    description: "Final tez metnini birleştir (bölümler + kaynakça + ekler)"
-    usage: "/thesis:export [--format md|docx|pdf]"
-    handler: "python -m tools.atw.cli export --format {options.format}"
+    description: "Final tez metnini birleştir (bölümler + kaynakça). Ekler dışa aktarılmaz: durum şemasında appendices alanı yok"
+    usage: "/thesis:export [--format md|docx|pdf] [--out DİZİN]"
+    handler: "python -m tools.atw.cli export --format {options.format} --out {options.out}"
 
 # Referans dosyaları. Yolları kökteki references/ klasöründedir
 # (SKILL.md:339-345 de aynı yolları yazar). Bu blok test_skill_yaml_contracts.py

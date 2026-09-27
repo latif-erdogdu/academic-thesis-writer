@@ -118,9 +118,49 @@ def test_export_kayitli_ama_butunluk_bozukken_engellenir(depo, capsys):
     assert "kanıtsız" in capsys.readouterr().out
 
 
-def test_export_her_şey_hazirken_stuba_gecer(depo):
-    _onayli(depo)
+def test_export_her_şey_hazirken_dosya_doker(depo, capsys):
+    """Onayli VE metni olan tez gercekten disa aktarilir.
+
+    DRIFT NOTU: bu test once `test_export_her_şey_hazirken_stuba_gecer`
+    idi ve yalnizca `== 0` dogruluyordu. Komut o haliyle "Henuz implemente
+    edilmedi" yazip 0 donuyor, YANI hicbir sey uretmeden basari
+    bildiriyordu. Sarti bilerek degistirildi: simdi cikti dosyasi dogrulanir.
+    """
+    durum = _onayli(depo)
+    durum["chapters"] = [{
+        "id": "CH-001",
+        "number": 1,
+        "title": "B",
+        "paragraphs": [{
+            "id": "P-001",
+            "type": "introduction",
+            "text": "Deneme giris metni.",
+            "chapter": "CH-001",
+        }],
+    }]
+    _yaz(depo, durum)
+
     assert cli.cmd_export(Namespace(format="md")) == 0
+
+    cikti = capsys.readouterr().out
+    assert "Dışa aktarıldı" in cikti
+    dokumler = list(depo.glob("tez_*.md"))
+    assert len(dokumler) == 1, f"tek dosya beklenirken: {dokumler}"
+    assert "Deneme giris metni." in dokumler[0].read_text(encoding="utf-8")
+
+
+def test_export_metni_olmayan_tez_reddedilir(depo, capsys):
+    """Onayli ama govdesi bos tez BASARILI sayilmaz.
+
+    Onceki surumde bu durum 0 donuyordu ve cikti uretilmiyordu. Kullanicı
+    "basarili" ciktisini gorup tesin yayinlanmis sanardi; ortaya cikan
+    dosya yalnizca basliklardan ibaret olurdu.
+    """
+    _onayli(depo)  # bolum var, ama paragraf metni YOK
+
+    assert cli.cmd_export(Namespace(format="md")) == 1
+    assert "paragraf" in capsys.readouterr().out
+    assert list(depo.glob("tez_*")) == [], "reddedilen export dosya birakti"
 
 
 # --- cmd_status ------------------------------------------------------------
