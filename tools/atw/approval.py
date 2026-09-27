@@ -39,12 +39,21 @@ from tools.atw.state import APPROVAL_GATES
 # Her kapi icin: kapinin hangi registry'leri bos olmamali, ve o asamada
 # calisacak ek hazirlik denetimi. Sirayla bagimlidir: bir onceki kapinin
 # onayi olmadan sonrakinin denetimi calistirilmaz.
+#
+# DIKKAT: buradaki registry tuple'lari HIC OKUNMAZ (yalnizca uyelik ve
+# sira denetimi yapilir). Canli hazirlik denetimi `GATE_HAZIRLIK`te.
+# Buradaki degerler belge amaclidir; degistirdiginizde `GATE_HAZIRLIK`i de
+# degistirin.
 GATE_ASAMALARI: dict[str, tuple[str, ...]] = {
     "research_question": ("research_questions",),
     "search_strategy": ("search_runs",),
     "source_set": ("sources",),
     "research_gap": ("gap_registry",),
-    "methodology": ("chapters",),
+    # `chapters` BILINCLI OLARAK bos. Bu kapinin on kosulu, kapinin
+    # yazdirdigi seyin kendisiydi: `chapters`'i dolduran tek yol
+    # `cmd_write`, o da `methodology` kapisinin arkasinda. Boylece ilk
+    # bolum yazilamiyordu. Ayrinti: `test_methodology_kapisi_bos_bolumle_yazilabilir`.
+    "methodology": (),
     "findings": ("findings_registry",),
     # final_thesis'te ayrica butunluk ve kanit denetimi calisir; tez
     # kanitsiz iddia veya kopuk referans iceriyorsa onaylanabilir degildir.
@@ -139,12 +148,23 @@ def _registry_dolu(durum: dict[str, Any], alan: str) -> list[str]:
 # Kapi basina hazirlik denetimleri. Her kapi kendi asamasinin registry'sini
 # doldurmus olmalidir; aksi halde kapı, içliği boş bir belgeye verilmiş
 # onay olur.
+#
+# KURAL (dolaylı ama zorunlu): bir kapinin hazirlik denetimi YALNIZCA
+# kendisinden ONCE uretilen veriye bakabilir. Denetimi, kapinin arkasindaki
+# komutun URETTIGI registry'ye bakmak dairesel bagimlilik kurar ve o
+# komutun hic calismamasina yol acar. `methodology` kapisi tam olarak
+# boyle bir durumdu: `chapters` bu kapinin arkasindaki `cmd_write` ile
+# doluyor, `cmd_write` da bu kapinin on kosulu olarak `chapters`'i
+# ariyordu. `methodology` bilincli olarak listede YOK; hazirlik denetimi
+# tasimayan tek kapi `final_thesis`tir (butunluk + kanit).
+#
+# `test_baska_kapilarin_hazirligi_korunur` bu kurali digerleri icin
+# sabitler.
 GATE_HAZIRLIK: dict[str, Callable[[dict[str, Any]], list[str]]] = {
     "research_question": lambda d: _registry_dolu(d, "research_questions"),
     "search_strategy": lambda d: _registry_dolu(d, "search_runs"),
     "source_set": lambda d: _registry_dolu(d, "sources"),
     "research_gap": lambda d: _registry_dolu(d, "gap_registry"),
-    "methodology": lambda d: _registry_dolu(d, "chapters"),
     "findings": lambda d: _registry_dolu(d, "findings_registry"),
     "final_thesis": _bulgulari_tara,
 }

@@ -112,6 +112,76 @@ def test_kapali_kapi_yazima_hazir_degil():
     assert not yazim_hazir_mi(durum, "methodology")
 
 
+# --- methodology kilitlenmesi ----------------------------------------------
+
+def _yazima_hazir_ama_bolumsuz() -> dict:
+    """Önceki kapılar açık, `methodology` onaylı, ama HİÇ bölüm yok."""
+    durum = _acik_durum(ch=[])
+    assert durum["chapters"] == []
+    return durum
+
+
+def test_methodology_kapisi_bos_bolumle_yazilabilir():
+    """`chapters` doluluğu yazımın ÖNCÜLÜ olamaz: bölümü yazım üretir.
+
+    Bulgu
+    -----
+    `GATE_HAZIRLIK["methodology"]`, `chapters` boşken yazıma izin
+    vermiyordu (`_registry_dolu(d, "chapters")`). Ama tez durumundaki
+    `chapters` kaydını dolduran TEK kod yolu `bolumu_kaydet`, o da tam
+    bu kapının arkasında: `tools/atw/cli/main.py` `cmd_write` başında
+    `if not _kapi_raporu(durum, "methodology"): return CIKIS_SORUN`.
+
+    Yani kapının ön koşulu, kapının açtığı işin çıktısıydı. Sonuç:
+    **ilk bölüm hiç yazılamazdı.** `thesis:write` yalnızca
+    "henüz implemente edilmedi" değil, mimari olarak kullanılamazdı.
+
+    Aynı desenin tersi `state["methodology"]` alanında da geçerliydi:
+    `empty_state()` onu `{}` ile kuruyor ve hiçbir komut doldurmuyor.
+    Yani hazırlık şartını oraya taşımak da kilitlenmeyi kaldırmazdı;
+    çözüm, mantıksal olarak imkânsız şartı KALDIRMAKTIR.
+    """
+    durum = _yazima_hazir_ama_bolumsuz()
+    assert yazim_hazir_mi(durum, "methodology")
+    assert kontrol_yaz(durum, "methodology") == []
+
+
+def test_methodology_kapisi_hazirligi_bos_oldugu_icin_engel_uretmez():
+    """`GATE_HAZIRLIK` bu kapıda artık ek şart aramamalı.
+
+    Kapının ADI hazırlık denetimi taşıması, insan onayını ve akış
+    sırasını ortadan kaldırmaz; sadece "onaylanabilir mi?" sorusunu
+    yanıtlar.
+    """
+    from tools.atw.approval import GATE_HAZIRLIK
+
+    assert "methodology" not in GATE_HAZIRLIK
+
+
+def test_methodology_kapisi_insan_onayini_zorunlu_tutar():
+    """Hazırlık şartı kalkınca kapı BOŞALMAMALI: onay yine de şart."""
+    durum = _acik_durum()
+    durum["human_approvals"]["methodology"] = False
+    assert not yazim_hazir_mi(durum, "methodology")
+    assert any("onay" in e for e in kontrol_yaz(durum, "methodology"))
+
+
+def test_baska_kapilarin_hazirligi_korunur():
+    """Bu düzeltme TEK kapıya sınırlı olmamalı.
+
+    `research_question`, `search_strategy`, `source_set`, `research_gap`
+    ve `findings` kapılarının hazırlık denetimleri durmalı: onların
+    registry'lerini bir ÖNCEKİ komut üretiyor, döngü yok.
+    """
+    from tools.atw.approval import GATE_HAZIRLIK
+
+    for kapi in ("research_question", "search_strategy", "source_set",
+                 "research_gap", "findings"):
+        assert kapi in GATE_HAZIRLIK, f"{kapi} hazırlık denetimini kaybetti"
+        durum = _kapili_durum()
+        assert kontrol_yaz(durum, kapi), f"{kapi} boş durumda engel üretmiyor"
+
+
 def test_tam_durum_yazima_hazir():
     durum = _acik_durum()
     assert yazim_hazir_mi(durum, "methodology")
