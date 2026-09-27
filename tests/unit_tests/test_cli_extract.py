@@ -72,7 +72,7 @@ def kurulum(tmp_path, monkeypatch):
     """CLI'nin gecici dizini ve sahte bir PDF kullanan ortam hazirlar."""
     pdf = tmp_path / "kaynak.pdf"
     pdf.write_bytes(b"%PDF-1.4 kurgusal")
-    monkeypatch.setattr(cli, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(cli, "VERI_KOKU", tmp_path)
     return tmp_path, pdf
 
 

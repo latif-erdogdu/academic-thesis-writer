@@ -13,7 +13,49 @@ from tools.atw.audit import UYARILACAK_TURLER, denetim_kimligi_ata, tum_denetiml
 from tools.atw.state import empty_state
 
 
+# Skill'in kurulu oldugu depo (semalar, sablonlar).
+#
+# DIKKAT: burasi VERI yolu olarak KULLANILMAZ. Semalar
+# tools.atw.state.SCHEMA_DIR'den gelir. Bu sabit bir surecler boyunca
+# tes durumu dosyasi icin kullaniliyordu ve CLI hangi dizinden
+# calistirilirsa calistirilsin hep skill'in deposuna yaziyordu; yani
+# `thesis:new` skill'in git deposunu kirlettiriyordu. Bkz. veri_koku().
 REPO_ROOT = Path(__file__).resolve().parents[3]  # tools/atw/cli -> repo root
+
+DURUM_DOSYASI = "thesis_state.json"
+
+# Veri koku. None ise calisma dizini (varsayilan). Testler bu degere
+# yazmak sureci gecici bir dizine baglar; ileride `--state` ile de
+# ayrilabilir.
+VERI_KOKU: Path | None = None
+
+
+def veri_koku() -> Path:
+    """Tez verisinin bulunacagi dizin: varsayilan calisma dizini.
+
+    Neden calisma dizini: CLI, kullanicinin tez dizininde calisir. Skill'in
+    kuruldugu depo kullanilsaydi iki sonuc olusurdu:
+
+      1. `thesis:new` skill'in git deposunu kirletirdi.
+      2. `thesis_state.json` izlenen bir dosya OLMADIGI icin (dogru bir
+         karar: kullanici verisi kaynak deposuna karismamali) skill'i
+         guncellediginizde tez verisi hicbir yerden kurtarilamazdi.
+
+    Yol modul yuklenirken degil, CAGRIDA cozulur; boylece `os.chdir`
+    calisma aninda yapildiginda da dogru yere bakilir.
+    """
+    return VERI_KOKU if VERI_KOKU is not None else Path.cwd()
+
+
+def durum_yolu() -> Path:
+    """thesis_state.json dosyasinin tam yolu."""
+    return veri_koku() / DURUM_DOSYASI
+
+
+def _cozumle(yol: str) -> Path:
+    """Nispi yollari veri kokune gore cozumler; mutlak yollara dokunmaz."""
+    aday = Path(yol)
+    return aday if aday.is_absolute() else veri_koku() / aday
 
 # Cikis kodlari. Ucuncu ayri bir kod, cunku "calistim ve sorun buldum" ile
 # "hic baslayamadim" ayni sey degildir.
@@ -53,7 +95,7 @@ def load_state() -> dict:
     ama 0 kaynak" ile "tez dosyasi hic yok" durumlarini ayirt edilemez
     hale getiriyordu; `cmd_audit` bu hayali durumu diske de yaziyordu.
     """
-    state_file = REPO_ROOT / "thesis_state.json"
+    state_file = durum_yolu()
     if not state_file.exists():
         raise TezYok(
             f"thesis_state.json bulunamadı: {state_file}. "
@@ -101,7 +143,7 @@ def _durum_gerekir(fn):
 
 def save_state(state: dict) -> None:
     """thesis_state.json kaydet."""
-    state_file = REPO_ROOT / "thesis_state.json"
+    state_file = durum_yolu()
     state["updated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     state["version"] = state.get("version", 0) + 1
     state_file.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -119,7 +161,7 @@ def cmd_new(args) -> int:
     Ezmeyi kast eden kullanıcı `--force` verir; o zaman kayıp bilinçlidir.
     Bozuk dosya da ezilmez: bozukluğu gidermek veriyi silmekten iyidir.
     """
-    state_file = REPO_ROOT / "thesis_state.json"
+    state_file = durum_yolu()
     if state_file.exists() and not getattr(args, "force", False):
         print(f"❌ Mevcut tez durumu bulundu, üzerine yazılmadı: {state_file}")
         try:
@@ -212,9 +254,7 @@ def cmd_extract(args, durum) -> int:
     if not getattr(args, "pdf", None):
         print("❌ --pdf zorunlu (source.json'da yerel dosya yolu alanı yok)")
         return 1
-    pdf_yolu = Path(args.pdf)
-    if not pdf_yolu.is_absolute():
-        pdf_yolu = REPO_ROOT / pdf_yolu
+    pdf_yolu = _cozumle(args.pdf)
     if not pdf_yolu.exists():
         print(f"❌ PDF bulunamadı: {pdf_yolu}")
         return 1

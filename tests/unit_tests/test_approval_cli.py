@@ -25,7 +25,7 @@ def depo(tmp_path, monkeypatch):
         (tmp_path / "schemas" / sema.name).write_text(
             sema.read_text(encoding="utf-8"), encoding="utf-8"
         )
-    monkeypatch.setattr(cli, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(cli, "VERI_KOKU", tmp_path)
     return tmp_path
 
 

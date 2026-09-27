@@ -21,13 +21,13 @@ DOLAR = chr(36)
 
 @pytest.fixture
 def depo(tmp_path, monkeypatch):
-    """CLI'nin depo kokunu gecici bir dizine baglar."""
+    """CLI'nin veri kokunu gecici bir dizine baglar (semalari dahtan kopyalar)."""
     (tmp_path / "schemas").mkdir()
     for sema in Path("schemas").glob("*.json"):
         (tmp_path / "schemas" / sema.name).write_text(
             sema.read_text(encoding="utf-8"), encoding="utf-8"
         )
-    monkeypatch.setattr(cli, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(cli, "VERI_KOKU", tmp_path)
     return tmp_path
 
 

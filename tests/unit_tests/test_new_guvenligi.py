@@ -36,7 +36,7 @@ from tools.atw.cli import main as cli
 @pytest.fixture
 def depo(tmp_path, monkeypatch):
     """CLI'nin durum dosyasini gecici bir dizine baglar."""
-    monkeypatch.setattr(cli, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(cli, "VERI_KOKU", tmp_path)
     return tmp_path
 
 
