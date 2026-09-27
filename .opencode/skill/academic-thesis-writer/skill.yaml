@@ -157,9 +157,9 @@ commands:
     handler: "python -m tools.atw.cli extract {args[0]} --claim {options.claim} --pdf {options.pdf}"
 
   - name: thesis:write
-    description: "Doğrulanmış girdilerle bölüm yaz (Evidence Gate → Writing Gate)"
-    usage: "/thesis:write <CHAPTER-ID> --rq <RQ-ID>"
-    handler: "python -m tools.atw.cli write {args[0]} --rq {options.rq}"
+    description: "Bölüm yazımı: doğrulanmış girdi brifingi üretir; ajanın yazdığı bölüm dosyasını denetleyip kaydeder. --file verilmezse brifing basılır ve tez durumu değişmez — metni yazar ajanı üretir, CLI Türkçe metin yazmaz (Evidence Gate → Writing Gate)"
+    usage: "/thesis:write <CHAPTER-ID> --rq <RQ-ID> [--file <BÖLÜM.json>]"
+    handler: "python -m tools.atw.cli write {args[0]} --rq {options.rq} --file {options.file}"
 
   - name: thesis:audit
     description: "Tam tez denetimi (5 aşama: yapısal, atıf, metodoloji, tutarlılık, yazım)"

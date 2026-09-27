@@ -74,11 +74,26 @@ def test_write_kapaliyken_engellenir(depo, capsys):
     )
 
 
-def test_write_onayliyken_stuba_gecer(depo, capsys):
-    """Kapı açıkken komut kendi işine devam eder."""
+def test_write_onayliyken_brifing_uretir(depo, capsys):
+    """Kapı açıkken komut brifing üretir — stub'a düşmez.
+
+    DRIFT (raporlanıyor): bu test önce
+    `test_write_onayliyken_stuba_gecer` adıyla vardı ve tek şartı
+    `"Henüz implemente edilmedi" in cikti` idi, yani **stub'ın
+    çalışmasını şart koşuyordu**. `cmd_export` için aynı desen
+    (`test_export_her_şey_hazirken_stuba_gecer`) vardı; orada da stub'ı
+    doğrulayan test, dosyayı doğrulayan teste çevrilmişti. Burada da aynı
+    işlem yapıldı: kapının açık olduğu davranışı korunuyor, ama artık
+    "stub çalıştı" yerine "brifing üretildi ve durum değişmedi"
+    doğrulanıyor. `cmd_write` gerçekleşince test eskiden kırmızıya dönerdi.
+    """
     _onayli(depo)
     assert cli.cmd_write(Namespace(chapter="CH-001", rq="RQ-001")) == 0
-    assert "Henüz implemente edilmedi" in capsys.readouterr().out
+
+    cikti = capsys.readouterr().out
+    assert "Henüz implemente edilmedi" not in cikti, "stub'a düşülmüyor"
+    assert "BRİFİNG" in cikti, cikti
+    assert "RQ-001" in cikti, "istenen soru brifingde adıyla geçmeli"
 
 
 def test_write_engel_mesaji_hangi_kapiyi_soyluyor(depo, capsys):

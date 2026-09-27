@@ -57,6 +57,29 @@ def _cozumle(yol: str) -> Path:
     aday = Path(yol)
     return aday if aday.is_absolute() else veri_koku() / aday
 
+
+def _secili_dosya(deger: str | None) -> str | None:
+    """`--file` degerini yola uygun hale getirir; yoksa `None` doner.
+
+    Skill.yaml'daki handler sablonu (`write {args[0]} --rq {options.rq}
+    --file {options.file}`) secenek verilmediginde ne yaptigini bu depo
+    belgelemiyor; ayni kalip `thesis:verify --all {options.all}` ve
+    `thesis:extract --pdf {options.pdf}` icinde de var. Uc olasilik da
+    bu komut icin elde tutuluyor:
+
+      * bos dize  -> `None` (brifing kipi)
+      * bayrak    -> `None` (brifing kipi)
+      * `{options.file}` gibi COZULMEMIS sablon -> `None` (brifing kipi)
+
+    Ucuncu durum sessizce gecilmez: cozulmemis `{...}` bir yol DEGILDIR,
+    onu dosya adi sanmak "Bölüm dosyası bulunamadı: {options.file}"
+    demektir. Yok saymak, kullanicinin yazmak istemedigi bir ikinci
+    kipi calistirmaktir.
+    """
+    if not deger or "{" in deger:
+        return None
+    return deger
+
 # Cikis kodlari. Ucuncu ayri bir kod, cunku "calistim ve sorun buldum" ile
 # "hic baslayamadim" ayni sey degildir.
 CIKIS_OK = 0
@@ -343,17 +366,92 @@ def _kapi_raporu(durum: dict, kapi: str) -> bool:
 
 @_durum_gerekir
 def cmd_write(args, durum) -> int:
-    """Bölüm yaz.
+    """Bölüm yaz: brifing üret, yazılanı denetle, geçerse kaydet.
 
     Önce 'methodology' kapısı sorulur: yazım yöntem onayından geçmeden
     yapılırsa, sonradan yöntem değişince tüm bölümler geçersiz olur.
+
+    İki kip:
+
+      * ``--file`` YOK: brifing basılır, tez durumu **değişmez**. Metni
+        `agents/writer.md` ajanı üretir — CLI Türkçe metin üretmez.
+      * ``--file`` VAR: ajanın bölüm dosyası denetlenir. Tüm sorunlar
+        bildirilir; tek bir sorun bile varsa **hiçbir şey yazılmaz**, ki
+        dosya elle düzeltilip yeniden denenebilsin.
     """
+    from tools.atw.state import validate_state
+    from tools.atw.write import (
+        YazimHatasi,
+        bolum_dogrula,
+        bolumu_kaydet,
+        brifing_metni,
+        brifing_uret,
+    )
+
     if not _kapi_raporu(durum, "methodology"):
         return CIKIS_SORUN
 
-    print(f"✍️  Bölüm yazımı: Chapter={args.chapter}, RQ={args.rq}")
-    print("⚠️  Henüz implemente edilmedi (agent/writer)")
-    return 0
+    bolum_id, rq_id = args.chapter, args.rq
+    dosya = _secili_dosya(getattr(args, "file", None))
+
+    if not dosya:
+        try:
+            brifing = brifing_uret(durum, bolum_id, rq_id)
+        except YazimHatasi as hata:
+            print(f"✗ {hata}")
+            return CIKIS_SORUN
+        if getattr(args, "json", False):
+            print(json.dumps(brifing, ensure_ascii=False, indent=2))
+        else:
+            print(brifing_metni(brifing))
+        return CIKIS_OK
+
+    yol = _cozumle(dosya)
+    try:
+        metin = yol.read_text(encoding="utf-8-sig")
+    except FileNotFoundError:
+        print(f"✗ Bölüm dosyası bulunamadı: {dosya}")
+        return CIKIS_SORUN
+    except OSError as hata:
+        print(f"✗ Bölüm dosyası okunamadı: {yol} ({hata})")
+        return CIKIS_SORUN
+
+    try:
+        bolum = json.loads(metin)
+    except json.JSONDecodeError as hata:
+        print(f"✗ Geçersiz JSON: {yol.name} (satır {hata.lineno}, sütun {hata.colno})")
+        return CIKIS_SORUN
+
+    if not isinstance(bolum, dict):
+        print(f"✗ Bölüm dosyası bir JSON nesnesi olmalı: {yol.name}")
+        return CIKIS_SORUN
+
+    hatalar = bolum_dogrula(bolum, durum, bolum_id, rq_id)
+    if hatalar:
+        print(f"✗ Bölüm denetimi başarısız — {bolum_id}, {len(hatalar)} sorun:")
+        for hata in hatalar:
+            print(f"   • {hata}")
+        print("   Dosya yerinde bırakıldı; düzeltip yeniden çalıştır.")
+        return CIKIS_SORUN
+
+    bolumu_kaydet(durum, bolum)
+
+    # Kaydedilmeden önce durumun şemaya uyduğunu doğrula. `save_state`
+    # (aşağıda) doğrulama yapmıyor; sessizce bozuk durum yazmamak için
+    # burada açıkça deniyor.
+    durum_hatalari = validate_state(durum)
+    if durum_hatalari:
+        detay = "; ".join(durum_hatalari[:5])
+        print(f"✗ Kaydedilecek durum şemaya uymuyor ({len(durum_hatalari)} hata): {detay}")
+        print(f"   {bolum_id} kaydedilmedi.")
+        print("   Bu hatalar bölüm dosyasından DEĞİL, tez durumunun başka")
+        print("   registry'lerinden geliyor olabilir; yolundaki alanı düzelt.")
+        return CIKIS_SORUN
+
+    save_state(durum)
+    paragraf_sayisi = len(bolum.get("paragraphs") or [])
+    print(f"✅ Bölüm kaydedildi: {bolum_id} · {paragraf_sayisi} paragraf")
+    return CIKIS_OK
 
 
 @_durum_gerekir
@@ -534,6 +632,19 @@ def build_parser() -> argparse.ArgumentParser:
     p_write = sub.add_parser("write", help="Bölüm yaz")
     p_write.add_argument("chapter", help="Bölüm ID (CH-XXX)")
     p_write.add_argument("--rq", required=True, help="Araştırma sorusu ID (RQ-XXX)")
+    p_write.add_argument(
+        "--file",
+        help=(
+            "Yazar ajanının ürettiği bölüm dosyası. Verilmezse brifing "
+            "basılır ve durum değişmez; verilirse dosya denetlenir ve "
+            "geçerse tez durumuna yazılır."
+        ),
+    )
+    p_write.add_argument(
+        "--json",
+        action="store_true",
+        help="Brifingi JSON olarak bas (ajanın okuması için)",
+    )
     p_write.set_defaults(func=cmd_write)
 
     # thesis:audit
