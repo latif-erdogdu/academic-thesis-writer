@@ -8,6 +8,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from tools.atw.audit import UYARILACAK_TURLER, denetim_kimligi_ata, tum_denetimler
 from tools.atw.state import empty_state
 
 
@@ -192,10 +193,48 @@ def cmd_write(args) -> int:
 
 
 def cmd_audit(args) -> int:
-    """Tez denetimi."""
-    audit_type = args.type or "all"
-    print(f"🔍 Denetim başlatılıyor: {audit_type}")
-    print("⚠️  Henüz implemente edilmedi (agents/*-auditor)")
+    """Tez denetimi.
+
+    Denetim kayitlari audit_registry'ye yazilir. En az bir 'critical' bulgusu
+    varsa 1 doner; boylece bir denetim dogrudan CI'da gate olabilir.
+
+    Uygulanmayan turler (consistency) sessizce gecmez: acikca uyari yazilir.
+    Sahte bir denetim yazmak, denetimi olmayan bir alani denetlenmis
+    gostermekten kotudur.
+    """
+    durum = load_state()
+    tur = args.type or "all"
+
+    if tur in UYARILACAK_TURLER:
+        print(f"⚠️  '{tur}' denetimi bu CLI'de YOK — skill.yaml'daki "
+              f"{tur}-auditor ajanının işidir. Atlandı.")
+        return 0
+
+    kayitlar = tum_denetimler(durum, [tur])
+    denetim_kimligi_ata(durum, kayitlar)
+    durum.setdefault("audit_registry", []).extend(kayitlar)
+    save_state(durum)
+
+    kritik_toplam = 0
+    for kayit in kayitlar:
+        bulgular = kayit["findings"]
+        kritik = kayit["critical_issues"]
+        kritik_toplam += len(kritik)
+        print(f"\n🔍 {kayit['audit_id']} — {kayit['audit_type']} denetimi")
+        print(f"   Bulgu: {len(bulgular)}  (critical: {len(kritik)})")
+        for bulgu in bulgular:
+            isaret = {"critical": "🔴", "major": "🟠", "minor": "🟡"}.get(
+                bulgu["severity"], "⚪"
+            )
+            print(f"   {isaret} [{bulgu['severity']}] {bulgu['message']}")
+        sayaclar = kayit["integrity_checks"]
+        ozet = "  ".join(f"{k}={v}" for k, v in sayaclar.items() if v)
+        print(f"   Sayımlar: {ozet or 'hepsi sıfır'}")
+
+    print(f"\n✅ {len(kayitlar)} denetim kaydı → audit_registry")
+    if kritik_toplam:
+        print(f"🔴 {kritik_toplam} kritik bulgu — tez onaya hazır değil.")
+        return 1
     return 0
 
 
@@ -271,7 +310,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     # thesis:audit
     p_audit = sub.add_parser("audit", help="Tez denetimi")
-    p_audit.add_argument("--type", choices=["citation", "methodology", "consistency", "integrity", "all"], default="all")
+    # Secenekler tools.atw.audit.DESTEKLENEN_TURLER ile ayni olmali; liste
+    # ayrisirsa CLI bir turu kabul edip modul sessizce atlar.
+    p_audit.add_argument("--type", choices=["citation", "methodology", "consistency", "integrity", "evidence", "all"], default="all")
     p_audit.set_defaults(func=cmd_audit)
 
     # thesis:status

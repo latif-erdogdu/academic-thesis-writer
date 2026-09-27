@@ -178,6 +178,12 @@
         "$ref": "citation.json"
       }
     },
+    "paragraphs": {
+      "type": "array",
+      "items": {
+        "$ref": "paragraph.json"
+      }
+    },
     "datasets": {
       "type": "array",
       "items": {

@@ -154,8 +154,8 @@ def registry_haritasi() -> dict[str, str]:
     """Durum alani -> varlik tipi. ``thesis_state.json``'den turetilir.
 
     Her ``$ref`` dizisi bir registry'dir. Elle yazilan
-    ``state._REGISTRY_FIELDS`` 15 alan icerir ve 4'unu kacirir;
-    bu yuzden burada kullanilmaz. Olculen: 18 semada 19 alan.
+    ``state._REGISTRY_FIELDS`` 15 alan icerir ve 5'unu kacirir;
+    bu yuzden burada kullanilmaz. Olculen: 18 semada 20 alan.
     """
     harita: dict[str, str] = {}
     for alan, tanim in (_semalari()["thesis_state"].get("properties") or {}).items():

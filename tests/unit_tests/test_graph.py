@@ -151,11 +151,18 @@ def test_kenar_sayisi_semadan_turetilir():
 
 
 def test_registry_haritasi_gercekci_sayi():
-    """Harita elle yazılmamış, 19 alan türetir. Elle yazılan
-    ``_REGISTRY_FIELDS`` 15'tir ve 4'ünü kaçırır."""
+    """Harita elle yazılmamış, semadan türetilen 20 alanı kapsar.
+
+    Elle yazılan ``_REGISTRY_FIELDS`` 15'tir ve 5'ini kaçırır. 19→20
+    değişimi `paragraphs` registry'sinin eklenmesiyle oldu: graph'ta
+    `citation.paragraph_id -> paragraph` kenarı vardı ama karşılığı olan
+    registry yoktu, bu yüzden atıfların paragraf referansı çözümsüz kalıyor
+    ve bütünlük denetimi her atifi "kopuk" sayıyordu.
+    """
     harita = graph.registry_haritasi()
-    assert len(harita) == 19
-    for alan in ("research_questions", "hypotheses", "chapters", "variables"):
+    assert len(harita) == 20
+    for alan in ("research_questions", "hypotheses", "chapters", "variables",
+                 "paragraphs"):
         assert alan in harita, f"{alan} haritada yok: kopuk bağlar yanlış alarm verir"
 
 

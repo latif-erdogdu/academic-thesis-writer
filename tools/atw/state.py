@@ -138,6 +138,10 @@ def empty_state(thesis_id: str, title: str = "") -> dict[str, Any]:
         "search_runs": [],
         "sources": [],
         "citations": [],
+        # citation.paragraph_id -> paragraph kenarinin hedefi. Bu registry
+        # olmadan atiflarin paragraf referansi COZUMSUZ kalir ve butunluk
+        # denetimi her atifi kalici olarak "kopuk referans" sayardi.
+        "paragraphs": [],
         "datasets": [],
         "analyses": [],
         "statistics": [],
