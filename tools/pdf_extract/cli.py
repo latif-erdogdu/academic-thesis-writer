@@ -10,8 +10,8 @@ from tools.pdf_extract import (
     download_pdf,
     check_unpaywall_oa,
     extract_text_from_pdf,
+    extract_text_from_pdf_with_pages,
     find_evidence_for_claim,
-    EvidenceExtractor,
 )
 
 

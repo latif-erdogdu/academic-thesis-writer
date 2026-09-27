@@ -205,14 +205,13 @@ class PDFDownloader:
 
         if doi:
             return self.download_with_oa_check(doi, source_url=url)
-        elif source_url:
-            return self.download(source_url)
-        else:
-            return DownloadResult(
-                success=False,
-                source_url=source_url,
-                error="Neither DOI nor URL provided",
-            )
+        if url:
+            return self.download(url)
+        return DownloadResult(
+            success=False,
+            source_url=url,
+            error="Neither DOI nor URL provided",
+        )
 
 
 def download_pdf(url: str, download_dir: str | Path = "downloads/pdfs") -> DownloadResult:

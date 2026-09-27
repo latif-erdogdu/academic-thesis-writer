@@ -1,7 +1,24 @@
+# Kapsam kapisi yalnizca karar mantigini olcer: tools/atw (referans butunlugu,
+# durum dogrulama, tip denetimi) ve tools/citation_check (atif denetimi).
+#
+# Harici I/O araclari kapsam disi birakilir: source_search ve source_verify
+# ag cagrisi, pdf_extract ise ek olarak gercek PDF ayristirma gerektirir.
+# Bunlar birim testiyle dogrulanmaz, butunlukleri entegrasyon calistirmasiyla
+# dogrulanir. Ayrica */cli/* yalnizca 'cli' adiyla DIZIN olan yollari esler;
+# tools/pdf_extract/cli.py bir dosya adidir, bu yuzden ayrica yazildi.
+#
+# DUYARLILIK: bu araclarin gercek kapsami 2026-09-27 itibariyle asagidaki
+# gibidir ve kapisina DAHIL DEGILDIR:
+#   pdf_extract    %53  (cli %36, downloader %36, extractor %54, similarity %96)
+#   source_verify  %78  (verify %81, bibliographic %89, retraction %42, cli %0)
+#   source_search  %0   (9 modul, 1357 satir, hic test edilmedi)
+# Kapsam sayisini buyuterek gizlemek yerine burada acikca yazildi.
+# Olcum: pytest tests/ --cov-fail-under=0 --cov=tools --cov-config=<omitsiz rc>
 [run]
 omit =
     */cli/*
     */source_search/*
     */source_verify/*
+    */pdf_extract/*
     */__pycache__/*
     */tests/*

@@ -184,30 +184,27 @@ class ClaimEvidenceMatcher:
         corpus = [claim_text] + [c.get(text_field, "") for c in evidence_candidates]
         self._engine.fit(corpus)
 
-        # Claim vektörü
-        claim_vec = self._engine.transform([claim_text])
-
         results = []
-        for idx, candidate in enumerate(evidence_candidates):
+        for candidate in evidence_candidates:
             text = candidate.get(text_field, "")
             if not text or len(text) < 50:
                 continue
 
-            # TF-IDF similarity
+            # TF-IDF similarity — cosine_similarity 2B doner, [0,0] tek skalerdir
             cand_vec = self._engine.transform([text])
-            tfidf_sim = cosine_similarity(
+            tfidf_sim = float(cosine_similarity(
                 self._engine._vectorizer.transform([claim_text]),
                 cand_vec
-            )[0, 0]
+            )[0, 0])
 
             # Anahtar kelime bonusu
             keyword_bonus = self._keyword_bonus(claim_text, text)
 
-            final_score = float(tfidf_sim[0]) + keyword_bonus
+            final_score = tfidf_sim + keyword_bonus
 
             if final_score >= self.min_similarity:
                 result = candidate.copy()
-                result["tfidf_similarity"] = float(tfidf_sim[0])
+                result["tfidf_similarity"] = tfidf_sim
                 result["keyword_bonus"] = keyword_bonus
                 result["final_score"] = final_score
                 results.append(result)
