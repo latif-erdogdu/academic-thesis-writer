@@ -4,8 +4,8 @@ Problem
 -------
 Bu depoda skill'in iki farkli yukleme yolu var:
 
-  1. `opencode.json:16` -> `.opencode/skill/academic-thesis-writer`
-     (bu depoda calisirken)
+  1. `.opencode/skill/academic-thesis-writer` otomatik kesifle gelir
+     (bu depoda calisirken; V2 migration, `.opencode/skill/` yolunu kesfeder)
   2. `~/.agents/skills/academic-thesis-writer/`
      (Claude Code / Agent Skills dizini)
 

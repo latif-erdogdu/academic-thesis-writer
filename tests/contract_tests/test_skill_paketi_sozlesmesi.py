@@ -2,7 +2,7 @@
 
 Neden bu test
 -------------
-`.opencode/skill/academic-thesis-writer/` dizini `opencode.json:16` ile
+`.opencode/skill/academic-thesis-writer/` dizini otomatik kesifle
 yukleniyor. Bu dizinin ne OLDUGU konusunda skill.yaml'da iki birbiriyle
 celisan iddia vardi:
 
