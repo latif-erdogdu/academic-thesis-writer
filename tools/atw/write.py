@@ -262,8 +262,8 @@ def brifing_uret(durum: dict[str, Any], bolum_id: str, rq_id: str) -> dict[str, 
     Raises:
         YazimHatasi: ``rq_id`` tez durumunda yoksa.
     """
-    soru = _kimlikle_esles(_kayitlar(durum, "research_questions")).get(rq_id)
-    if soru is None:
+    soru = _kimlikle_esles(_kayitlar(durum, "research_questions")).get(rq_id) if rq_id else None
+    if soru is None and rq_id is not None:
         raise YazimHatasi(f"Araştırma sorusu bulunamadı: {rq_id}")
 
     iddialar, haric_iddia = haric_eden_iddialar(durum)
@@ -679,7 +679,13 @@ def _soru_hatalari(
 
     Paragrafsız bölümde kural uygulanmaz: yazı henüz başlamamış olabilir
     ve `write` ilk çalıştırmada boş bölüm üretmekten de sorumlu değil.
+
+    RQ'suz bölümde (giriş/literatür/yöntem/sonuç) kural uygulanmaz: bölüm
+    bir RQ'ya bağlı değil, RQ anması hata değil.
     """
+    if not rq_id:
+        return []
+
     if _kimlikle_esles(_kayitlar(durum, "research_questions")).get(rq_id) is None:
         return [f"araştırma sorusu tez durumunda bulunamadı: {rq_id}"]
 

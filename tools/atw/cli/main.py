@@ -1416,7 +1416,7 @@ def build_parser() -> argparse.ArgumentParser:
     # thesis:write
     p_write = sub.add_parser("write", help="Bölüm yaz")
     p_write.add_argument("chapter", help="Bölüm ID (CH-XXX)")
-    p_write.add_argument("--rq", required=True, help="Araştırma sorusu ID (RQ-XXX)")
+    p_write.add_argument("--rq", help="Araştırma sorusu ID (RQ-XXX); RQ'suz bölüm için boş bırakılır")
     p_write.add_argument(
         "--file",
         help=(

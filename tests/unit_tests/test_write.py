@@ -392,6 +392,29 @@ def test_gecerli_bolum_hatasiz_dogrulanir():
     assert bolum_dogrula(_bolum(), _tez(), "CH-002", "RQ-001") == []
 
 
+def test_brifing_rq_suz_bolum_icin_uretilir():
+    """RQ'suz bolum (giris/literatur/yontem/sonuc) brifing uretebilmeli.
+
+    Regresyon: brifing_uret, rq_id None geldiyse YazimHatasi firlatiyordu;
+    bu yuzden giris/literatur/yontem/sonuc bolumleri yazilamiyordu.
+    """
+    brifing = brifing_uret(_tez(), "CH-004", None)
+    assert brifing["arastirma_sorusu"] is None
+    assert [k["id"] for k in brifing["kaynaklar"]] == ["SRC-001"]
+
+
+def test_dogrulama_rq_suz_bolumde_soru_kontrolunu_atlar():
+    """RQ'suz bolumde RQ-mention kontrolu yapilmamali.
+
+    Regresyon: _soru_hatalari, rq_id None iken cokuyordu; RQ'suz bolum
+    RQ anmasa da hata veriyordu.
+    """
+    bolum = _bolum()
+    bolum["id"] = "CH-004"
+    bolum["paragraphs"][0]["chapter"] = "CH-004"
+    assert bolum_dogrula(bolum, _tez(), "CH-004", None) == []
+
+
 def test_bolum_kimligi_istendikle_ayni_olmali():
     """`write CH-002` cagrisi CH-003 dosyasini kabul etmemeli.
 
@@ -959,11 +982,17 @@ def test_cli_write_kapi_kapaliyken_engellenir(cli_tesi, tmp_path, capsys):
     assert "methodology" in capsys.readouterr().out
 
 
-def test_parser_write_rq_zorunlu():
+def test_parser_write_rq_opsiyonel():
+    """--rq opsiyonel; RQ'suz bolum (giris/literatur/yontem/sonuc) yazilabilir.
+
+    Degisim: --rq artik zorunlu degil. RQ'suz bolumler (front/back matter)
+    yazilabilmeli; bu yuzden parser --rq'siz de calismali.
+    """
     from tools.atw.cli.main import build_parser
 
-    with pytest.raises(SystemExit):
-        build_parser().parse_args(["write", "CH-002"])
+    args = build_parser().parse_args(["write", "CH-004"])
+    assert args.chapter == "CH-004"
+    assert args.rq is None
 
 
 def test_parser_write_file_bayragi_kayitli():
