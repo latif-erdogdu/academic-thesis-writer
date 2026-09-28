@@ -30,6 +30,52 @@ DURUM_DOSYASI = "thesis_state.json"
 VERI_KOKU: Path | None = None
 
 
+def _cikti_kodlamasini_ayarla(stdout=None, stderr=None) -> None:
+    """Çıktı akışlarını UTF-8'e çevirir; dar kodlamada glif kaybını önler.
+
+    Neden var
+    ---------
+    Windows'ta `sys.stdout.encoding` konsol kod sayfasıdır ve Türkçe
+    kurulumda cp1254'tür. CLI'in kullandığı durum gliflerinin (✅ U+2705,
+    ❌ U+274C, ✗ U+2717, ⚠ U+26A0) hiçbiri cp1254'te yoktur. Bu yüzden
+    `thesis:new` bile `print` aşamasında `UnicodeEncodeError` fırlatıyor,
+    süreç 1 ile çıkıyordu — durum dosyası yazılmış olsa bile. `approve`
+    ise durumu başarıyla yazıp sonra aynı hatayla "başarısız" görünüyordu.
+    `PYTHONIOENCODING=utf-8` ile hepsi sorunsuz çalışıyor. Yani araç, tam
+    olarak hedeflediği ortamda (Türkçe Windows) varsayılan ayarlarla
+    kullanılamaz durumdaydı.
+
+    Neden `errors="replace"`
+    ----------------------
+    UTF-8'e çevirmek tek başına yeterli değil: `stdout` bir dosyaya ya da
+    başka bir akışa yönlendirilmişse, o akışın kodlaması başka bir şey
+    olabilir ve glif yine de kaybolabilir. `replace` ile yazma hiçbir
+    koşulda patlamaz; glif yerine `?` düşer. Bir CLI'nin kullanıcıyı
+    kilitlemesine kıyasla `?` kabul edilebilir bir kayıptır.
+
+    Neden sessizce yutuyor
+    ---------------------
+    Bu, çıktı tarafında bir konfor ayarıdır. Yeniden yapılandırma
+    desteklenmeyen ya da hata fırlatan bir akışta **istisna atmaz** —
+    atsaydı, düzeltilen kusurun aynısı oluşurdu: komut hiç çalışmazdı.
+    """
+    for akis in (stdout if stdout is not None else sys.stdout,
+                 stderr if stderr is not None else sys.stderr):
+        if akis is None:
+            continue
+        kodlama = (getattr(akis, "encoding", "") or "").lower().replace("-", "")
+        if kodlama in ("utf8", ""):
+            continue
+        yeniden = getattr(akis, "reconfigure", None)
+        if yeniden is None:
+            continue
+        try:
+            yeniden(encoding="utf-8", errors="replace")
+        except (ValueError, OSError, LookupError):
+            # Akış yapılandırılamıyorsa çıktı kodlaması neyse onunla devam et.
+            pass
+
+
 def veri_koku() -> Path:
     """Tez verisinin bulunacagi dizin: varsayilan calisma dizini.
 
@@ -1184,6 +1230,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
+    # Sıralama önemli: çıktı kodlaması, argparse'nin hata çıktısından ve
+    # her komutun `print` çağrısından ONCE ayarlanmalıdır.
+    _cikti_kodlamasini_ayarla()
     args = build_parser().parse_args()
     return args.func(args)
 
