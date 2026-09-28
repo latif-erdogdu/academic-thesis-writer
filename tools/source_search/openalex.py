@@ -19,6 +19,26 @@ from .kayit import sema_uyumlu
 logger = logging.getLogger(__name__)
 
 
+def _openalex_journal(item: dict) -> str | None:
+    """OpenAlex çalışma yanıtından dergi adını çıkar.
+
+    OpenAlex ``host_venue`` alanını kaldırdı (belge: verify.py
+    ``_openalex_journal``); dergi adı ``primary_location.source.display_name``
+    altında geliyor. Konum listesi boşsa ``locations`` listesindeki ilk
+    kaynağa düşülür. Hiçbir konum dergi taşımıyorsa ``None`` döner —
+    çağıran taraf bunu nötr (boş) dergi olarak işler, uydurma ad üretmez.
+    """
+    konum = item.get("primary_location") or {}
+    kaynak = (konum.get("source") or {}).get("display_name") or ""
+    if kaynak:
+        return kaynak
+    for konum in item.get("locations") or []:
+        ad = ((konum or {}).get("source") or {}).get("display_name") or ""
+        if ad:
+            return ad
+    return None
+
+
 @dataclass
 class OpenAlexWork:
     """OpenAlex'ten gelen bir çalışma (work) kaydı."""
@@ -106,8 +126,8 @@ class OpenAlexWork:
             title=item.get("display_name", "") or item.get("title", ""),
             authors=authors,
             year=item.get("publication_year"),
-            journal=item.get("host_venue", {}).get("display_name") if item.get("host_venue") else None,
-            venue=item.get("host_venue", {}).get("display_name") if item.get("host_venue") else None,
+            journal=_openalex_journal(item),
+            venue=_openalex_journal(item),
             volume=item.get("biblio", {}).get("volume"),
             issue=item.get("biblio", {}).get("issue"),
             pages=item.get("biblio", {}).get("first_page") + "-" + item.get("biblio", {}).get("last_page")
@@ -138,8 +158,9 @@ class OpenAlexWork:
         author_strings = []
         for a in self.authors:
             name = a.get("display_name", "")
-            if a.get("orcid"):
-                name += f" (ORCID: {a['orcid']})"
+            # ORCID ayrı bir alandır; ad string'ine gömülmez. Gömülürse
+            # bibliyografik normalizasyon (verify) ve tez kaynakçası bozulur
+            # (ölçüldü 2026-09-28: 43 kayıtta 'Ad (ORCID: ...)').
             author_strings.append(name)
 
         # Dergi/venue

@@ -120,8 +120,9 @@ class CrossrefWork:
         author_strings = []
         for a in self.authors:
             name = f"{a['family']}, {a['given']}" if a['family'] else a['given']
-            if a.get('orcid'):
-                name += f" (ORCID: {a['orcid']})"
+            # ORCID ayrı bir alandır (self.orcid); ad string'ine gömülmez
+            # (ör. 'Yilmaz, Ayse (ORCID: 0000-...)'). Gömülü biçim
+            # bibliyografik dogrulamayi ve tez kaynakcasini bozuyordu.
             author_strings.append(name)
 
         # Yıl
