@@ -22,6 +22,19 @@ logger = logging.getLogger(__name__)
 # sözcükleri doğru ayırır.
 _X_TOLERANCE = 1
 
+
+def _sayfa_metinini_cikar(page) -> str:
+    """Sayfa metnini çıkar (sözcüklerin doğru ayrılması için x_tolerance=1).
+
+    Not: İki sütunlu düzenlerde (örn. PLoS) pdfplumber varsayılan satır
+    gruplaması sütunları harmanlar. Sütun ayrımı için crop tabanlı bir
+    yaklaşım denendi; başlık/başlık-altı sınırı güvenilir tespit
+    edilemediği ve tek sütunlu PDF'lerde başlık kırpmaya yol açtığı
+    için vazgeçildi. İki sütunlu kaynakların metin kalitesi bu yüzden
+    sınırlıdır; bu durum tez metodolojisinde açıkça belirtilmelidir.
+    """
+    return page.extract_text(x_tolerance=_X_TOLERANCE) or ""
+
 # Yaygın akademik bölüm başlıkları (büyük/küçük harf duyarsız)
 SECTION_PATTERNS = [
     (r"^\s*abstract\s*$", "Abstract"),
@@ -127,7 +140,7 @@ class PDFExtractor:
 
         for i, page in enumerate(self._pdf.pages):
             page_num = i + 1
-            text = page.extract_text(x_tolerance=_X_TOLERANCE) or ""
+            text = _sayfa_metinini_cikar(page)
             tables = page.extract_tables() or []
 
             # Karakter bilgileri (sayfa numarası doğrulaması için)
@@ -339,7 +352,7 @@ def extract_text_from_pdf(pdf_path: str | Path) -> str:
     with pdfplumber.open(pdf_path) as pdf:
         texts = []
         for page in pdf.pages:
-            text = page.extract_text(x_tolerance=_X_TOLERANCE)
+            text = _sayfa_metinini_cikar(page)
             if text:
                 texts.append(text)
         return "\n".join(texts)
@@ -350,7 +363,7 @@ def extract_text_from_pdf_with_pages(pdf_path: str | Path) -> list[tuple[int, st
     results = []
     with pdfplumber.open(pdf_path) as pdf:
         for i, page in enumerate(pdf.pages):
-            text = page.extract_text(x_tolerance=_X_TOLERANCE) or ""
+            text = _sayfa_metinini_cikar(page)
             if text.strip():
                 results.append((i + 1, text))
     return results
