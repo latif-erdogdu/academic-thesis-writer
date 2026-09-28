@@ -350,6 +350,38 @@ def test_find_evidence_ortak_kelime_kapsami_esigi_asar(tmp_path):
     assert bulgular, "Ortak anahtar kelime kapsami olan paragraf bulunamadi"
 
 
+def test_extract_dar_aralikli_pdf_sozcukleri_ayirir(tmp_path):
+    """Sik dizilmis (dar aralikli) PDF metninde sozcukler ayrilmali.
+
+    Regresyon: page.extract_text() pdfplumber varsayilani x_tolerance=3 ile
+    calisiyordu; kelime arasi bosluk 3 birimden kucuk olan PDF'lerde tum
+    sozcukler tek jetona birlesiyordu (SRC-143: 'RESEARCHARTICLE' ve
+    'massivereleaseofcaptive-bredchukarpartridge' gibi) ve token tabanli
+    eslestirme o kaynaklar icin hic kanit bulamiyordu.
+    """
+    from fpdf import FPDF
+    from tools.pdf_extract.extractor import extract_text_from_pdf_with_pages
+
+    pdf = tmp_path / "dar.pdf"
+    p = FPDF()
+    p.add_page()
+    p.set_font("Helvetica", size=14)
+    kelimeler = ["Breeding", "seasonality", "of", "chukar", "partridge",
+                 "is", "linked", "to", "environmental", "conditions",
+                 "and", "habitat", "quality."]
+    x, y = 20.0, 40.0
+    for kelime in kelimeler:
+        p.text(x, y, kelime)
+        x += p.get_string_width(kelime) + 0.8
+    p.output(str(pdf))
+
+    sayfalar = extract_text_from_pdf_with_pages(str(pdf))
+    metin = " ".join(t for _, t in sayfalar)
+
+    assert "Breeding seasonality of chukar partridge" in metin
+    assert "Breedingseasonality" not in metin
+
+
 # --- similarity: saf mantik (ag/PDF gerekmez) ------------------------------
 
 # Aday metinleri >= 50 karakter olmali ve iddiayla ortak kelime icermeli,

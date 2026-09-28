@@ -16,6 +16,12 @@ import pdfplumber
 logger = logging.getLogger(__name__)
 
 
+# pdfplumber metin çıkarımında sözcük aralığı eşiği. Varsayılan 3, sık
+# dizilmiş PDF'lerde sözcükleri tek jetona birleştiriyor (SRC-143:
+# "RESEARCHARTICLE", "massivereleaseofcaptive-bredchukarpartridge"); 1
+# sözcükleri doğru ayırır.
+_X_TOLERANCE = 1
+
 # Yaygın akademik bölüm başlıkları (büyük/küçük harf duyarsız)
 SECTION_PATTERNS = [
     (r"^\s*abstract\s*$", "Abstract"),
@@ -121,7 +127,7 @@ class PDFExtractor:
 
         for i, page in enumerate(self._pdf.pages):
             page_num = i + 1
-            text = page.extract_text() or ""
+            text = page.extract_text(x_tolerance=_X_TOLERANCE) or ""
             tables = page.extract_tables() or []
 
             # Karakter bilgileri (sayfa numarası doğrulaması için)
@@ -333,7 +339,7 @@ def extract_text_from_pdf(pdf_path: str | Path) -> str:
     with pdfplumber.open(pdf_path) as pdf:
         texts = []
         for page in pdf.pages:
-            text = page.extract_text()
+            text = page.extract_text(x_tolerance=_X_TOLERANCE)
             if text:
                 texts.append(text)
         return "\n".join(texts)
@@ -344,7 +350,7 @@ def extract_text_from_pdf_with_pages(pdf_path: str | Path) -> list[tuple[int, st
     results = []
     with pdfplumber.open(pdf_path) as pdf:
         for i, page in enumerate(pdf.pages):
-            text = page.extract_text() or ""
+            text = page.extract_text(x_tolerance=_X_TOLERANCE) or ""
             if text.strip():
                 results.append((i + 1, text))
     return results
