@@ -33,7 +33,7 @@ sistemik tarama hiç çalışmıyordu: Crossref boş döndü, OpenAlex gürült�
 döndürdü. Bu, "arama yapıldı" diye yeşil çıkan ama metodolojik olarak
 çöpe yazılan bir akıştır.
 
-Aynı PICO, doğru parametrelerle:
+Aynı PICO için iki deneme, ölçülen (canlı, 2026-09-28):
 
   * OpenAlex `filter=title_and_abstract.search:alectoris chukar,
     title_and_abstract.search:survival` -> 22 sonuç, HEPSİ İLGİLİ:
@@ -41,15 +41,26 @@ Aynı PICO, doğru parametrelerle:
       - "Monitoring the survival rate of released chukars: a case study"
       - "Introgression of chukar genes into a reintroduced red-legged ..."
 
-`title_and_abstract.search` filtreleri virgülle zincirlendiğinde OpenAlex
-bunları **VE** olarak uygular. Crossref'te karşılığı yoktur (Boolean
-desteklenmez); en yakın doğru karşılık `query.bibliographic`'tir ve bu
-bir *kısıt* olarak dokümante edilmelidir.
+    ama `title_and_abstract.search:<çok kelimeli>` değerleri OpenAlex'te
+    BİTİŞİK TAMLAMA olarak aranır: üretken PICO bileşenleri (Türkçe+
+    İngilizce karışık, 3-7 kelime) hiçbir özette bitişik geçmediği için
+    aynı zincir `meta.count=0` döndürüyordu (SEARCH-2982/9078/5201:
+    openalex kayıt=0). Tam metin eşleşmesi bu yüzden `search=`
+    parametresine taşındı; OpenAlex `(a OR b) AND (c OR d)` yazımını
+    destekler (resmi doküman: BÜYÜK harf AND/OR/NOT + parantez; boşluk
+    ayıracı AND'dir). Kısa tamlama eşleşen eski süzgeç zinciri bu
+    mekanizmaya göre daha kırılgandı ve üretken PICO'da kullanılamazdı.
+
+Crossref'te Boolean desteklenmez; en yakın doğru karşılık
+`query.bibliographic`'tir ve bu bir *kısıt* olarak dokümante edilmelidir.
 
 Bu dosya düzeltmeyi şu davranışlara bağlar:
   1. `SearchQuery.filter_terms` — bileşen başına BİR temiz ifade.
-  2. `search_openalex` bu ifadeleri VE zincirli `title_and_abstract.search`
-     filtresine çevirir ve `search=` parametresini GÖNDERMEZ.
+  2. `search_openalex` bu ifadeleri `search=` parametresinde parantezli
+     `(t1 OR t2) AND (u1 OR u2)` ifadesine çevirir; tam metin için
+     `title_and_abstract.search` süzgeç anahtarı GÖNDERİLMEZ (tekrarlanan
+     anahtar + çok kelimeli değer ölçülen 0-sonuç arızası). Yıl ve tip
+     süzgeçleri `filter=`'de kalır.
   3. `search_crossref` Boolean dizgesini `query=` olarak gönderMEZ;
      `query.bibliographic` kullanır.
   4. Kısıt canlı testle ölçülür (`@pytest.mark.live`), varsayılan
@@ -165,9 +176,17 @@ class TestFilterTerimleri:
 
 
 class TestOpenAlexParametreleri:
-    """`title_and_abstract.search` zinciri VE olarak uygulanmalı."""
+    """`filter_terms` VE zinciri `search=` parametresinde kurulmalı."""
 
     def test_ifadeler_ve_zincirli_filter_olur(self, monkeypatch):
+        """Bileşenler `(t1 OR t2) AND (u1 OR u2)` olarak AND'lenir.
+
+        Önceden `title_and_abstract.search` süzgeç anahtarı bileşen
+        başına tekrarlanıyordu; ölçüldü (2026-09-28): çok kelimeli değer
+        bitişik tamlama arandığı için üretken PICO'da 0 sonuç. Süzgeç
+        anahtarını tekrarlamak yerine AND zinciri `search=` ifadesinde
+        kurulur (OpenAlex resmi sözdizimi: parantez + BÜYÜK harf işleç).
+        """
         from tools.source_search import openalex as oa
 
         yakalayici = _Yakalayici()
@@ -179,16 +198,17 @@ class TestOpenAlexParametreleri:
             max_results=5,
         )
 
-        assert yakalayici.cagrilar, "OpenAlex'e hiç istek atılmadı"
-        filtre = yakalayici.cagrilar[0].get("filter", "")
-        assert "title_and_abstract.search:alectoris chukar" in filtre
-        assert "title_and_abstract.search:survival mortality" in filtre
-        assert "," in filtre, "iki filtre virgülle zincirlenmezse VE olmaz"
+        params = yakalayici.cagrilar[0]
+        assert params.get("search") == "(alectoris OR chukar) AND (survival OR mortality)"
+        assert "title_and_abstract.search" not in (params.get("filter") or "")
 
-    def test_search_parametri_gonderilmez(self, monkeypatch):
-        """`search=` Boolean dizgesini torbalar; gönderilmemeli.
+    def test_search_parametresi_ham_boolean_dizgesi_tasimaz(self, monkeypatch):
+        """`search=` ham Boolean dizgesini değil, temiz ifadeyi taşımalı.
 
-        Ölçülen hata: 47 sonuç, neredeyse tamamı gürültü.
+        Eski davranışta (ölçülen) `search=` ham dizgeyi torbalıyordu:
+        47 sonuç, neredeyse tamamı gürültü (`title:`/`AND`/`OR` yok
+        sayılıyordu). Düzeltmede `filter_terms`'ten kurulan parantezli
+        ifade gider; `title:` gibi alan sözdizimi karışmaz.
         """
         from tools.source_search import openalex as oa
 
@@ -201,7 +221,9 @@ class TestOpenAlexParametreleri:
             max_results=5,
         )
 
-        assert "search" not in yakalayici.cagrilar[0]
+        params = yakalayici.cagrilar[0]
+        assert params.get("search") == "(alectoris OR chukar) AND (survival)"
+        assert "title:" not in (params.get("search") or "")
 
     def test_ifade_yoksa_eski_yol_calisir(self, monkeypatch):
         """Geriye uyumluluk: `filter_terms` verilmezse `search` gider."""
@@ -214,14 +236,14 @@ class TestOpenAlexParametreleri:
 
         assert yakalayici.cagrilar[0].get("search") == "alectoris chukar"
 
-    def test_ifade_iki_kez_yazilmaz(self, monkeypatch):
-        """Aynı terim hem `zincili`ye hem `parcalar`'a eklenirse iki kez yazılır.
+    def test_zincir_bir_kez_kurulur(self, monkeypatch):
+        """Her bileşen OR-grubu `search=` ifadesinde TAM OLARAK BİR kez.
 
-        Ölçülen arıza: filtre
-        'title_and_abstract.search:reproductive breeding productivity,
-         title_and_abstract.search:alectoris chukar,
-         title_and_abstract.search:reproductive breeding productivity'
-        olmuştu. Tekrarlanan aynı filtre anahtarı zinciri bozar.
+        Önceden ölçülen arıza: aynı `title_and_abstract.search` anahtarı
+        tekrar tekrar yazılıyordu ('...:reproductive..., ...:alectoris...,
+         ...:reproductive...'). Artık tam metin için süzgeç anahtarı hiç
+         yazılmaz; AND yalnız `search=` ifadesinde, bileşen başına bir
+         OR grubu olarak kurulur.
         """
         from tools.source_search import openalex as oa
 
@@ -234,9 +256,65 @@ class TestOpenAlexParametreleri:
             max_results=5,
         )
 
-        parcalar = yakalayici.cagrilar[0]["filter"].split(",")
-        assert len(parcalar) == len(set(parcalar)) == 2
-        assert "title_and_abstract.search:alectoris chukar" in parcalar
+        params = yakalayici.cagrilar[0]
+        ifade = params.get("search") or ""
+        assert ifade == (
+            "(alectoris OR chukar) AND "
+            "(reproductive OR breeding OR productivity)"
+        )
+        assert ifade.count("reproductive") == 1  # bileşen tek kez yazılır
+        assert "title_and_abstract.search" not in (params.get("filter") or "")
+
+
+class TestOpenAlexBooleanArama:
+    """`boolean_arama_ifadesi` parantezli OR grupları + AND kurmalı."""
+
+    def test_turkce_bilesen_tokenlarina_bolunur(self):
+        from tools.source_search.openalex import boolean_arama_ifadesi
+
+        ifade = boolean_arama_ifadesi(
+            ["alectoris chukar", "yerleştirme saldırım translocat release"]
+        )
+        assert ifade == (
+            "(alectoris OR chukar) AND "
+            "(yerleştirme OR saldırım OR translocat OR release)"
+        )
+
+    def test_bos_ifadeler_atlanir_ve_bos_girdi_bos_doner(self):
+        from tools.source_search.openalex import boolean_arama_ifadesi
+
+        assert boolean_arama_ifadesi(["alectoris chukar", "", " "]) == "(alectoris OR chukar)"
+        assert boolean_arama_ifadesi([]) == ""
+
+    def test_ayrilmis_sozcukler_tirnaklanir(self):
+        """AND/OR/NOT token olarak kabul edilmemeli; literal kalmalı."""
+        from tools.source_search.openalex import boolean_arama_ifadesi
+
+        assert boolean_arama_ifadesi(["and or not day"]) == (
+            '("AND" OR "OR" OR "NOT" OR day)'
+        )
+
+    def test_yil_ve_tip_filterinde_kalir(self, monkeypatch):
+        """Yıl/tip süzgeçleri `filter=`'de kalır; tam metin anahtarı yok."""
+        from tools.source_search import openalex as oa
+
+        yakalayici = _Yakalayici()
+        monkeypatch.setattr(oa.OpenAlexClient, "_get", yakalayici)
+
+        search_openalex(
+            query="alectoris chukar",
+            filter_terms=["alectoris chukar"],
+            year_from=2020,
+            year_to=2025,
+            types=["article"],
+            max_results=5,
+        )
+
+        filtre = yakalayici.cagrilar[0].get("filter", "")
+        assert "from_publication_date:2020-01-01" in filtre
+        assert "until_publication_date:2025-12-31" in filtre
+        assert "type:article" in filtre
+        assert "title_and_abstract.search" not in filtre
 
 
 class TestCrossrefParametreleri:

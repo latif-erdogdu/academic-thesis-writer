@@ -232,11 +232,15 @@ class OpenAlexClient:
         api_key: str | None = None,
         rate_limit: float = 10.0,  # req/s (anonymous)
         timeout: int = 30,
+        retry_deneme: int = 3,
+        retry_gecikme_sn: float = 30.0,
     ):
         self.email = email
         self.api_key = api_key
         self.rate_limit = rate_limit
         self.timeout = timeout
+        self.retry_deneme = max(1, retry_deneme)
+        self.retry_gecikme_sn = retry_gecikme_sn
         self.session = requests.Session()
         self.session.headers.update(self.DEFAULT_HEADERS)
         self._last_request = 0.0
@@ -253,13 +257,33 @@ class OpenAlexClient:
             time.sleep(min_interval - elapsed)
 
     def _get(self, path: str, params: dict | None = None) -> dict:
+        """OpenAlex'e GET; 429'a karşı sınırlı geri çekilme + yeniden deneme.
+
+        Neden yeniden deneme
+        --------------------
+        Anonim havuzda OpenAlex periyodik 429 döndürür (ölçüldü
+        2026-09-28: SEARCH-1724/4775 openalex kayıt=0 — tek atışta
+        kalıcı boşluk yazılıyordu). 429 geçicidir; geri çekilme ile
+        yeniden deneme, kayıtın "meşru boş sonuç" gibi görünmesini
+        engeller. Diğer hata kodları (4xx/5xx) kalıcıdır — yeniden
+        denenmez, `raise_for_status` yükseltir.
+        """
         self._throttle()
         url = f"{self.BASE_URL}{path}"
-        logger.debug(f"GET {url} params={params}")
-        response = self.session.get(url, params=params, timeout=self.timeout)
-        self._last_request = time.time()
-        response.raise_for_status()
-        return response.json()
+        for deneme in range(1, self.retry_deneme + 1):
+            logger.debug(f"GET {url} params={params}")
+            response = self.session.get(url, params=params, timeout=self.timeout)
+            self._last_request = time.time()
+            if response.status_code == 429 and deneme < self.retry_deneme:
+                gecikme = self.retry_gecikme_sn * deneme
+                logger.warning(
+                    f"OpenAlex 429 (deneme {deneme}/{self.retry_deneme}); "
+                    f"{gecikme:.0f}s sonra yeniden deneniyor"
+                )
+                time.sleep(gecikme)
+                continue
+            response.raise_for_status()
+            return response.json()
 
     def works(
         self,
@@ -346,25 +370,65 @@ class OpenAlexClient:
         return data
 
 
+AYRILMIS_SOZCUKLER = {"AND", "OR", "NOT"}
+
+
+def boolean_arama_ifadesi(filter_terms: list[str]) -> str:
+    """OpenAlex `search` parametresi için parantezli boolean ifade kurar.
+
+    Her PICO bileşeni (ör. ``yerleştirme saldırım translocat release``)
+    tokenlara bölünür ve ``(t1 OR t2 …)`` olarak kapatılır; bileşenler
+    `` AND `` ile zincirlenir:
+
+        (yerleştirme OR saldırım OR translocat OR release) AND (…)
+
+    Neden: `title_and_abstract.search` süzgeci çok kelimeli değeri
+    bitişik TAMLAMA olarak arar (ölçüldü, 2026-09-28): üretken PICO
+    bileşenleri (Türkçe+İngilizce karışık, 3-7 kelime) hiçbir özette
+    bitişik geçmediği için anahtar tekrarlı VE zinciri
+    ``meta.count=0`` döndürüyordu. OpenAlex `search` parametresi
+    ``(a OR b) AND (c OR d)`` yazımını destekler (resmi doküman); boşluk
+    ayıracı AND'dir, işleçler BÜYÜK harf olmalıdır — `AYRILMIS_SOZCUKLER`
+    içindeki bir sözcük ifadeyi bozmasın diye tırnaklanır.
+
+    Args:
+        filter_terms: `SearchQuery.filter_terms` — bileşen başına BİR
+            temiz ifade (etiket/Boolean sözdizimi içermez).
+
+    Returns:
+        `` AND `` ile bağlı ``(…)`` grupları; girdi boşsa boş dize.
+    """
+    gruplar: list[str] = []
+    for ifade in filter_terms or []:
+        tokenlar = [
+            f'"{t.upper()}"' if t.upper() in AYRILMIS_SOZCUKLER else t
+            for t in ifade.split()
+        ]
+        if tokenlar:
+            gruplar.append(f"({' OR '.join(tokenlar)})")
+    return " AND ".join(gruplar)
+
+
 def filtre_dizgesi(
     *,
     year_from: int | None = None,
     year_to: int | None = None,
     types: list[str] | None = None,
-    filter_terms: list[str] | None = None,
 ) -> str | None:
-    """`filter=` parametresine gönderilecek ham dizeyi üretir.
+    """`filter=` parametresine gönderilecek ham dizeyi üretir (yıl/tip).
+
+    NOT: Tam metin eşleşmesi bu fonksiyonun kapsamı DIŞINDADIR. Önceden
+    `filter_terms` burada `title_and_abstract.search` anahtarına çevriliyor
+    ve bileşen başına tekrarlanıyordu; ölçüldü (2026-09-28): çok kelimeli
+    değer OpenAlex'te bitişik tamlama arandığı için üretken PICO'da
+    ``meta.count=0``. Tam metin araması `boolean_arama_ifadesi`'nin
+    ürettiği `search=` parametresine taşındı. Bu fonksiyon yalnız
+    `from_publication_date`/`until_publication_date`/`type` süzgeçlerini
+    üretir; bunlar `search=` ile VE olarak birleşir (farklı anahtarlar).
 
     Arama kaydının denetlenebilir olması için `search_openalex` ile
-    `search_run._sentelen_sorgu` AYNI fonksiyonu çağırır. Sorgu
-    dizesi burada kopyalanırsa denetim kaydı gerçeği yansıtmaz.
-
-    Neden sözlük değil
-    ------------------
-    Aynı anahtar (`title_and_abstract.search`) birden çok kez geçtiği
-    için sözlük kullanılamaz: ikinciyi birincinin üstüne yazar ve VE
-    zinciri tek terime düşer (ölçüldü: yalnız 'survival mortality'
-    gitti, popülasyon terimi kayboldu).
+    `search_run._sentelen_sorgu` AYNI fonksiyonları çağırır. Sorgu
+    dizesi kopyalanırsa denetim kaydı gerçeği yansıtmaz.
     """
     parcalar: list[str] = []
     if year_from:
@@ -373,7 +437,6 @@ def filtre_dizgesi(
         parcalar.append(f"until_publication_date:{year_to}-12-31")
     if types:
         parcalar.append(f"type:{'|'.join(types)}")
-    parcalar += [f"title_and_abstract.search:{t}" for t in (filter_terms or []) if t]
     return ",".join(parcalar) or None
 
 
@@ -390,18 +453,24 @@ def search_openalex(
 
     Neden `filter_terms` var
     -----------------------
-    `query` parametresi doğrudan `OpenAlexClient.works(search=...)` olur.
-    OpenAlex `search` **Boolean/alan sözdizimi desteklemez**: `title:` öneki
-    ve `AND`/`OR` işleçleri yok sayılır, terimler torbalanır. Ölçülen
-    sonuç: aynı PICO ile 47 sonuç, neredeyse tamamı gürültü ("Nutritional
-    modulation ... in poultry", "Chemical mutagenesis: a survey of the
-    1975-1976 literature").
+    Ham `query` (kütüphane-genel Boolean dizgesi) doğrudan `search=`'e
+    verilemez: `title:`/`abstract:` alan önekleri OpenAlex'te yok sayılır
+    ve terimler torbalanır. Ölçülen sonuç (eski, 2026-09-28): 47 sonuç,
+    neredeyse tamamı gürültü ("Nutritional modulation ... in poultry",
+    "Chemical mutagenesis: a survey of the 1975-1976 literature").
 
-    `filter_terms` verilirse sorgu `title_and_abstract.search` filtrelerine
-    çevrilir; OpenAlex virgülle zincirlenen filtreleri **VE** olarak
-    uygular. Aynı PICO ile ölçülen doğru sonuç: 22 kayıt, hepsi konuyla
-    ilgili ("Chukar Seasonal Survival and Probable Causes of Mortality",
-    "Monitoring the survival rate of released chukars").
+    `filter_terms` verilirse `boolean_arama_ifadesi` her bileşeni
+    ``(t1 OR t2 …)`` grubuna kapatıp `` AND `` ile zincirler ve bu
+    ifade `search=` parametresine gider. Neden süzgeç değil: önceki
+    uygulama `title_and_abstract.search` anahtarını bileşen başına
+    tekrarlıyordu; OpenAlex çok kelimeli değeri bitişik TAMLAMA olarak
+    aradığı için üretken PICO bileşenleri (Türkçe+İngilizce, 3-7 kelime)
+    ölçülen 0 sonuç döndürüyordu (SEARCH-2982/9078/5201: openalex
+    kayıt=0). Kısa tamlamalı deneme PICO'su ("alectoris chukar",
+    "survival mortality") 22 ilgili kayıt verse de mekanizmanın kendisi
+    kırılgandı; `(a OR b) AND (c OR d)` resmi `search` sözdizimi,
+    bileşen içinde OR'u (eş anlamlılar) ve bileşenler arası AND'i tam
+    olarak ifade eder.
 
     Args:
         query: Boolean dizgesi (yalnızca `filter_terms` verilmezse kullanılır).
@@ -410,25 +479,25 @@ def search_openalex(
         year_to: Bitiş yılı.
         types: OpenAlex kayıt tipleri.
         email: Politika e-postası için.
-        filter_terms: VE ile zincirlenecek ham ifadeler.
+        filter_terms: VE ile zincirlenecek temiz ifadeler (bileşen başına BİR).
     """
     client = OpenAlexClient(email=email)
 
-    # OpenAlex aynı filtre anahtarını iki kez kabul ETMEZ; AND zinciri
-    # virgülle kurulur, anahtar tekrarlanmaz. Dize `filtre_dizgesi`
-    # tarafından üretilir; arama kaydı da aynı fonksiyonu çağırır,
-    # böylece denetim kaydı gönderilen metinle aynı kalır.
+    # Tam metin eşleşmesi `search=` parametresinde parantezli boolean
+    # ifadeyle gider: filter_terms → `(t1 OR t2) AND (u1 OR u2)`.
+    # `title_and_abstract.search` süzgeç anahtarı çok kelimeli değeri
+    # bitişik TAMLAMA aradığı için kullanılmaz (ölçüldü 2026-09-28:
+    # üretken PICO'da meta.count=0). Yıl/tip süzgeçleri `filter=`'de
+    # kalır; `search_run._sentelen_sorgu` aynı fonksiyonları çağırdığı
+    # için denetim kaydı gönderilen metinle aynı kalır.
     aranacak: str | None = query
     if filter_terms:
-        # `search` gönderilirse gürültü geri gelir: filtreler AND işler,
-        # `search` ise VE zincirini bozup torbalıyordu.
-        aranacak = None
+        aranacak = boolean_arama_ifadesi(filter_terms) or None
 
     filter_str = filtre_dizgesi(
         year_from=year_from,
         year_to=year_to,
         types=types,
-        filter_terms=filter_terms,
     )
 
     all_works = []

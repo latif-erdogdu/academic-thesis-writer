@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Iterable, Optional
 
 from .crossref import search_crossref, CrossrefWork
-from .openalex import search_openalex, OpenAlexWork, filtre_dizgesi
+from .openalex import search_openalex, OpenAlexWork, boolean_arama_ifadesi
 from .semantic_scholar import search_semantic_scholar
 from .pubmed import search_pubmed, PubMedArticle
 from .google_scholar import search_google_scholar
@@ -32,16 +32,14 @@ def _sentelen_sorgu(
 
     Arama kaydı, gönderilmesi *gereken* metni yazmak denetimi
     yanıltır. Ölçülen ayrım: Crossref/PubMed gerçekten Boolean dizgesi
-    gönderir; OpenAlex ise `filter_terms`'ten kurduğu
-    `title_and_abstract.search` zincirini. OpenAlex için dize
-    `openalex.filtre_dizgesi` ile üretilir — istemciyle AYNI fonksiyon
-    çağrılır, kopya değil.
+    gönderir; OpenAlex ise `filter_terms`'ten kurduğu parantezli boolean
+    ifadeyi (`boolean_arama_ifadesi`) `search=` parametresi olarak.
+    OpenAlex için dize `openalex.boolean_arama_ifadesi` ile üretilir —
+    istemciyle AYNI fonksiyon çağrılır, kopya değil.
     """
     terimler = [t for t in (query.filter_terms or []) if t]
     if db == "openalex":
-        return filtre_dizgesi(
-            year_from=year_from, year_to=year_to, types=types, filter_terms=terimler
-        ) or ""
+        return boolean_arama_ifadesi(terimler) or ""
     if db == "crossref":
         # `search_crossref` `filter_terms`'i boşlukla birleştirir.
         return " ".join(terimler) if terimler else query.boolean_string
@@ -60,7 +58,8 @@ class DatabaseSearchResult:
     errors: list[str] = field(default_factory=list)
     #: API'ye fiilen gönderilen metin. `query.boolean_string` DENETLENEBİLİR
     #: değildir: Crossref/PubMed Boolean dizgesini gerçekten gönderir,
-    #: OpenAlex ise `title_and_abstract.search` süzgeç zinciri gönderir.
+    #: OpenAlex ise `filter_terms`'ten kurulan parantezli boolean ifadeyi
+    #: (`boolean_arama_ifadesi`) `search=` parametresi olarak gönderir.
     #: Arama kaydı ne gönderildiğini değil, ne gönderilmesi *gerektiğini*
     #: yazıyorsa denetim yanlış yönlendirir.
     sent_query: str = ""
