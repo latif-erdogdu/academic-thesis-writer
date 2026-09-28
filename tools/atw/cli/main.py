@@ -327,7 +327,20 @@ def _aramaya_pico(args, durum: dict) -> tuple:
     from tools.source_search import parse_pico
 
     if getattr(args, "pico", None):
-        return parse_pico(args.pico), None
+        # Boşluk denetimi `--rq` dalıyla AYNI olmalı. Ölçülen arıza:
+        # `--pico "alelik analizi"` gibi anahtar kelimesiz bir metin boş
+        # PICO'ya dönüşüyordu ve arama sessizce genel sorguyla çalışıyor,
+        # "arama tamamlandı" diye yeşil çıkıyordu. `--rq` dalı bunu zaten
+        # reddediyordu; iki dalın farklı davranması kural değil, eksiklikti.
+        pico = parse_pico(args.pico)
+        if not pico.non_empty():
+            return None, (
+                "❌ --pico metninden arama terimi üretilemedi.\n"
+                f"   Verilen: {args.pico!r}\n"
+                "   Etiketli yazım kullan ya da terim içeren serbest metin ver\n"
+                '   (örn. --pico "pop: Alectoris chukar, outcome: survival").'
+            )
+        return pico, None
 
     rq_id = getattr(args, "rq", None)
     sorular = durum.get("research_questions") or []

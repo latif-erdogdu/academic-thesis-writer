@@ -64,34 +64,160 @@ class SearchQuery:
         return self.boolean_string
 
 
+#: Bileşen -> anahtar kelime regex'leri. Serbest metinden çıkarım bunları
+#: kullanır. Hem İngilizce hem Türkçe terimler aynı bileşende toplanır:
+#: tez dili İngilizce olduğunda da Türkçe olduğunda da aynı yol çalışsın.
+#:
+#: Türkçe terimler `command source_search` aracındaki boş-PICO reddinin
+#: sebebini kaldırmak için eklendi: Türkçe bir RQ bu tabloda eşleşme
+#: bulamadığı için boş PICO'ya dönüşüyor ve arama hiç yapılamıyordu.
+ANAHTAR_KELIMELER: dict[str, tuple[str, ...]] = {
+    "population": (
+        r"(?:patients?|participants?|subjects?|individuals?|people|adults?"
+        r"|adolescents?|children|elderly|older adults?)",
+        # Türkçe: canlı topluluğu gösteren terimler.
+        r"(?:alectoris chukar|keklik(?:ler|i)?|chukar|popülasyon\w*|populasyon\w*"
+        r"|birey(?:ler)?|nesil|doğal popülasyon|dogal populasyon)",
+    ),
+    "intervention": (
+        r"(?:treatment|therapy|intervention|program|training|exercise"
+        r"|meditation|mindfulness|cbt|cognitive behavioral therapy|drug|medication)",
+        # Türkçe: yapılan müdahale / maruziyet.
+        r"(?:yerleştir\w*|translokasyon\w*|bırak\w*|birak\w*|saldırım\w*"
+        r"|saldirim\w*| reintroduc\w+|reintroduc\w+|translocat\w+"
+        r"|releas\w+|restor\w+| yeniden yerleştir\w*)",
+    ),
+    "comparison": (
+        r"(?:versus|vs\.?|compared to|control|placebo|waitlist"
+        r"|treatment as usual|usual care|no treatment)",
+        # Türkçe: karşılaştırma kolu.
+        r"(?:karşılaştır\w*|karsilastir\w*|kontrol (?:grubu|popülasyonu)?"
+        r"|yerli popülasyon\w*|doğal popülasyon\w*)",
+    ),
+    "outcome": (
+        r"(?:outcome|effect|efficacy|effectiveness|improvement|reduction"
+        r"|change|score|symptoms?|quality of life|well-being)",
+        # Türkçe: ölçülen sonuç değişkenleri.
+        r"(?:hayatta kal\w*|üreme\w*|ureme\w*|başar\w+|basar\w+|mortalite"
+        r"|yaşam\w*|yasam\w*|oran\w*|verim\w*)",
+    ),
+    "context": (
+        r"(?:setting|clinic|hospital|community|online|internet"
+        r"|primary care|primary health care)",
+        # Türkçe: ortam / çalışma ortamı.
+        r"(?:doğa\w*|doga\w*|saha\w*|ortam\w*|bölge\w*|bolge\w*|orman\w*)",
+    ),
+    "study_design": (
+        r"(?:randomized|RCT|controlled trial|systematic review|meta-analysis"
+        r"|cohort|case-control|cross-sectional)",
+        # Türkçe: tasarım / yöntem izi.
+        r"(?:saha çalışmas\w+|saha calisma\w+|gözlem\w*|gozlem\w*|izlem\w*"
+        r"|deneysel\w*|biçiminde|biciminde|tesadüfi\w*|tesadufi\w*"
+        r"|açık alan|acik alan)",
+    ),
+}
+
+#: `--pico` yazımındaki etiket -> PICO bileşeni. Uzun takma adlar önce
+#: sıralanır ki `pop` , `p` + artık `op:` olarak yorumlanmasın.
+#:
+#: Bu tablo olmadan `cmd_search`'in boş PICO hatasında önerdiği
+#: `--pico "pop: …, outcome: …"` yazımı ÇALIŞMIYORDU: etiketler
+#: bilinmediği için regex, etiketin kendi kelimesine (`outcome`)
+#: takılıp çevresindeki 30 karakteri kırpıyordu. Yani kullanıcı
+#: yazdığı terimi değil, teriminin kırılmış hâlini arıyordu ve akış
+#: "arama tamamlandı" diye yeşil çıkıyordu.
+ETIKET_ALANLARI: dict[str, str] = {
+    "population": "population",
+    "pop": "population",
+    "p": "population",
+    "intervention": "intervention",
+    "int": "intervention",
+    "exposure": "intervention",
+    "comparison": "comparison",
+    "comp": "comparison",
+    "control": "comparison",
+    "outcome": "outcome",
+    "out": "outcome",
+    "context": "context",
+    "ctx": "context",
+    "setting": "context",
+    "study_design": "study_design",
+    "study design": "study_design",
+    "design": "study_design",
+    "sd": "study_design",
+}
+
+#: Bir etiketin geçerli sayılması için solda sözcük sınırı olmalı;
+#: aksi hâlde "top:" içindeki "p:" etiket sayılırdı.
+_ETIKET_DESENI = re.compile(
+    r"(?<![0-9A-Za-z_])(?:"
+    + "|".join(re.escape(ad) for ad in sorted(ETIKET_ALANLARI, key=len, reverse=True))
+    + r")\s*:\s*",
+    re.IGNORECASE,
+)
+
+#: Bileşen değerinin sonundan atılacak ayraçlar. Nokta ATILMAZ: değer
+#: cümlenin sonu olduğunda nokta değerin parçasıdır.
+_SON_AYRACLAR = " \t\n,;:"
+
+
+def _etiketli_bilesenler(metin: str) -> dict[str, str]:
+    """`pop: X, outcome: Y` yazımından bileşenleri çıkar.
+
+    Değer, kendisinden sonraki etikete kadar olan metindir; yani
+    kırpılmaz. Yazarın yazdığı terim aranacak terimdir, çevresinden
+    30 karakter koparılan bir parça değil.
+
+    Args:
+        metin: Serbest metin.
+
+    Returns:
+        ``{bileşen: değer}``. Etiket yoksa boş sözlük.
+    """
+    bulunanlar = [m for m in _ETIKET_DESENI.finditer(metin)]
+    sonuc: dict[str, str] = {}
+    for sira, eslesme in enumerate(bulunanlar):
+        alan = ETIKET_ALANLARI[eslesme.group(0).strip().rstrip(":").strip().lower()]
+        bas = eslesme.end()
+        son = (
+            bulunanlar[sira + 1].start()
+            if sira + 1 < len(bulunanlar)
+            else len(metin)
+        )
+        deger = metin[bas:son].strip().strip(_SON_AYRACLAR).strip()
+        if deger:
+            sonuc[alan] = deger
+    return sonuc
+
+
 def parse_pico(text: str) -> PICO:
-    """Serbest metinden PICO bileşenlerini çıkar (basit heuristik)."""
+    """Metinden PICO bileşenlerini çıkar.
+
+    İki yol, öncelik sırasıyla:
+
+      1. **Açık etiket** (`pop: X, outcome: Y`) — yazarın niyetidir,
+         olduğu gibi alınır. Heuristik bunu ezmez.
+      2. **Anahtar kelime heuristiği** — etiket yoksa serbest metinden
+         çıkarılır. Terimler İngilizce ve Türkçe olabilir.
+
+    Args:
+        text: Serbest metin veya etiketli PICO yazımı.
+
+    Returns:
+        PICO. Eşleşme yoktur boş döner; **uydurma terin üretmez**.
+    """
     pico = PICO()
 
-    # Basit anahtar kelime eşleştirme
-    patterns = {
-        "population": [
-            r"(?:patients?|participants?|subjects?|individuals?|people|adults?|adolescents?|children|elderly|older adults?)",
-        ],
-        "intervention": [
-            r"(?:treatment|therapy|intervention|program|training|exercise|meditation|mindfulness|cbt|cognitive behavioral therapy|drug|medication|therapy)",
-        ],
-        "comparison": [
-            r"(?:versus|vs\.?|compared to|control|placebo|waitlist|treatment as usual|usual care|no treatment)",
-        ],
-        "outcome": [
-            r"(?:outcome|effect|efficacy|effectiveness|improvement|reduction|change|score|symptoms?|quality of life|well-being)",
-        ],
-        "context": [
-            r"(?:setting|clinic|hospital|community|online|internet|primary care|primary health care)",
-        ],
-        "study_design": [
-            r"(?:randomized|RCT|controlled trial|systematic review|meta-analysis|cohort|case-control|cross-sectional)",
-        ],
-    }
+    etiketli = _etiketli_bilesenler(text)
+    for alan, deger in etiketli.items():
+        setattr(pico, alan, deger)
 
     text_lower = text.lower()
-    for component, patterns_list in patterns.items():
+    for component, patterns_list in ANAHTAR_KELIMELER.items():
+        # Açık etiketle gelmiş bileşen heuristiğe YENİLİR.
+        if getattr(pico, component):
+            continue
+
         matches = []
         for pattern in patterns_list:
             for match in re.finditer(pattern, text_lower):
