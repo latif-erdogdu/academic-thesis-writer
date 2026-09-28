@@ -141,6 +141,11 @@ commands:
     usage: "/thesis:new <tez_id> <başlık>"
     handler: "python -m tools.atw.cli new {args[0]} {args[1]}"
 
+  - name: thesis:record
+    description: "Ajanın ürettiği JSON kaydını şema + kopuk referans denetiminden geçirip registry'ye yaz (araştırma sorusu, hipotez, iddia, atıf, boşluk, bulgu, ölçüm koleksiyonları). Kayıt ya hep yazılır ya hiç; id verilmezse otomatik atanır. sources/search_runs/evidence_registry/chapters/paragraphs/audit_registry yazılamaz — onların sahibi ayrı komut"
+    usage: "/thesis:record <REGISTRY> --file <KAYIT.json>"
+    handler: "python -m tools.atw.cli record {args[0]} --file {options.file}"
+
   - name: thesis:search
     description: "Araştırma sorusu için sistematik kaynak arama başlat"
     usage: "/thesis:search <RQ-ID> [--databases crossref,openalex,pubmed]"
