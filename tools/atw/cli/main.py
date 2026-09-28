@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from tools.atw.audit import UYARILACAK_TURLER, denetim_kimligi_ata, tum_denetimler
-from tools.atw.state import empty_state
+from tools.atw.state import empty_state, validate_state
 
 
 # Skill'in kurulu oldugu depo (semalar, sablonlar).
@@ -822,6 +822,107 @@ def _kapi_sirasi(kapi: str) -> int:
 
 
 @_durum_gerekir
+def cmd_record(args, durum) -> int:
+    """Ajanın ürettiği JSON kaydını denetleyip registry'ye yaz.
+
+    Neden ayrı komutlar değil
+    --------------------------
+    `research_questions`, `hypotheses`, `claims_registry`, `citations`,
+    `gap_registry`, `findings_registry` ve ölçüm koleksiyonlarının
+    yazıcısı YOKTU. `research_questions` boş kaldığı için
+    `research_question` kapısı hiç açılamıyor, sonraki altı kapı da
+    sırayla kilitleniyor ve `write`/`export` erişilemiyordu.
+
+    Her registry için ayrı komut, her biri kendi testine sahip ikinci
+    birer yüzey olurdu. Tek komut: tek denetim, tek hata biçimi.
+
+    Doğrulama sırası: varlık şeması → kimlik (ön ek/biçim/tekrar) →
+    kaydın eklenmesiyle oluşan YENİ kopuk referanslar. Son adım
+    `graph.kopuk_baglari` ile yapılır; ikinci bir kopukluk denetimi
+    yazılmaz, çünkü o tablo zaten şemadan türüyor ve her bütünlük
+    denetiminde raporlanıyor.
+
+    Kısmi yazma yoktur: dosyadaki kayıtlar ya hep yazılır ya hiç.
+    """
+    from tools.atw.record import (
+        KayitHatasi,
+        kaydet,
+        kayitlari_oku,
+        ozet,
+        varlik_tipi,
+        yazilabilir_registryler,
+    )
+
+    registry = getattr(args, "registry", None)
+    if not registry:
+        gecerli = ", ".join(sorted(yazilabilir_registryler()))
+        print("❌ Registry adı gerekli.")
+        print(f"   Yazılabilir: {gecerli}")
+        print("   Kullanım: record <REGISTRY> --file <KAYIT.json>")
+        return CIKIS_SORUN
+
+    # Registry adı ve sahiplik burada çözülür; `kayitlari_oku` hatası
+    # ile karışmasın diye dosya okunmadan ÖNCE.
+    try:
+        tip = varlik_tipi(registry)
+    except KayitHatasi as hata:
+        for satir in hata.mesajlar:
+            print(f"❌ {satir}")
+        return CIKIS_SORUN
+
+    yol = getattr(args, "file", None)
+    if not yol:
+        print("❌ --file gerekli (ajanın ürettiği JSON dosyası).")
+        print(f"   Örnek: record {registry} --file sorular.json")
+        return CIKIS_SORUN
+
+    cozulmus = _cozumle(yol)
+    if not cozulmus.exists():
+        print(f"❌ Dosya bulunamadı: {cozulmus}")
+        return CIKIS_SORUN
+
+    try:
+        kayitlar = kayitlari_oku(cozulmus)
+    except KayitHatasi as hata:
+        for satir in hata.mesajlar:
+            print(f"❌ {satir}")
+        return CIKIS_SORUN
+
+    try:
+        sonuc = kaydet(durum, registry, kayitlar)
+    except KayitHatasi as hata:
+        print(f"✗ {registry} kaydı reddedildi — {len(hata.mesajlar)} sorun:")
+        for satir in hata.mesajlar:
+            print(f"   • {satir}")
+        print("   Hiçbir kayıt yazılmadı.")
+        return CIKIS_SORUN
+
+    # Kaydedilmeden önce durumun şemaya uyduğunu doğrula. CLI'nin kendi
+    # `save_state`'i doğrulama yapmıyor; `cmd_write` ile aynı gerekçe.
+    durum_hatalari = validate_state(durum)
+    if durum_hatalari:
+        durum[registry] = [k for k in durum[registry] if k.get("id")
+                           not in set(sonuc["eklendi"] + sonuc["degistirildi"])]
+        print(f"✗ Kaydedilecek durum şemaya uymuyor ({len(durum_hatalari)} hata):")
+        for satir in durum_hatalari[:5]:
+            print(f"   • {satir}")
+        print(f"   {tip} kaydı geri alındı. Bu hatalar {registry} dosyasından")
+        print("   değil, tez durumunun başka registry'lerinden geliyor olabilir.")
+        return CIKIS_SORUN
+
+    save_state(durum)
+
+    for kayit in kayitlar:
+        etiket = "yeni" if kayit.get("id") in sonuc["eklendi"] else "güncel"
+        print(f"   {etiket:>6}  {ozet(kayit)}")
+    print(f"\n✅ {registry}: {len(sonuc['eklendi'])} eklendi, "
+          f"{len(sonuc['degistirildi'])} güncellendi → {len(durum[registry])} kayıt")
+    if registry == "research_questions":
+        print("   Sonraki adım: thesis:approve research_question")
+    return CIKIS_OK
+
+
+@_durum_gerekir
 def cmd_audit(args, durum) -> int:
     """Tez denetimi.
 
@@ -1042,6 +1143,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Akışı ve engelleri göster; durumu değiştirmez",
     )
     p_approve.set_defaults(func=cmd_approve)
+
+    # thesis:record
+    p_record = sub.add_parser(
+        "record",
+        help="Registry'ye kayıt yazar (şema + kopuk referans denetimiyle)",
+    )
+    p_record.add_argument(
+        "registry",
+        help="Registry adı (research_questions, hypotheses, claims_registry, "
+             "citations, gap_registry, findings_registry, …)",
+    )
+    p_record.add_argument(
+        "--file",
+        help="Ajanın ürettiği JSON dosyası (tek kayıt nesnesi ya da dizi)",
+    )
+    p_record.set_defaults(func=cmd_record)
 
     # thesis:audit
     p_audit = sub.add_parser("audit", help="Tez denetimi")
