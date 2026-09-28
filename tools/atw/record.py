@@ -222,8 +222,12 @@ def dogrula(registry: str, kayitlar: list[dict], durum: dict) -> list[str]:
     # denetlenir. `dogrula` saf kalsın diye `durum` MUTASYONA UĞRAMAZ.
     onceki = durum.get(registry) or []
     kimlikler = [k.get("id") for k in onceki if isinstance(k, dict)]
+    # Mevcut kayitlara YENI kayitlar EKLENMELI; registry'nin tamamini yeni
+    # kayitlarla DEGISTIRMEK mevcut kayitlari siler ve kopuk_baglari kontrolunde
+    # sahte 'kopuk referans' hatasi uretir. (Regresyon: ikinci citations kaydi
+    # yapilamiyordu; mevcut CIT-001..008 kayboluyordu.)
     aday = dict(durum)
-    aday[registry] = [
+    aday[registry] = list(onceki) + [
         dict(k) if isinstance(k, dict) else k for k in kayitlar
     ]
     for kayit in kayitlar:
