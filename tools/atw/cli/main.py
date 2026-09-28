@@ -656,6 +656,33 @@ def cmd_extract(args, durum) -> int:
         print(f"❌ PDF bulunamadı: {pdf_yolu}")
         return 1
 
+    # Ajan-küratörlüğü: ajan PDF'i okuyup doğruladığı alıntıyı doğrudan
+    # kaydet (matcher yerine). İki aşamalı akışın ikinci aşaması: motor
+    # aday üretir, ajan en iyisini seçip doğrular.
+    if getattr(args, "quote", None):
+        sira = _sonraki_kanit_sirasi(durum.get("evidence_registry", []))
+        kayit = {
+            "id": f"EVD-{sira:03d}",
+            "source_id": args.source,
+            "location": {
+                "page": args.page or 1,
+                "section": args.section or "",
+                "paragraph": 1,
+            },
+            "text": args.quote,
+            "evidence_type": "literature",
+            "strength": "direct",
+            "supports_claim": args.claim,
+            "verified": True,
+            "extracted_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "extraction_method": "manual",
+            "notes": "Ajan PDF'i okuyup doğruladı",
+        }
+        durum["evidence_registry"].append(kayit)
+        save_state(durum)
+        print(f"✅ {kayit['id']} kaydedildi (ajan-küratörlüğü, verified: true)")
+        return 0
+
     print(f"📄 Kanıt aranıyor: {args.source} → {args.claim}")
     bulgular = find_evidence_for_claim(pdf_yolu, iddia.get("text", ""))
 
@@ -1379,6 +1406,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_extract.add_argument("source", help="Kaynak ID (SRC-XXX)")
     p_extract.add_argument("--claim", required=True, help="Hedef iddia ID (CLM-XXX)")
     p_extract.add_argument("--pdf", help="Yerel PDF dosya yolu (source.json'da yol alanı yok)")
+    # Ajan-küratörlüğü: ajan PDF'i okuyup doğruladığı alıntıyı doğrudan
+    # kaydedebilir (matcher yerine). İki aşamalı akışın ikinci aşaması.
+    p_extract.add_argument("--quote", help="Ajanın doğruladığı alıntı metni (matcher yerine)")
+    p_extract.add_argument("--page", type=int, default=0, help="Alıntının sayfa numarası")
+    p_extract.add_argument("--section", default="", help="Alıntının bölüm başlığı")
     p_extract.set_defaults(func=cmd_extract)
 
     # thesis:write

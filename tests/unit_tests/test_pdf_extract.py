@@ -350,6 +350,49 @@ def test_find_evidence_ortak_kelime_kapsami_esigi_asar(tmp_path):
     assert bulgular, "Ortak anahtar kelime kapsami olan paragraf bulunamadi"
 
 
+def test_find_evidence_kaynakca_bolumu_aday_olamaz(tmp_path):
+    """Kaynakca bolumu kanit adayi olarak DONEMEZ.
+
+    Regresyon: kaynakca listesi anahtar kelime yogunlugu yuksek oldugu icin
+    kapsam motorunu domine ediyor; gercek alintilari (ozet/sonuc) top-k
+    disina iteriyordu. Kaynakca bolumleri artik aday deger.
+    """
+    from fpdf import FPDF
+    from tools.pdf_extract.extractor import find_evidence_for_claim
+
+    pdf = tmp_path / "deneme.pdf"
+    p = FPDF()
+    p.add_page()
+    p.set_font("Helvetica", size=10)
+    p.multi_cell(0, 5, "Abstract")
+    p.ln(2)
+    p.multi_cell(
+        0, 5,
+        "Breeding seasonality of chukar partridges is linked to environmental "
+        "conditions and habitat quality across the study region.",
+    )
+    p.ln(2)
+    p.multi_cell(0, 5, "References")
+    p.ln(2)
+    p.multi_cell(
+        0, 5,
+        "Chukar partridge breeding seasonality hybridization genetic diversity "
+        "habitat quality environmental conditions partridge populations.",
+    )
+    p.output(str(pdf))
+
+    iddia = ("Breeding seasonality, nesting and reproductive output of chukar "
+             "partridges are associated with environmental conditions and "
+             "habitat quality.")
+
+    bulgular = find_evidence_for_claim(str(pdf), iddia, top_k=5, min_similarity=0.3)
+
+    # Kaynakca paragrafı (hybridization vs) aday olmamalı
+    for b in bulgular:
+        assert "hybridization" not in b.text.lower(), \
+            "Kaynakca bolumu kanit adayi olarak dondu"
+
+
 def test_extract_dar_aralikli_pdf_sozcukleri_ayirir(tmp_path):
     """Sik dizilmis (dar aralikli) PDF metninde sozcukler ayrilmali.
 

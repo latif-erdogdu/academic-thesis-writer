@@ -22,6 +22,12 @@ logger = logging.getLogger(__name__)
 # sözcükleri doğru ayırır.
 _X_TOLERANCE = 1
 
+# Kaynakça/bibliography bölümleri kanıt adayı DEĞİLDİR: içerikleri anahtar
+# kelime yoğunluğu yüksek olduğu için kapsamlılık motorunu domine eder ve
+# gerçek alıntıları (özet, sonuç) top-k dışına iter. (Regresyon: SRC-010
+# için üst-5'in tamamı kaynakça listesi paragraflarından oluşuyordu.)
+_KAYNAKCA_BOLUMLER = {"references", "bibliography", "references and notes", "kaynakça", "kaynaklar"}
+
 
 def _sayfa_metinini_cikar(page) -> str:
     """Sayfa metnini çıkar (sözcüklerin doğru ayrılması için x_tolerance=1).
@@ -289,6 +295,10 @@ class PDFExtractor:
 
         for section in self.sections:
             if not section.text.strip():
+                continue
+
+            # Kaynakça bölümleri kanıt adayı değildir (yorum satırına bak)
+            if (section.title or "").strip().lower() in _KAYNAKCA_BOLUMLER:
                 continue
 
             # Paragraflara böl

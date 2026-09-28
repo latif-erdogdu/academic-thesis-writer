@@ -39,8 +39,10 @@ def _ornek_kanit() -> ExtractedEvidence:
     )
 
 
-def _args(source: str = "SRC-001", claim: str = "CLM-001", pdf: str | None = None) -> argparse.Namespace:
-    return argparse.Namespace(source=source, claim=claim, pdf=pdf)
+def _args(source: str = "SRC-001", claim: str = "CLM-001", pdf: str | None = None,
+          quote: str | None = None, page: int = 0, section: str = "") -> argparse.Namespace:
+    return argparse.Namespace(source=source, claim=claim, pdf=pdf,
+                              quote=quote, page=page, section=section)
 
 
 def _durum_yaz(tmp_path: Path, durum: dict) -> Path:
@@ -123,6 +125,31 @@ def test_extract_kayit_evidence_semasina_uyar(kurulum, monkeypatch):
     jsonschema.Draft202012Validator(_sema_yukle("evidence")).validate(
         durum["evidence_registry"][0]
     )
+
+
+def test_extract_ajan_kuratoregu_dogrulanmis_alinti_kaydeder(kurulum, monkeypatch):
+    """--quote ile ajanin dogruladigi alinti verified:true olarak kaydedilir.
+
+    İki asamali akisin ikinci asamasi: motor aday uretir, ajan PDF'i okuyup
+    dogruladigi alintiyi --quote ile dogrudan kaydeder.
+    """
+    tmp_path, pdf = kurulum
+    _durum_yaz(tmp_path, _temel_durum())
+    cli.cmd_extract(_args(
+        pdf=str(pdf),
+        quote="Chukars normally breed once a year, depending on environmental factors.",
+        page=2,
+        section="Abstract",
+    ))
+    durum = json.loads((tmp_path / "thesis_state.json").read_text(encoding="utf-8"))
+    assert len(durum["evidence_registry"]) == 1
+    kayit = durum["evidence_registry"][0]
+    assert kayit["verified"] is True
+    assert kayit["text"] == "Chukars normally breed once a year, depending on environmental factors."
+    assert kayit["location"]["page"] == 2
+    assert kayit["location"]["section"] == "Abstract"
+    assert kayit["extraction_method"] == "manual"
+    jsonschema.Draft202012Validator(_sema_yukle("evidence")).validate(kayit)
 
 
 def test_extract_ilk_paragraf_konumu_1_bazli_kaydedilir(kurulum, monkeypatch):
