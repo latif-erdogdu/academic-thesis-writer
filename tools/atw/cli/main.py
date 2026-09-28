@@ -1004,6 +1004,161 @@ def cmd_record(args, durum) -> int:
     return CIKIS_OK
 
 
+#: Eleme koruması tablosu: elenen kaynaklara referans veren registry alanları.
+#: (registry alanı, varlık adı, referans alanları). Tekil alanlar
+#: (source_id) ve dizi alanlar (supporting_source_ids) aynı biçimde
+#: taranır; `tools.atw.state.find_dangling_references` yalnızca tekil
+#: `<varlık>_id` mekanizmasını kapsadığı için dizi alanlar burada açıkça
+#: denetlenir.
+_KAYNAK_REFERANSLARI: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+    ("citations", "citation", ("source_id",)),
+    ("evidence_registry", "evidence", ("source_id",)),
+    ("gap_registry", "research_gap",
+     ("supporting_source_ids", "contradicting_source_ids")),
+    ("discussion_registry", "discussion", ("compared_source_ids",)),
+    ("figures", "figure", ("original_source_id",)),
+    ("tables", "table", ("original_source_id",)),
+    ("sources", "source", ("supersedes_source_id",)),
+)
+
+
+def _kaynak_baglari(
+    durum: dict, elenen: set[str], birlikte_elenen: set[str]
+) -> list[str]:
+    """Elenecek kaynaklara başka kayıtların verdiği referansları listeler.
+
+    `birlikte_elenen`: aynı çağrıda birlikte elenen kimlikler. O kayıt da
+    kaldırılacağı için kopuk bağ oluşmaz; örneğin SRC-002'nin
+    `supersedes_source_id` döndürdüğü SRC-001 ile SRC-002 birlikte
+    eleniyorsa referans koruması takılmaz.
+    """
+    bagli: list[str] = []
+    for alan, varlik, referans_alanlari in _KAYNAK_REFERANSLARI:
+        for kayit in durum.get(alan, []) or []:
+            if not isinstance(kayit, dict):
+                continue
+            kimlik = kayit.get("id")
+            if kimlik in birlikte_elenen:
+                continue
+            for referans_alan in referans_alanlari:
+                deger = kayit.get(referans_alan)
+                if isinstance(deger, str):
+                    if deger in elenen:
+                        bagli.append(
+                            f"{varlik} {kimlik} -> {referans_alan}={deger}"
+                        )
+                elif isinstance(deger, list):
+                    for ref in deger:
+                        if ref in elenen:
+                            bagli.append(
+                                f"{varlik} {kimlik} -> {referans_alan}={ref}"
+                            )
+    return bagli
+
+
+@_durum_gerekir
+def cmd_exclude(args, durum) -> int:
+    """Elenecek kaynakları kaynak kümesinden çıkar (PRISMA tarama kararı).
+
+    Neden var
+    ---------
+    Skill'in sistematik inceleme protokolü (SKILL.md 2.3) başlık/özet
+    taraması ve hariç tutma kriterlerini zorunlu kılar. Gerçek bir
+    koşuda üç arama 80 kayıt getirdi ve küme tarama olmadan `source_set`
+    kapısına gidemez: 25 çakışan DOI (aynı çalışma her aramada ayrı SRC
+    kimliği aldı) ve `fig-*`/`supp-*` ek-materyal DOI'leri vardı. Kayıt
+    elenecek bir komut yoktu (`record sources` sahiplik nedeniyle
+    reddediliyor).
+
+    Davranış
+    --------
+    1. Verilen kimlikler `sources`'dan çıkarılır; diğer kayıtlar
+       korunur.
+    2. Kimliği `included_source_ids`'ta olan HER arama kaydının PRISMA
+       akışı yeniden türetilir: `studies_included` azalır,
+       `reports_excluded` artar (`reports_sought` değişmez — o karar
+       verilmişti). Gerekçe `exclusion_reasons`'a yazılır; aynı gerekçe
+       varsa `count` birikir.
+    3. Referans koruması: elenen kaynağa başka bir kayıt referans
+       veriyorsa (citation, evidence, gap, discussion, figure/table,
+       supersedes) hiçbir şey YAZILMAZ.
+    4. Yazım yalnızca `validate_state` temizse yapılır.
+
+    Hiçbir adımda kısmi yazım yoktur.
+    """
+    kimlikler = list(dict.fromkeys(args.ids or []))
+    if not kimlikler:
+        print("❌ En az bir SRC kimliği gerekli.")
+        print("   Kullanım: exclude SRC-001 SRC-002 … --reason <GEREKÇE>")
+        return CIKIS_SORUN
+
+    sebep = (getattr(args, "reason", "") or "").strip()
+    if not sebep:
+        print("❌ --reason gerekli (boş olamaz).")
+        print("   Tarama kararının gerekçesi arama kayıtlarının "
+              "`exclusion_reasons`'ına yazılır.")
+        return CIKIS_SORUN
+
+    mevcut = {kayit.get("id") for kayit in durum["sources"]}
+    bilinmeyen = [k for k in kimlikler if k not in mevcut]
+    if bilinmeyen:
+        print("❌ Bilinmeyen kaynak kimlikleri: " + ", ".join(bilinmeyen))
+        return CIKIS_SORUN
+
+    elenen = set(kimlikler)
+    bagli = _kaynak_baglari(durum, elenen, elenen)
+    if bagli:
+        print(f"✗ {len(kimlikler)} kaynak elenemedi — referans veren kayıtlar var:")
+        for satir in bagli:
+            print(f"   • {satir}")
+        print("   Önce referansları çözün ya da elenecek kümeyi değiştirin.")
+        print("   Hiçbir şey yazılmadı.")
+        return CIKIS_SORUN
+
+    durum["sources"] = [
+        kayit for kayit in durum["sources"] if kayit.get("id") not in elenen
+    ]
+
+    degisen_kayitlar = 0
+    for kosu in durum.get("search_runs", []) or []:
+        dahil = kosu.get("included_source_ids", []) or []
+        kesilen = [k for k in kimlikler if k in dahil]
+        if not kesilen:
+            continue
+        kosu["included_source_ids"] = [k for k in dahil if k not in elenen]
+        akis = kosu["prisma_flow"]
+        akis["reports_excluded"] = akis.get("reports_excluded", 0) + len(kesilen)
+        akis["studies_included"] = akis.get("studies_included", 0) - len(kesilen)
+        nedenler = kosu.get("exclusion_reasons", []) or []
+        for neden in nedenler:
+            if neden.get("reason") == sebep:
+                neden["count"] = neden.get("count", 0) + len(kesilen)
+                break
+        else:
+            nedenler.append({"reason": sebep, "count": len(kesilen)})
+        kosu["exclusion_reasons"] = nedenler
+        degisen_kayitlar += 1
+
+    durum_hatalari = validate_state(durum)
+    if durum_hatalari:
+        print(f"✗ Eleme sonrası durum şemaya uymuyor ({len(durum_hatalari)} hata):")
+        for satir in durum_hatalari[:5]:
+            print(f"   • {satir}")
+        print("   Hiçbir şey yazılmadı.")
+        return CIKIS_SORUN
+
+    save_state(durum)
+
+    print(f"✅ {len(kimlikler)} kaynak elendi: {', '.join(kimlikler)}")
+    print(f"   Gerekçe: {sebep}")
+    if degisen_kayitlar:
+        print(f"   {degisen_kayitlar} arama kaydının PRISMA akışı güncellendi.")
+    else:
+        print("   Hiçbir arama kaydı bu kaynakları dahil etmemişti.")
+    print(f"   Kaynak kümesi: {len(durum['sources'])} kayıt")
+    return CIKIS_OK
+
+
 @_durum_gerekir
 def cmd_audit(args, durum) -> int:
     """Tez denetimi.
@@ -1248,6 +1403,24 @@ def build_parser() -> argparse.ArgumentParser:
     # ayrisirsa CLI bir turu kabul edip modul sessizce atlar.
     p_audit.add_argument("--type", choices=["citation", "methodology", "consistency", "integrity", "evidence", "all"], default="all")
     p_audit.set_defaults(func=cmd_audit)
+
+    # thesis:exclude
+    p_exclude = sub.add_parser(
+        "exclude",
+        help="Kaynak kümesinden kayıt ele (PRISMA tarama kararı)",
+    )
+    p_exclude.add_argument(
+        "ids",
+        nargs="+",
+        metavar="SRC-ID",
+        help="Kaynak kümesinden çıkarılacak kimlikler",
+    )
+    p_exclude.add_argument(
+        "--reason",
+        required=True,
+        help="Eleme gerekçesi — arama kayıtlarının `exclusion_reasons`'ına yazılır",
+    )
+    p_exclude.set_defaults(func=cmd_exclude)
 
     # thesis:status
     p_status = sub.add_parser("status", help="Tez durumu özeti")
