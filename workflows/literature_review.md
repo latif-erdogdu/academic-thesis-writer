@@ -1,100 +1,93 @@
 # Literatür Taraması Çalışma Akışı
 
-## Genel Bakış
-Bu çalışma akışı tez konunuzdaki mevcut araştırmaların sistematik incelemesini ve sentezlenmesini sağlar.
+> **Bu akış bir komut dizisidir.** Ana zincir: `workflows/thesis_creation.md`
+> Bu dosya yalnızca 2. ve 3. kapının (`search_strategy`, `source_set`) detayını verir.
 
-## Aşama 1: Konu Tanımı
-### Kapsam Belirleme
-- **Araştırma alanı**: Alan/etki alanını netleştirin
-- **Temel kavramlar**: Çekirdek terminolojiyi belirleyin
-- **Sınırlar**: Dahil etme/hariç tutma kriterlerini belirtin
+## Ön koşul
 
-### Arama Stratejisi
-1. Akademik veritabanları (Google Scholar, Scopus, Web of Science)
-2. Konferans bildirileri
-3. Uygun olduğunda gri literatür
-4. Alandaki anahtar yazarlar ve temel eserler
+`research_question` kapısı açık olmalıdır. Arama, kaydedilmiş bir soruya
+bağlanır; `thesis:search` verilen `RQ-XXX` kimliğini bulamazsa **arama yapmaz
+ve reddeder** — sessizce boş sonuç üretmez.
 
-## Aşama 2: Kaynak Toplama
-### Minimum Gereksinimler
-- **Temel makaleler**: Temel eserler (öncelik verin)
-- **Yayınlar**: Mümkünse son 5 yıl
-- **Yöntemsel çeşitlilik**: Uygunsa birden fazla yaklaşım
-- **Coğrafi/zamansal kapsam**: İlgiliyse net sınırlar
-
-### Toplama Şablonu
-```markdown
-## Kaynak Girişi
-### Atıf: [Tam atıf]
-### İlgililik puanı: Yüksek/Orta/Düşük
-### Temel katkı: [1-2 cümle]
-### Metodoloji türü: [Nicel/Nitel/Karma]
-### Tarih: YYYY
-### Durum: ✓ Doğrulandı / ⚠ İnceleme gerekli / ✗ Atıldı
+```bash
+thesis:approve --list      # kapının durumunu öğren
 ```
 
-## Aşama 3: Sentez Matrisi
-`templates/literature_matrix.md` kullanarak literatür matrisi oluşturun:
+## Adım 1 — Arama stratejisi (`search_strategy` kapısı)
 
-### Yapı
-```markdown
-# Literatür İnceleme Matrisi
-## Konu Alanı
-| Yazar (Yıl) | Temel Bulgular | Metodoloji | Sınırlılıklar | İlgililik Puanı |
-|---------------|-------------|--------------|-------------|-----------------|
-|               |             |              |             |                 |
+`thesis:search` bir **PICO** metnini veritabanlarına gönderir.
 
-## Belirlenen Temalar
-1. Tema 1: [Özet]
-2. Tema 2: [Özet]
-3. Tema 3: [Özet]
-
-## Belirlenen Boşluklar
-- Boşluk 1: [Mevcut araştırmada eksik olan]
-- Boşluk 2: [Daha fazla araştırma gerektiren]
-- Boşluk 3: [Katkı fırsatları]
+```bash
+thesis:search RQ-001 \
+  --pico "P: chukar I: reintroduction O: survival" \
+  --databases crossref,openalex,pubmed \
+  --year-from 2000 \
+  --max-results 100
 ```
 
-## Aşama 4: İnceleme Bölümü Yazımı
-### Bölüm 1: Literatür Taramasına Giriş
-- İnceleme amacı
-- Kapsam ve organizasyon
-- Seçim kriterleri
+### `--pico` şarttır, lüks değildir
 
-### Bölüm 2: Tematik Organizasyon
-- Kaynakları kronolojik olarak değil, tematik olarak gruplayın
-- Her tema içinde: sadece listelemeyin, sentezleyin
-- Desenleri, çelişkileri, boşlukları belirleyin
+`tools/source_search/query_builder.py:parse_pico` PICO'yu **İngilizce
+anahtar sözcük listesiyle** ayrıştırır. Türkçe bir sorudan boş PICO üretilir
+ve arama hiç sonuç döndürmez. Türkçe araştırma sorusu kullanıyorsanız
+`--pico` değerini **İngilizce** yazın; RQ metni Türkçe kalabilir.
 
-### Bölüm 3: Eleştirel Analiz
-- Metodolojik yaklaşımları karşılaştırın
-- Kanıt gücünü değerlendirin
-- Mevcut çalışma sınırlılıklarını belirtin
-- Araştırmanızı manzarada konumlandırın
+Bu bir kusurdur, tasarım değil — düzeltilmedi. Arama terimini İngilizce
+vermek, sorunun kendisinden ayrı bir karardır.
 
-### Bölüm 4: Boşluk Belirleme
-- Araştırma boşluklarını netleştirin
-- Boşlukları araştırma sorularıyla bağlayın
-- Bu tezin nasıl adreslediğini gerekçelendirin
+### Olası çıktı
 
-## Aşama 5: Tez Durumu ile Entegrasyon
-`schemas/thesis_state.json` şunu güncelleyin:
-- Literatür tarama tamamlanma durumu
-- Belirlenen temel temalar
-- Belgelendiği boşluklar
-- Doğrulanmış kaynak sayısı
+`search_runs` registry'si dolar: hangi veritabanına, hangi sorguyla, kaç
+sonuç geldi. Ham kayıtlar `sources`'a yazılmadan önce **incelenmelidir**.
 
-## Kalite Kontrol Listesi
-- [ ] Tüm kaynaklar düzgün atıflanmış
-- [ ] Literatür kapsamında boşluk yok
-- [ ] Temalar netleştirilmiş
-- [ ] Eleştirel analiz var (sadece özet değil)
-- [ ] Boşluklar araştırma sorularıyla net bağlantılı
-- [ ] Literatür matrisi tamamlanmış ve doğru
-- [ ] Tüm kaynaklar `references/source_verification.md` doğrulanmış
+## Adım 2 — Kaynak kümesi (`source_set` kapısı)
 
-## Sonraki Adımlar
-Literatür taraması tamamlandıktan sonra:
-1. Tez durum dosyasını güncelleyin
-2. Literatür bulgularına dayanarak metodolojiyi tanımlayın
-3. `workflows/methodology.md` akışına geçin
+```bash
+thesis:verify --all
+```
+
+`thesis:verify` her aday kaynağı Crossref ve OpenAlex'e sorar. Kabul
+ölçütleri `tools/source_verify/verify.py` içinde:
+
+- bibliyografik eşleşme ≥ **0.60** (`MIN_BIBLIOGRAPHIC_MATCH`)
+- en az **2 bağımsız** kaynak (`MIN_INDEPENDENT_SOURCES`)
+
+Doğrulanamayan kaynak `verified` işaretlenmez. **Geri çekilmiş (retract)
+kaynak hiçbir koşulda doğrulanmış sayılmaz.** Bu kaynaklar
+`tools/atw/write.py:haric_eden_kaynaklar` ile metinde kullanılamaz.
+
+```bash
+thesis:approve source_set
+```
+
+## Adım 3 — Kanıt çıkarımı (isteğe bağlı ama önerilir)
+
+`references/source_verification.md` bir kaynağın doğrulanmış olmasının
+**yeterli olmadığını**, iddiayı gerçekten desteklemesi gerektiğini söyler.
+Yerel PDF'ten alıntı çıkarmak için:
+
+```bash
+thesis:extract SRC-001 --claim CLM-001 --pdf <dosya.pdf>
+```
+
+Bu komut `evidence_registry`'yi doldurur — `record` komutunun yazamadığı,
+CLI'nin kendi sahibi olduğu tek registry budur.
+
+## Çıktılar
+
+| Registry | Komut | Sonraki kapı |
+|---|---|---|
+| `search_runs` | `thesis:search` | `search_strategy` |
+| `sources` | `thesis:verify` | `source_set` |
+| `evidence_registry` | `thesis:extract` | — (`research_gap` için girdi) |
+
+## Şablonlar
+
+- `templates/literature_matrix.md` — sentez matrisi
+- `references/source_verification.md` — doğrulama kuralları
+
+## Sık yapılan hata
+
+**Soru yazıp hemen aramaya geçmek.** `research_question` kapısı kapanmadan
+yapılan arama, kapı açıldığında geçersizdir: `thesis:approve` önceki kapılar
+onaylı değilse reddeder. Önce soruyu kaydedin ve onaylayın.

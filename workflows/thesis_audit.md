@@ -1,163 +1,113 @@
 # Tez Denetim Çalışma Akışı
 
-## Genel Bakış
-Bu çalışma akışı tez tamamlandıktan sonra kapsamlı akademik kalite kontrolü sağlar. Doğruluk, tutarlılık ve akademik bütünlük kontrol edilir.
+> **Bu akış bir komut dizisidir.** Ana zincir: `workflows/thesis_creation.md`
+> Bu dosya 7. kapının (`final_thesis`) denetim kısmını kapsar.
 
-## Denetim Aşamaları
+## Komut
 
-### 1. Yapısal Denetim
+```bash
+thesis:audit --type all
+```
 
-#### Bölüm Bütünlüğü
-- [ ] Bölüm 1: Giriş tamam mı?
-- [ ] Bölüm 2: Literatür Taraması tamam mı?
-- [ ] Bölüm 3: Yöntem tamam mı?
-- [ ] Bölüm 4: Bulgular tamam mı?
-- [ ] Bölüm 5: Tartışma tamam mı?
-- [ ] Bölüm 6: Sonuç ve Öneriler tamam mı?
+Kayıtlar `audit_registry`'ye yazılır. **En az bir `critical` bulgu varsa
+komut 1 döner** — böylece denetim doğrudan CI kapısı olabilir.
 
-#### Araştırma Soruları
-- [ ] Her soru tanımlı mı?
-- [ ] Her soru cevaplanabilir mi?
-- [ ] Sorular arasında tutarlılık var mı?
-- [ ] Tüm sorular cevaplanmış mı?
+## Gerçekte uygulanan dört denetim
 
-#### Hipotezler
-- [ ] Hipotezler test edildi mi?
-- [ ] Hipotezler bulgularla destekleniyor mu?
+| `--type` | Uygulanıyor mu? | Ne yapar |
+|---|---|---|
+| `citation` | evet | Eksik/fazla atıf, kaynakça eşleşmesi |
+| `methodology` | evet | Tasarım, analiz, geçerlilik tutarlılığı |
+| `integrity` | evet | Bütünlük denetimleri (aşağıdaki 5 sayaç) |
+| `evidence` | evet | Kanıt zinciri: bulgu → kanıt → kaynak |
+| `consistency` | **hayır** | ⚠️ `agents/consistency-auditor.md` ajanının işidir |
 
-#### Metodoloji
-- [ ] Tasarım açıklandı mı?
-- [ ] Evren ve örneklem tanımlandı mı?
-- [ ] Veri toplama süreci anlatıldı mı?
-- [ ] Analiz yöntemi belirtildi mi?
-- [ ] Geçerlik/güvenirlik değerlendirildi mi?
+`--type consistency` verildiğinde CLI **uyarı basar ve atlar**; sahte bir
+denetim kaydı yazmaz. Denetimi olmayan alanı denetlenmiş göstermek, hiç
+denetlenmemekten kötüdür.
 
-#### Sonuçlar
-- [ ] Bulgular sonuçlarla bağlantılı mı?
-- [ ] Öneriler bulgulara dayanıyor mu?
-- [ ] Teorik katkılar açıklandı mı?
+Bu, beş denetim türünden dördüdür. `--type all` dördünü çalıştırır.
 
-### 2. Atıf Denetimi
+## Bütünlük denetimi — beş sayaç
 
-#### Eksik Atıflar
-- Metinde atıf var mı?
-- Kaynakçada kayıt var mı?
-- Kaynak gerçekten iddiayı destekliyor mu?
-- Bibliyografik bilgiler doğru mu?
+`integrity` (ve `final_thesis` kapısı) `integrity_checks` alanında beş
+sayac döner:
 
-#### Fazla Kaynaklar
-- Kaynakçada var ama metinde atıf yok mu?
+| Sayaç | Anlamı |
+|---|---|
+| `fabricated_sources` | Doğrulanamayan kaynakla desteklenen iddia |
+| `unsupported_claims` | Kanıtı olmayan iddia |
+| `retracted_sources_in_use` | Geri çekilmiş kaynağa dayanan iddia |
+| `orphaned_citations` | Var olmayan kimliğe işaret eden atıf |
+| `unverifiable_claims` | Doğrulama durumu `unverified`/`pending` kalan iddia |
 
-#### Doğrulanmamış Kaynaklar
-- DOI/URL doğrulanabiliyor mu?
-- Kaynak mevcut mu?
+`"unverified"` bir sonuç değil, henüz çalışma durumudur
+(`tools/atw/audit.py:_TERMINAL_DOGRULAMA`).
 
-#### Kaynakça Tutarsızlıkları
-- Metin içi atıf → Kaynakça eşleşmesi
-- Kaynakça → Metin içi atıf eşleşmesi
-- Bibliyografik bilgi tutarlılığı
+## Elle yapılan denetimler
 
-### 3. Metodoloji Denetimi
+`thesis:audit` **üslubu, terminolojiyi ve edebi bütünlüğü denetlemez.**
+Aşağıdakiler ajana kalır:
 
-#### Araştırma Tasarımı
-- Tasarım açık ve uygun mu?
-- Tasarım araştırma sorularına uygun mu?
+### Terminoloji
+- [ ] Aynı kavram tez boyunca tek adla mı kullanılıyor?
+- [ ] Terim tanımı ilk kullanıldığı yerde verilmiş mi?
 
-#### Örneklem
-- Örneklem büyüklüğü belirlendi mi?
-- Örneklem yöntemi açıklandı mı?
-- Örneklem ile bulgular tutarlı mı?
+### Sayı tutarlılığı
+- [ ] Aynı veri farklı bölümlerde aynı rakamı veriyor mu?
+- [ ] Yuvarlama, metinden hesaplanabilir mi?
 
-#### Veri Toplama
-- Araçlar geçerli ve güvenilir mi?
-- Toplama süreci etik mi?
+### Örneklem tutarlılığı
+- [ ] Örneklem büyüklüğü her yerde aynı mı?
+- [ ] Dahil/hariç bırakılan birimler metot ile bulgular arasında tutarlı mı?
 
-#### Veri Analizi
-- Analiz yöntemi sorulara uygun mu?
-- İstatistiksel varsayımlar belirtildi mi?
+### Yöntem ↔ bulgular uyumu
+- [ ] Bulguların dayandığı analiz gerçekten yapılmış mı?
+- [ ] Yöntem bölümünde anlatılan ile yapılan aynı mı?
 
-#### Geçerlik / Güvenirlik
-- Geçerlilik testleri var mı?
-- Güvenilirlik katsayısı var mı?
+### Tutarlılık denetimi (ajan)
 
-### 4. Tutarlılık Denetimi
+```bash
+# CLI'da yok; ajanın görevi
+```
 
-#### Kavramlar
-- Aynı kavram farklı isimlerle kullanılıyor mu?
-
-#### Sayılar
 - Aynı veri farklı bölümlerde farklı mı?
+- Yöntem ile bulgular uyumlu mu?
 
-#### Tarihler
-- Tüm tarihler tutarlı mı?
+`agents/consistency-auditor.md` bu işi yapar. Raporunu
+`audit_registry`'ye yazması için ajan ayrıca `thesis:audit --type consistency`
+çağırmaz — bu komut uyarı basıp atlar.
 
-#### Örneklem
-- Örneklem büyüklüğü her yerde aynı mı?
+## Kritik sorun listesi
 
-#### Yöntem
-- Yöntem bölümü ile bulgular uyumlu mu?
+Denetim tamamlandıktan sonra önceliklendirilmiş tabloyu
+`templates/quality_report.md` şablonuyla doldurun.
 
-#### Bulgular
-- Bulgular araştırma sorularına cevap veriyor mu?
+| Sorun | Önem | Bölüm | Düzeltildi mi? |
+|---|---|---|---|
+| … | critical / major / minor | CH-00X | ✓ / ✗ |
 
-#### Sonuçlar
-- Sonuçlar bulgular tarafından destekleniyor mu?
+## Döngü
 
-### 5. Akademik Yazım Denetimi
+```bash
+thesis:audit --type all
+#   → 🔴 bulgu var mı? düzelt, sonra yine denetle
+thesis:approve final_thesis
+```
 
-#### Dil
-- [ ] Akademik üslup korunuyor mu?
-- [ ] Gereksiz süslü ifadeler yok mu?
-- [ ] Açık ve net mi?
+`final_thesis` en katı kapıdır: `approval.py` içinde bütünlük denetimi
+burada da devreye girer, yani `thesis:audit`'i ayrıca çalıştırmadan
+da kopuk referans, kanıtsız iddia ve retraksiyon denetimleri yapılır.
 
-#### Tekrar
-- [ ] Gereksiz tekrarlar var mı?
-- [ ] Terminolojik tutarlılık sağlandı mı?
+Kapı açıldıktan sonra:
 
-#### Mantık
-- [ ] Paragraf yapısı mantıklı mı?
-- [ ] Bölüm geçişleri akıcı mı?
-- [ ] İDDİA → KANIT → ANALİZ → BAĞLANTI yapısı kullanıldı mı?
+```bash
+thesis:export --format docx
+```
 
-#### Akademik Üslup
-- [ ] Nesnel ton mu?
-- [ ] Kanıta dayalı mı?
-- [ ] Kaynaklı iddialar var mı?
+## Ajanlar
 
-## 4 Bileşenli İç Denetim
-
-### Terminoloji (Kavramsal Tutarlılık)
-Aynı kavram farklı isimlerle kullanılıyor mu?
-
-### Numbers (Veri ve İstatistiksel Tutarlılık)
-Aynı veri farklı bölümlerde farklı mı verilmiş?
-
-### Sample/Population (Örneklem Tutarlılığı)
-Örneklem büyüklüğü her yerde aynı mı?
-
-### Method vs. Results (Yöntem ile Bulgular Arasındaki Uyum)
-Yöntem bölümü ile bulgular uyumlu mu?
-
-## Kritik Sorunların Listelenmesi
-
-En önemli sorunları önem derecesine göre listele:
-
-| Sorun | Önem Derecesi | Bölüm | Düzeltme Durumu |
-|-------|---------------|-------|-----------------|
-| [Sorun 1] | Yüksek | [Bölüm] | ✓ / ✗ |
-| [Sorun 2] | Orta | [Bölüm] | ✓ / ✗ |
-| [Sorun 3] | Düşük | [Bölüm] | ✓ / ✗ |
-
-## Denetim Raporu Oluşturma
-
-Denetim tamamlandıktan sonra `templates/quality_report.md` şablonu kullanılarak kapsamlı rapor oluştur.
-
-## Son Aşama
-
-- Tüm kritik sorunlar düzeltildi mi?
-- Tez akademik standartlara uygun mu?
-- Kaynaklar doğrulanmış mı?
-- Metodoloji tutarlı mı?
-
-Evet ise: Tez yayınlanmaya hazır.
-Hayır ise: Düzeltme döngüsüne gir.
+Denetimlerin altı aşaması CLI dışındadır; her birinin ajanı vardır:
+`agents/citation-auditor.md`, `agents/methodology-auditor.md`,
+`agents/consistency-auditor.md`, `agents/integrity-auditor.md`,
+`agents/gap-analyzer.md`, `agents/source-verifier.md`

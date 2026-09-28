@@ -1,177 +1,115 @@
 # Metodoloji Çalışma Akışı
 
-## Genel Bakış
-Bu çalışma akışı araştırma metodoloji bölümünüzün geliştirilmesini, katı ve savunulabilir metodolojik seçimler sağlayarak rehberlik eder.
+> **Bu akış bir komut dizisidir.** Ana zincir: `workflows/thesis_creation.md`
+> Bu dosya 5. kapının (`methodology`) kayıtlarını ve 7. kapının arkasındaki
+> bölüm yazımını kapsar.
 
-## Aşama 1: Araştırma Tasarımı Seçimi
+## Kapının kendisi hazırlık denetiminden geçmez
 
-### Nicel Yaklaşımlar
-- **Deneysel tasarım**: Kontrol grupları, randomizasyon
-- **Anket araştırması**: Örnekleme stratejisi, ölçüm araçları
-- **Veri analizi**: İstatistiksel yöntemler, yazılım paketleri
-- **Geçerlilik ölçümleri**: İç/dış geçerlilik stratejileri
+`methodology` kapısı, `tools/atw/approval.py:GATE_HAZIRLIK` içinde **boş
+denetim** taşır. Bu bir eksik değil, tasarım: bölümleri dolduran
+`thesis:write` bu kapının arkasındadır; denetim `chapters`'a baksa ilk
+bölüm hiç yazılamazdı (dairesel bağımlılık).
 
-### Nitel Yaklaşımlar
-- **Fenomenoloji**: Deneyimlerin derinlemesine anlaşılması
-- **Etnografi**: Kültürel bağlam ve dalış
-- **Olgu çalışması**: Belirli olgu(lar)ın ayrıntılı incelemesi
-- **Yerel teori**: Veriden teori geliştirme
-- **Geçerlilik ölçümleri**: Güvenilirlik, transfer edilebilirlik
+Bu yüzden metodoloji kayıtları **isteğe bağlı şema düzeyinde** durur ama
+tez inandırıcılığı için zorunludur. `thesis:audit --type methodology` boş
+metodolojiyi bulur.
 
-### Karma Yöntemler
-- **Eşzamanlı paralel**: Her ikisi toplanır, ayrı analiz edilir, sonuçlar birleştirilir
-- **Açıklayıcı sıralı**: Nicel → Nitel açıklama için
-- **Keşifsel sıralı**: Nitel → Nicel genelleme için
+## Kayıtlar
 
-## Aşama 2: Veri Toplama Planlaması
+Dört registry, dört komut. Hepsi `thesis:record` ile yazılır:
 
-### Örnekleme Stratejisi
-```markdown
-## Örnekleme Planı
-### Evren
-- Hedef evren tanımı
-- Erişilebilirlik değerlendirmeleri
-
-### Örnekleme Yöntemi
-- Olasılıksal örnekleme: Basit tesadüfi, tabakalı, küme
-- Olasılıksal olmayan: Amaçlı, kartopu, kolaylık (gerekçelendirin)
-
-### Örneklem Büyüklüğü
-- Gerekçe (nicel için güç analizi)
-- Doyma noktası (nitel için)
-- Dahil/hariç tutma kriterleri
-
-### Veri Toplama Dönemi
-- Başlangıç tarihi: YYYY-AA-GG
-- Bitiş tarihi: YYYY-AA-GG
-- Zaman aralığı gerekçesi
+```bash
+thesis:record variables   --file <DEGISKENLER.json>
+thesis:record datasets    --file <VERI_KUMELERI.json>
+thesis:record analyses    --file <ANALIZLER.json>
+thesis:record statistics  --file <ISTATISTIKLER.json>
+thesis:approve methodology
 ```
 
-## Aşama 3: Ölçüm Araçları
+Şemalar: `schemas/variable.json`, `schemas/dataset.json`,
+`schemas/analysis.json`, `schemas/statistic.json`
 
-### Nicel Ölçümler
-```markdown
-## Alet Tanımı
-### Kavramsal Operasyonelleştirme
-- [Kavram]: Nasıl ölçülür, neden bu ölçüm
+`thesis:record` yalnızca şu registry'leri kabul eder:
+`variables`, `datasets`, `analyses`, `statistics` (ve diğer ajan
+registry'leri). `chapters`, `sources`, `search_runs`, `evidence_registry`,
+`paragraphs`, `audit_registry` **CLI'nin sahibidir** — `thesis:record` bunları
+reddeder, çünkü yazılabilirliklerinin kanıtı yoksa içerik uydurulabilirdi.
 
-### Ölçek/Alet Özellikleri
-- Adı: [Alet adı]
-- Geliştirici: [Kim geliştirdi]
-- Madde sayısı: Soru sayısı
-- Yanıt formatı: Likert aralığı, çoktan seçmeli, vb.
-- Güvenirlik (α): Daha önce belirlenmiş veya pilot test edilmiş
-- Geçerlilik kanıtı: İçerik, yapısal, kriter
-```
+## Aşama 1 — Tasarım seçimi
 
-### Nitel Ölçümler
-```markdown
-## Görüşme Rehberi / Odak Grup Protokolü
-### Araştırma Soruları (görüşme için)
-1. [Soru 1]
-2. [Soru 2]
-3. [Soru 3]
+Bu kararlar **CLI'ya yazılmaz**; `analyses` registry'sine gider.
 
-### Soru Geliştirme
-- Literatür incelemesi bulgularından türetilmiş
-- Mümkünse pilot görüşmelerde test edilmiş
-- Açık uçlu vs. spesifik sorular
+| Yaklaşım | Ne zaman |
+|---|---|
+| Deneysel (kontrol grubu, randomizasyon) | Müdahale etkisi ölçülecekse |
+| Anket | Geniş örneklemde betimsel/genelleştirilebilir |
+| Nitel — fenomenoloji | Deneyimin derinlemesine anlamı |
+| Nitel — etnografi | Kültürel bağlam |
+| Nitel — durum çalışması | Tek olgu(ların) ayrıntılı incelenmesi |
+| Karma — eşzamanlı paralel | Her iki veri toplanır, ayrı analiz edilir |
+| Karma — açıklayıcı sıralı | Nicel bulguyu nitel açıklar |
+| Karma — keşifsel sıralı | Nitel bulgu nicel genellemeye yön verir |
 
-### Görüşme Lojistiği
-- Beklenen süre: X dakika
-- Format: Yüz yüze, sanal, hibrit
-- Kayıt izinleri alındı
-```
+## Aşama 2 — Veri toplama planı
 
-## Aşama 4: Veri Analiz Planı
+CLI'ya yazılan kısım `datasets` registry'sidir. Serbest metin kalanlar
+`templates/thesis_structure.md` ile bölüm taslağına gider.
 
-### Nicel Analiz
-```markdown
-## İstatistiksel Analiz Planı
-### Yazılım
-- Birincil: [SPSS/R/Python/Stata/vb.]
-- İkincil: [Uygunsa]
+- Evren ve erişilebilirlik
+- Örnekleme yöntemi (olasılıksal / olasılıksal değil — gerekçesiyle)
+- Örneklem büyüklüğü: nicelde **güç analizi**, nitelde **doyma noktası**
+- Veri toplama dönemi ve gerekçesi
 
-### Prosedürler
-1. Betimsel istatistikler
+## Aşama 3 — Ölçüm araçları
+
+- Kavramsal operasyonelleştirme: her kavram nasıl ölçülüyor, neden bu ölçüm
+- Güvenirlik (α) ve geçerlilik kanıtı (içerik / yapısal / kriter)
+- Nitelte: görüşme rehberi, pilot test, kayıt izinleri
+
+`references/methodology_rules.md` ayrıntılı kuralları verir.
+
+## Aşama 4 — Analiz planı
+
+`analyses` ve `statistics` registry'leri buraya yazılır.
+
+1. Yazılım ve sürümü
 2. Varsayım kontrolleri (normalite, homoskedastisite)
-3. Çıkarımsal testler (t-test, ANOVA, regresyon, vb.)
-4. Etki büyüklüğü hesaplamaları
-5. Uygunsa duyarlılık analizleri
+3. Çıkarımsal testler
+4. Etki büyüklüğü — yalnızca p değeri değil
+5. Duyarlılık analizleri
+
+Nitelte: kodlama süreci, üye kontrolü, akran danışmanlığı, denetim izi.
+
+## Aşama 5 — Etik
+
+Etik kurul onayı, aydınlatılmış onay, veri gizliliği, çıkar çatışması.
+Bu belgeler CLI'ya **yazılmaz**; `references/academic_integrity.md` ve tez
+metnindeki metodoloji bölümüne gider.
+
+## Aşama 6 — Geçerlilik ve güvenirlik
+
+Nicel: iç geçerlilik, dış geçerlilik, ölçüm güvenirlik belgelenmesi.
+Nitel: üçgenleme, üye kontrolü, kalıntı betimleme, refleksivite.
+
+## Kapıdan sonra — bölüm yazımı
+
+```bash
+thesis:write CH-001 --rq RQ-001
 ```
 
-### Nitel Analiz
-```markdown
-## Nitel Analiz Yaklaşımı
-### Yazılım (uygunsa)
-- NVivo, MAXQDA, Dedoose, veya manuel kodlama
+`--file` verilmezse brifing basılır ve **tez durumu değişmez**. Brifing,
+`variables`/`datasets`/`analyses`/`statistics` kayıtlarını ve yalnızca
+doğrulanmış kaynakları içerir. Metni `agents/writer.md` ajanı yazar.
+Ayrıntı: `workflows/chapter_writing.md`
 
-### Kodlama Süreci
-1. Veriyle tanışma
-2. Başlangıç/açık kodlama
-3. Tema/kategori geliştirme
-4. Tema iyileştirme ve doğrulama
-5. İllüstrasyon için alıntı seçimi
+## Kalite kontrol listesi
 
-### Katılık Ölçümleri
-- Üye kontrolü
-- Akran danışmanlığı
-- Kalıntı betimleme
-- Denetim izi
-```
-
-## Aşama 5: Etik Hususlar
-
-### Gerekli Belgeler
-- ETK/Etik kurul onay durumu
-- Aydınlatılmış onay prosedürleri
-- Veri gizliliği ve güvenliği önlemleri
-- Hassas bilgi işleme
-- Çıkar çatışması açıklaması
-
-## Aşama 6: Geçerlilik ve Güvenirlik Stratejileri
-
-### Nicel
-- İç geçerlilik kontrolleri
-- Dış geçerlilik stratejileri (genelleme)
-- Ölçüm güvenirlik belgelenmesi
-- Yanıt önyargısı azaltma
-
-### Nitel
-- Güvenilirlik stratejileri (triangülasyon, üye kontrolü)
-- Transfer edilebilirlik (kalıntı betimleme)
-- Bağlanılabilirlik (denetim izi)
-- Onaylanabilirlik (refleksivite bildirimi)
-
-## Aşama 7: Zaman Çizelgesi ve Kilometre Taşları
-
-```markdown
-## Metodoloji Uygulama Zaman Çizelgesi
-| Görev | Süre | Başlangıç Tarihi | Bitiş Tarihi |
-|------|----------|------------|----------|
-| [Görev 1] | X hafta | YYYY-AA-GG | YYYY-AA-GG |
-| [Görev 2] | X hafta | | |
-```
-
-## Çıktı Ürünleri
-Bu çalışma akışı şunu üretmelidir:
-1. Tam metodoloji bölümü taslağı
-2. Yöntem detaylarıyla güncellenmiş `schemas/thesis_state.json`
-3. Veri toplama araçları (anketler, görüşme rehberleri)
-4. Etik onay belgeleri referansı
-
-## Kalite Kontrol Listesi
-- [ ] Araştırma tasarımı gerekçelendirilmiş ve uygun
-- [ ] Örnekleme stratejisi net tanımlanmış
-- [ ] Ölçüm araçları doğrulanmış
-- [ ] Analiz planı ayrıntılı
-- [ ] Etik hususlar adreslenmiş
-- [ ] Geçerlilik/güvenirlik stratejileri belirtilmiş
-- [ ] Zaman çizelgesi gerçekçi ve ulaşılabilir
-- [ ] Tüm kaynaklar `references/citation_rules.md` per atıflanmış
-
-## Sonraki Adımlar
-Metodoloji tamamlandıktan sonra:
-1. Metodoloji bölümünü gözden geçirin ve sonlandırın
-2. Veri toplama başlatın (uygunsa)
-3. Bölüm yazımı için `workflows/chapter_writing.md` akışına geçin
+- [ ] Tasarım gerekçelendirilmiş ve araştırma sorusuna uygun
+- [ ] Örnekleme yöntemi ve büyüklüğü gerekçeli
+- [ ] Her değişken tanımlı ve ölçülebilir
+- [ ] Analiz planı varsayımlarıyla birlikte yazılı
+- [ ] Etki büyüklüğü hesaplanıyor
+- [ ] Etik onay durumu belirtilmiş
+- [ ] `thesis:audit --type methodology` temiz
+- [ ] Atıf biçimi `references/citation_rules.md` ile uyumlu

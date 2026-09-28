@@ -1,106 +1,118 @@
 # Bölüm Yazımı Çalışma Akışı
 
-## Genel Bakış
-Bu çalışma akışı tez bölümlerinin sistematik ve tutarlı şekilde yazılmasını sağlar. Her bölüm Tez Durumu ile uyumlu olmalı ve kaynak/iddia takibi gerektirir.
+> **Bu akış bir komut dizisidir.** Ana zincir: `workflows/thesis_creation.md`
+> Yalnızca `methodology` kapısı açıkken çalışır.
 
-## Ön Koşullar
-- `schemas/thesis_state.json` başlatılmış ve temel bilgiler doldurulmuş olmalı
-- `templates/thesis_structure.md` gözden geçirilmiş olmalı
-- Literatür araştırması tamamlanmış olmalı
+## Ön koşul: `methodology` kapısı açık olmalı
 
-## Bölüm Yazımı Adımları
+`thesis:write` ilk iş olarak `methodology` kapısını sorar. Kapı kapalıysa
+yazım yapılmaz: sonradan yöntem değişince yazılmış tüm bölümler geçersiz
+olur ve baştan yazılması gerekir.
 
-### Adım 1: Bölüm Hazırlığı
-1. Mevcut `thesis_state.json`'ı kontrol et
-2. Bölüm hedeflerini belirle
-3. Gerekli kaynakları ve iddiaları tanımla
-4. Bölüm şablonu oluştur
+## İki kip — ayrım bilinçlidir
 
-### Adım 2: Taslak Oluşturma
-1. Bölüm yapısını oluştur (alt başlıklar)
-2. Her alt başlık için ana iddiaları belirle
-3. İddia → Kaynak bağlantısını kur
-4. Taslak metni yaz
-
-### Adım 3: Kaynak Entegrasyonu
-1. Her iddia için kaynak doğrula
-2. Metin içi atıfları ekle
-3. Kaynakça listesini güncelle
-4. Atıf-kaynakça uyumunu kontrol et
-
-### Adım 4: Kalite Kontrolü
-1. Akademik dil kontrolü
-2. Mantıksal akış denetimi
-3. Kavramsal tutarlılık kontrolü
-4. Araştırma sorusuyla uyum kontrolü
-5. Tekrar kontrolü
-
-### Adım 5: Bölüm İçi Metadata Etiketleme
-Her paragraf için içsel olarak etiketle:
-```
-P-XXX
-Type: İDDİA / KANIT / ANALİZ / BAĞLANTI
-Claim: ...
-Evidence: SRC-XXX
-Citation: APA
-Confidence: DOĞRULANDI / BEKLEYEN / DOĞRULANAMADI
-Chapter: X
-Section: X.Y
+```bash
+thesis:write CH-001 --rq RQ-001                       # 1) brifing
+thesis:write CH-001 --rq RQ-001 --file <BOLUM.json>  # 2) denetle + kaydet
 ```
 
-## Bölüm Başına Kontrol Listesi
+| | `--file` yok | `--file` var |
+|---|---|---|
+| Ne yapar | brifing basar | bölümü denetler |
+| Tez durumu | **değişmez** | bölümü kaydeder |
+| Kim yazar | — | `agents/writer.md` ajanı |
 
-- [ ] Akademik dil kullanılmış
-- [ ] Mantıksal akış var
-- [ ] Kaynaklandırma tamamlanmış
-- [ ] Kaynak doğruluğu kontrol edilmiş
-- [ ] Kavramsal tutarlılık sağlanmış
-- [ ] Araştırma sorusuyla uyum var
-- [ ] Metodolojik uyum var
-- [ ] Tekrar kontrolü yapılmış
-- [ ] Veri doğruluğu sağlanmış
-- [ ] Atıf-kaynakça uyumu kontrol edilmiş
+**CLI Türkçe tez metni yazmaz.** Brifing verir, ajan metni yazar, CLI
+doğrular. Bu Writing Gate'in varoluş sebebidir.
 
-## Bölüm Yazımı İpuçları
+`--json` bayrağı brifingi makine-okunur biçimde basar:
 
-### Paragraf Yapısı
-Her paragraf tek ana düşünce etrafında kurulmalı.
-
-**Kullanılacak yapı:**
-```
-İDDİA → KANIT → ANALİZ → BAĞLANTI
+```bash
+thesis:write CH-001 --rq RQ-001 --json
 ```
 
-### Yazım Stili
-- Açık ve sistematik
-- Nesnel
-- Terminolojik olarak tutarlı
-- Gereksiz tekrar içermeyen
-- Kanıta dayalı
+## Adım 1 — Bölüm dosyasının şekli
 
-### Bölümler Arası Tutarlılık
-- Önceki bölümlerle çelişme olmamalı
-- Tanımlar tutarlı kullanılmalı
-- Sayılar aynı şekilde verilmeli
-- Örneklem büyüklüğü sabit kalmalı
+`--file` verilen dosya `schemas/chapter.json` şemasına uyan **tek bir
+JSON nesnesidir** (dizi değil):
 
-## Çıktı Formatı
+```json
+{
+  "id": "CH-001",
+  "number": 1,
+  "title": "Giriş",
+  "goal": "Araştırma sorusunu ve kapsamı tanımlamak",
+  "paragraphs": [
+    {
+      "id": "P-001",
+      "chapter": "CH-001",
+      "section": "1.1",
+      "type": "introduction",
+      "text": "Paragraf metni.",
+      "claims": ["CLM-001"],
+      "evidence": ["EVD-001"],
+      "sources": ["SRC-001"],
+      "citations": ["CLM-001"],
+      "research_questions": ["RQ-001"]
+    }
+  ]
+}
 ```
-Bölüm Başlığı
-Alt Başlık
 
-Akademik metin.
+Kurallar:
 
-Alt Başlık
+- `id` deseni `^CH-\d{3,}$`
+- `paragraphs[].chapter` dosyadaki `id` ile **aynı** olmalı
+- `research_questions` içindeki her kimlik `research_questions`
+  registry'sinde var olmalı
+- `sources` içindeki her kaynak `verified` olmalı — doğrulanmamış kaynak
+  bölüme giremez (`tools/atw/write.py:haric_eden_kaynaklar`)
+- `additionalProperties: false` — şemada olmayan alan hata verir
 
-Akademik metin.
+## Adım 2 — Denetim ve kayıt
 
-Kaynaklandırma
+Tek bir sorun bile varsa **hiçbir şey yazılmaz**; dosya yerinde bırakılır,
+görünen her sorun listelenir ve düzeltip yeniden deneyebilirsiniz. Yarım
+bölüm kaydedilmez.
+
+Kayıt öncesi tez durumu şemaya karşı da doğrulanır. Doğrulama hatası
+bölüm dosyasından değil, durumun **başka** registry'lerinden geliyor
+olabilir; bu durumda bölüm kaydedilmez ve yolundaki alanı düzeltmeniz
+gerekir.
+
+## Adım 3 — Kalite kontrolü (CLI'nin denetlemediği kısım)
+
+`thesis:write` şemayı ve bağları denetler, **üslubu denetlemez**. Elle
+kontrol edilecekler:
+
+- [ ] Akademik dil; süslü ifade yok
+- [ ] Paragraf yapısı: her paragraf bir iddia + dayanağı taşır
+- [ ] BULGU ve YORUM ayrı (`workflows/findings.md`)
+- [ ] Metin içi atıf ↔ `citations` eşleşmesi
+- [ ] `research_questions` bağlantısı doğru
+- [ ] Atıf biçimi `references/citation_rules.md` ile uyumlu
+- [ ] Terminoloji tez boyunca aynı
+
+## Toplu yazım
+
+```bash
+thesis:write CH-001 --rq RQ-001 --file <C1.json>
+thesis:write CH-002 --rq RQ-002 --file <C2.json>
+thesis:write CH-003 --rq RQ-001 --file <C3.json>
 ```
 
-## Sonraki Adım
-Bölüm yazımı tamamlandıktan sonra:
-1. Bölüm arası tutarlılık denetimi yap
-2. Tez Durumu'nu güncelle
-3. Gerekirse düzeltme yap
-4. Sonraki bölüme geç
+Bölümler birbirinden bağımsızdır; sıra onay zincirinde belirlenir,
+komutta değil.
+
+## Şablonlar
+
+- `templates/thesis_structure.md` — bölüm iskeleti
+- `references/citation_rules.md` — atıf biçimi
+
+## Sırada
+
+```bash
+thesis:audit --type all
+thesis:approve final_thesis
+thesis:export --format docx
+```
