@@ -86,11 +86,11 @@ def _arama_kaydi(dahil: list[str], kayit_sayisi: int = 2) -> dict:
         "database": "crossref",
         "query": "kurgusal arama terimleri",
         "timestamp": "2026-09-27T10:00:00+00:00",
-        "results_returned": 2,
+        "results_returned": kayit_sayisi,
         "inclusion_criteria": ["Sinif testi dahil etme olcutu"],
         "exclusion_criteria": ["Sinif testi dislama olcutu"],
         "prisma_flow": {
-            "records_identified": 2,
+            "records_identified": kayit_sayisi,
             "duplicates_removed": 0,
             "records_screened": kayit_sayisi,
             "records_excluded": 0,
@@ -164,7 +164,17 @@ def test_bos_gerekce_reddedilir(depo, capsys):
 # --- PRISMA akışı -----------------------------------------------------------
 
 def test_prisma_akis_ve_dahil_listesi_guncellenir(depo):
-    """Elemeyle arama kaydı: studies_included azalır, reports_excluded artar."""
+    """Elemeyle arama kaydı: screening elemesi records_excluded'a yazılır.
+
+    Ölçülen-bozuk aşama eşlemesi (düzeltildi, 2026-09-28): `exclude`
+    yalnızca başlık/DOI/özet TARAMA kararıdır (kopya, yayın türü,
+    konu dışı); hiçbir kaydın tam metnine ulaşılmaz. Bu yüzden eleme
+    `records_excluded` (başlık/özet aşaması) kademesine düşer ve
+    `reports_sought` (tam metin aranan raporlar) aynı miktar azalır.
+    Eski davranış her eleme kararını `reports_excluded`'a (tam metin
+    uygunluk) yazıyordu — PRISMA diyagramı, tam metni hiç alınmamış
+    raporlar için 'tam metin dışlanan N rapor' iddiası üretiyordu.
+    """
     durum = _durum(depo)
     durum["sources"] = [_kaynak("SRC-001"), _kaynak("SRC-002")]
     durum["search_runs"] = [_arama_kaydi(["SRC-001", "SRC-002"])]
@@ -175,9 +185,12 @@ def test_prisma_akis_ve_dahil_listesi_guncellenir(depo):
     kayit = _oku(depo)["search_runs"][0]
     assert kayit["included_source_ids"] == ["SRC-001"]
     assert kayit["prisma_flow"]["studies_included"] == 1
-    assert kayit["prisma_flow"]["reports_excluded"] == 1
-    assert kayit["prisma_flow"]["reports_sought"] == 2, (
-        "tam metin aşamasına alınan sayı değişmemeli (o karar VERİLMİŞTI)"
+    assert kayit["prisma_flow"]["records_excluded"] == 1
+    assert kayit["prisma_flow"]["reports_sought"] == 1, (
+        "tam metin aranan rapor sayısı, taramada elenen kayıt kadar azalmalı"
+    )
+    assert kayit["prisma_flow"]["reports_excluded"] == 0, (
+        "tam metin uygunluk aşamasında KARAR VERİLMEDİ — o sayı değişmemeli"
     )
 
 
@@ -206,6 +219,36 @@ def test_ayni_neden_birikir(depo):
 
     nedenler = _oku(depo)["search_runs"][0].get("exclusion_reasons", [])
     assert nedenler == [{"reason": "ek materyal", "count": 2}]
+
+
+def test_eleme_her_zaman_tarama_asamasina_yazilir(depo):
+    """Her `exclude` çağrısı başlık/özet (records_excluded) kademesine düşer.
+
+    Tarama kararı tam metin incelemesi DEĞİLDİR: rapor hiç alınmadı,
+    okuyucu hiç görmedi. `reports_excluded` (tam metin uygunluk) ve
+    `reports_not_retrieved` (alınamayan) kademeleri bu komutla
+    dokunulmadan kalmalı — aksi halde PRISMA diyagramı, tam metni hiç
+    alınmamış raporlar için 'tam metin aşamasında dışlandı' iddiası taşır.
+    """
+    from tools.atw.state import validate_prisma_flow
+
+    durum = _durum(depo)
+    durum["sources"] = [
+        _kaynak("SRC-001"), _kaynak("SRC-002"), _kaynak("SRC-003"),
+    ]
+    durum["search_runs"] = [_arama_kaydi(["SRC-001", "SRC-002", "SRC-003"], 3)]
+    _yaz(depo, durum)
+
+    cli.cmd_exclude(_ns("SRC-002", sebep="ek materyal"))
+    cli.cmd_exclude(_ns("SRC-003", sebep="kopya"))
+
+    akis = _oku(depo)["search_runs"][0]["prisma_flow"]
+    assert akis["records_excluded"] == 2
+    assert akis["reports_sought"] == 1
+    assert akis["reports_excluded"] == 0
+    assert akis["reports_not_retrieved"] == 0
+    assert akis["studies_included"] == 1
+    assert not validate_prisma_flow(akis), validate_prisma_flow(akis)
 
 
 # --- referans koruması ------------------------------------------------------

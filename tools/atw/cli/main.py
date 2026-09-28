@@ -1099,9 +1099,17 @@ def cmd_exclude(args, durum) -> int:
        korunur.
     2. Kimliği `included_source_ids`'ta olan HER arama kaydının PRISMA
        akışı yeniden türetilir: `studies_included` azalır,
-       `reports_excluded` artar (`reports_sought` değişmez — o karar
-       verilmişti). Gerekçe `exclusion_reasons`'a yazılır; aynı gerekçe
-       varsa `count` birikir.
+       `records_excluded` (başlık/özet tarama) artar ve `reports_sought`
+       aynı miktar azalır. Gerekçe `exclusion_reasons`'a yazılır; aynı
+       gerekçe varsa `count` birikir.
+       `reports_excluded` (tam metin uygunluk) ve `reports_not_retrieved`
+       (alınamayan) kademelerine DOKUNULMAZ: `exclude` yalnızca
+       başlık/DOI/özet TARAMA kararıdır — hiçbir raporun tam metni
+       alınmaz, o rapor tam metin aşamasına hiç girmemiştir.
+       (Ölçülen-bozuk aşama eşlemesi düzeltildi, 2026-09-28: eski
+       davranış her tarama elemesini `reports_excluded`'a yazıyor,
+       PRISMA diyagramı tam metni hiç alınmamış raporlar için 'tam
+       metin dışlanan N rapor' iddiası üretiyordu.)
     3. Referans koruması: elenen kaynağa başka bir kayıt referans
        veriyorsa (citation, evidence, gap, discussion, figure/table,
        supersedes) hiçbir şey YAZILMAZ.
@@ -1150,8 +1158,13 @@ def cmd_exclude(args, durum) -> int:
             continue
         kosu["included_source_ids"] = [k for k in dahil if k not in elenen]
         akis = kosu["prisma_flow"]
-        akis["reports_excluded"] = akis.get("reports_excluded", 0) + len(kesilen)
+        akis["records_excluded"] = akis.get("records_excluded", 0) + len(kesilen)
+        akis["reports_sought"] = akis.get("reports_sought", 0) - len(kesilen)
         akis["studies_included"] = akis.get("studies_included", 0) - len(kesilen)
+        # `reports_excluded` (tam metin uygunluk) ve `reports_not_retrieved`
+        # (alınamayan) kademelerine dokunulmaz: tarama kararı hiçbir raporun
+        # tam metnini görmeden verilir (kopya/yayın türü/konu dışı →
+        # başlık, DOI ve özet düzeyinde).
         nedenler = kosu.get("exclusion_reasons", []) or []
         for neden in nedenler:
             if neden.get("reason") == sebep:
