@@ -344,10 +344,22 @@ def _dogrula(durum: dict[str, Any]) -> None:
     }
 
     atiflanan: set[str] = set(atiflanan_kaynak_kimlikleri(durum))
+    # Paragraf atiflari (CIT-XXX) kaynak kimliklerine (SRC-XXX) cozulmeli;
+    # CIT ID'leri sources sozlugunde bulunmaz. (Regresyon: cozum yapilmadigi
+    # icin gercek atif iceren her bolum 'kaynak uydurulamaz' hatasiyla
+    # reddediliyordu.)
+    cit_to_src = {
+        c.get("id"): c.get("source_id")
+        for c in durum.get("citations") or []
+        if c.get("id") and c.get("source_id")
+    }
     for bolum in durum.get("chapters") or []:
         for paragraf in bolum.get("paragraphs") or []:
             atiflanan.update(paragraf.get("sources") or [])
-            atiflanan.update(paragraf.get("citations") or [])
+            for cit in paragraf.get("citations") or []:
+                src = cit_to_src.get(cit)
+                if src:
+                    atiflanan.add(src)
 
     for kimlik in sorted(atiflanan):
         if kimlik not in kaynaklar:

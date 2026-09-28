@@ -163,6 +163,23 @@ def test_atiflanan_kaynak_kimlikleri(dolu_tez):
     assert atiflanan_kaynak_kimlikleri(dolu_tez) == {"SRC-001", "SRC-002"}
 
 
+def test_dogrula_paragraf_atifini_kaynaga_cozer(dolu_tez):
+    """Paragraf citations (CIT-XXX) kaynak kimligine (SRC-XXX) cozulmelidir.
+
+    Regresyon: _dogrula, paragraf citations ID'lerini (CIT-XXX) kaynak kimlikleri
+    kumesine ekleyip hepsini sources sozlugune karsi kontrol ediyordu; CIT ID'leri
+    hicbir zaman sources'de olmadigi icin gercek bir atif iceren her bolum
+    'kaynak uydurulamaz' hatasiyla reddediliyordu.
+    """
+    from tools.atw.export import _dogrula
+
+    # P-001'e gercek bir atif ekle (CIT-001 -> SRC-001, sources'de var)
+    dolu_tez["chapters"][0]["paragraphs"][0]["citations"] = ["CIT-001"]
+
+    # _dogrula hata vermemeli: CIT-001'in kaynagi SRC-001 sources'de mevcut
+    _dogrula(dolu_tez)
+
+
 def test_kaynakca_yoksa_bos_liste():
     assert kaynakca_girdileri(_tez()) == []
 
