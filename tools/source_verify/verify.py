@@ -117,6 +117,39 @@ def _openalex_journal(item: dict) -> str:
     return ""
 
 
+def _get_with_retry(
+    ses,
+    url: str,
+    *,
+    params: dict | None = None,
+    headers: dict | None = None,
+    timeout: int = 30,
+    retry_deneme: int = 3,
+    retry_gecikme_sn: float = 2.0,
+):
+    """GET; 429'a karşı sınırlı geri çekilme + yeniden deneme.
+
+    Neden yeniden deneme
+    --------------------
+    Anonim havuzda OpenAlex (ara sıra Crossref) periyodik 429 döndürür.
+    Tek atışta hata yiyen `verify_crossref`/`verify_openalex` ayağı
+    hata siciliyle döner; `verify_source` o ayağı 'eşleşme yok' saymaz
+    ve kaynak spurious `unverified` olur (ölçüldü 2026-09-28:
+    52'si openalex kaynaklı 72 kayıt doğrulama bekliyordu). 429
+    geçicidir; geri çekilme ile yeniden deneme, geçici tıkanıklığı
+    'eşleşme bulunamadı' gibi göstermeyi engeller.
+
+    Diğer durum kodları (4xx/5xx) kalıcıdır — yeniden denenmez; son
+    yanıt döner, `raise_for_status` çağıran tarafından çağrılır.
+    """
+    for deneme in range(1, retry_deneme + 1):
+        yanit = ses.get(url, params=params, headers=headers, timeout=timeout)
+        if yanit.status_code == 429 and deneme < retry_deneme:
+            time.sleep(retry_gecikme_sn * deneme)
+            continue
+        return yanit
+
+
 class SourceVerifier:
     """Kaynak doğrulayıcı."""
 
@@ -130,6 +163,8 @@ class SourceVerifier:
         timeout: int = 30,
         min_match: float = MIN_BIBLIOGRAPHIC_MATCH,
         min_sources: int = MIN_INDEPENDENT_SOURCES,
+        retry_deneme: int = 3,
+        retry_gecikme_sn: float = 2.0,
     ):
         self.crossref_mailto = crossref_mailto
         self.openalex_email = openalex_email
@@ -139,6 +174,8 @@ class SourceVerifier:
         self.timeout = timeout
         self.min_match = min_match
         self.min_sources = min_sources
+        self.retry_deneme = max(1, retry_deneme)
+        self.retry_gecikme_sn = retry_gecikme_sn
         self.session = requests.Session()
         self.session.headers.update({
             "User-Agent": "AcademicThesisWriter/1.0",
@@ -173,7 +210,11 @@ class SourceVerifier:
             self._throttle(50)  # 50 req/s
             url = f"https://api.crossref.org/works/{doi}"
             headers = {"User-Agent": f"AcademicThesisWriter/1.0 (mailto:{self.crossref_mailto})"}
-            resp = requests.get(url, headers=headers, timeout=self.timeout)
+            resp = _get_with_retry(
+                requests, url, headers=headers, timeout=self.timeout,
+                retry_deneme=self.retry_deneme,
+                retry_gecikme_sn=self.retry_gecikme_sn,
+            )
             resp.raise_for_status()
             data = resp.json()
             item = data.get("message", {})
@@ -236,7 +277,12 @@ class SourceVerifier:
             url = f"https://api.openalex.org/works/https://doi.org/{doi}"
             params = {"mailto": self.openalex_email} if self.openalex_email else {}
             headers = {"User-Agent": "AcademicThesisWriter/1.0"}
-            resp = requests.get(url, params=params, headers=headers, timeout=self.timeout)
+            resp = _get_with_retry(
+                requests, url, params=params, headers=headers,
+                timeout=self.timeout,
+                retry_deneme=self.retry_deneme,
+                retry_gecikme_sn=self.retry_gecikme_sn,
+            )
             resp.raise_for_status()
             item = resp.json()
 
