@@ -166,7 +166,7 @@ def test_betik_metadata_only_oldugunu_soyler() -> None:
     )
 
 
-def test_betik_içerik_agacini_listelemez() -> None:
+def test_betik_icerik_agacini_listelemez() -> None:
     """Kuru calistirma, icerik agaci dosyalarini ONERMEMELI.
 
     Yanlis cozum olan "4 dizini pakete kopyala" seceneginin kuru
