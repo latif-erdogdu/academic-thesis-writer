@@ -92,7 +92,7 @@ def test_audit_kritik_bulgu_durumda_hata_kodu_doner(depo, capsys):
     """Kopuk referans varsa cikis kodu 1 olmali (CI gate'i olarak calisabilmeli)."""
     durum = _bos_durum(depo)
     durum["citations"] = [
-        {"id": "CIT-001", "source_id": "SRC-999", "style": "apa7",
+        {"id": "CIT-001", "paragraph_id": "P-001", "source_id": "SRC-999", "style": "apa7",
          "in_text_form": "(Yazar, 2020)"}
     ]
     (depo / "thesis_state.json").write_text(

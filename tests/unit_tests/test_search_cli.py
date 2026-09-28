@@ -41,10 +41,26 @@ from tools.atw.state import empty_state
 
 @dataclass
 class _AramaSonucu:
-    """`tools.source_search.SearchRunResult` ile aynı okuma yüzeyi."""
+    """`tools.source_search.SearchRunResult` ile aynı okuma yüzeyi.
+
+    `to_dict()` çıktısı `schemas/search_run.json` ile UYUMLUDUR: CLI
+    artık yazmadan önce doğruladığı için sahte sonuç da geçerli olmak
+    zorunda. `inclusion_criteria`/`exclusion_criteria` dizi olmalı ve
+    boş olamaz (`minItems: 1`), `prisma_flow` ise tam sekiz sayı
+    taşımalı.
+    """
 
     search_run_id: str = "SEARCH-0001"
-    prisma_flow: dict = field(default_factory=lambda: {"records_identified": 0})
+    prisma_flow: dict = field(default_factory=lambda: {
+        "records_identified": 0,
+        "duplicates_removed": 0,
+        "records_screened": 0,
+        "records_excluded": 0,
+        "reports_sought": 0,
+        "reports_not_retrieved": 0,
+        "reports_excluded": 0,
+        "studies_included": 0,
+    })
     deduplication: object = field(default_factory=lambda: type(
         "D", (), {"stats": {"removed": 0}})())
     included_source_ids: list = field(default_factory=list)
@@ -54,11 +70,11 @@ class _AramaSonucu:
         return {
             "id": self.search_run_id,
             "database": "crossref",
-            "query": "",
+            "query": "patients cognitive behavioral therapy quality of life",
             "timestamp": "2026-09-27T10:00:00+00:00",
             "results_returned": 0,
-            "inclusion_criteria": {},
-            "exclusion_criteria": [],
+            "inclusion_criteria": ["Sinif testi olcutu"],
+            "exclusion_criteria": ["Sinif testi dislama olcutu"],
             "prisma_flow": self.prisma_flow,
         }
 

@@ -64,12 +64,40 @@ def _onayli_oncekiler(depo: Path, kapi: str) -> dict:
 
     durum = _durum(depo)
     durum["research_questions"] = [{"id": "RQ-001", "text": "Soru", "type": "main", "status": "pending"}]
-    durum["search_runs"] = [{"id": "SR-001"}]
-    durum["sources"] = [{"id": "SRC-001", "doi": "10.1/x"}]
+    durum["search_runs"] = [{
+        "id": "SEARCH-0001",
+        "database": "crossref",
+        "query": "kurgusal arama terimleri",
+        "timestamp": "2026-09-27T10:00:00+00:00",
+        "results_returned": 0,
+        "inclusion_criteria": ["Sinif testi dahil etme olcutu"],
+        "exclusion_criteria": ["Sinif testi dislama olcutu"],
+        "prisma_flow": {
+            "records_identified": 0,
+            "duplicates_removed": 0,
+            "records_screened": 0,
+            "records_excluded": 0,
+            "reports_sought": 0,
+            "reports_not_retrieved": 0,
+            "reports_excluded": 0,
+            "studies_included": 0,
+        },
+    }]
+    durum["sources"] = [{
+        "id": "SRC-001",
+        "title": "Kurgusal Kaynak",
+        "source_type": "article",
+        "verification": {
+            "status": "verified",
+            "bibliographic_match": 1.0,
+            "verified_at": "2026-09-27T10:00:00+00:00",
+            "verification_sources": ["crossref"],
+        },
+    }]
     durum["gap_registry"] = [{"id": "GAP-001", "statement": "S", "gap_type": "population",
-                              "evidence_ids": [], "confidence": "low"}]
+                              "evidence_ids": ["EVD-001"], "confidence": "low"}]
     durum["findings_registry"] = [{"id": "FND-001", "rq_id": "RQ-001", "statement": "S",
-                                   "evidence_ids": []}]
+                                   "evidence_ids": ["EVD-001"]}]
     for onceki in APPROVAL_GATES[: APPROVAL_GATES.index(kapi)]:
         onay_ver(durum, onceki)
     _yaz(depo, durum)

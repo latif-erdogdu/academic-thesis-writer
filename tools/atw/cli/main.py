@@ -211,7 +211,30 @@ def _durum_gerekir(fn):
 
 
 def save_state(state: dict) -> None:
-    """thesis_state.json kaydet."""
+    """thesis_state.json kaydet — DOĞRULAMAYLA.
+
+    Bu fonksiyon düz `write_text` ile yazıyordu. `tools/atw/state.py`
+    içindeki eş adlı fonksiyon ise `validate_state` çağırıp hatalı
+    durumda `ValueError` fırlatıyor. Aynı ada sahip iki farklı
+    davranış, hatanın hangi yoldan geldiğini gizliyordu: kütüphane
+    yolu reddediyor, CLI sessizce yazıyordu.
+
+    Ölçülen sonuç: `thesis:search` üç kez çalıştıktan sonra gerçek
+    tez durumu 312 şema hatası taşıyordu ve kimse bunu görmemişti.
+    Arama katmanı `journal`/`volume`/`issue`/`pages` için `None`,
+    `access_date` ve `verified_at` için `""` yazıyordu; `search_run`
+    kayıtları da dört ayrı ihlal içeriyordu.
+
+    Doğrulama BAŞARISIZ olursa hiçbir dosya yazılmaz. Kısmi yazım,
+    sonraki koşuda okunamayan bir durum bırakır ve bu durumu üreten
+    komutun çıktısındaki hata mesajı yanıltıcı olur.
+    """
+    hatalar = validate_state(state)
+    if hatalar:
+        detay = "; ".join(hatalar[:5])
+        raise ValueError(
+            f"Durum semaya uymuyor ({len(hatalar)} hata), dosyaya yazılmadı: {detay}"
+        )
     state_file = durum_yolu()
     state["updated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     state["version"] = state.get("version", 0) + 1
