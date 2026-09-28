@@ -327,12 +327,35 @@ def cmd_search(args, durum) -> int:
     print(f"   Kopya kaldırıldı: {result.deduplication.stats['removed']}")
     print(f"   Dahil edilen: {len(result.included_source_ids)}")
 
-    # State'e kaydet
-    durum["search_runs"].append(result.to_dict())
-    for db_result in result.database_results:
-        for record in db_result.records:
-            if "id" in record and record["id"]:
-                durum["sources"].append(record)
+    # State'e kaydet. `result.to_dict()` burada KULLANILMAZ: o yalnızca
+    # İLK veritabanının kaydını döndürür — iki veritabanlı bir koşuda
+    # ikinci veritabanının kaydı sessizce kaybolur (ölçüldü: 3 arama ->
+    # 3 kayıt, üçü de crossref). `to_state_records()` veritabanı başına
+    # kayıt üretir ve `included_source_ids`'i doldurur; `included_records`
+    # ise TEKİLLEŞTİRİLMİŞ, kimlikli kayıtlardır (ham `database_results`
+    # listesi veritabanı başına kopya taşır).
+    durum["search_runs"].extend(result.to_state_records())
+
+    varolan = {kayit.get("id") for kayit in durum["sources"] if kayit.get("id")}
+    eklenen = [kayit for kayit in result.included_records if kayit.get("id")]
+    cakisan = sorted({kayit["id"] for kayit in eklenen} & varolan)
+    if cakisan:
+        print(f"✗ Kaynak kimliği çakışıyor: {cakisan}.")
+        print("   Arama, durumda kullanılan kimlikleri görmüyor; hiçbir şey yazılmadı.")
+        return CIKIS_SORUN
+
+    durum["sources"].extend(eklenen)
+
+    # Şema kapısı: `save_state` doğrular ama istisnayla değil, açık
+    # mesajla dönmek daha iyidir (`cmd_exclude` ile aynı biçim).
+    durum_hatalari = validate_state(durum)
+    if durum_hatalari:
+        print(f"✗ Arama sonrası durum şemaya uymuyor ({len(durum_hatalari)} hata):")
+        for satir in durum_hatalari[:5]:
+            print(f"   • {satir}")
+        print("   Hiçbir şey yazılmadı.")
+        return CIKIS_SORUN
+
     save_state(durum)
 
     return CIKIS_OK

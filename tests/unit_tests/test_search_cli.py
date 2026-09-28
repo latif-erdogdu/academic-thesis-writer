@@ -65,6 +65,17 @@ class _AramaSonucu:
         "D", (), {"stats": {"removed": 0}})())
     included_source_ids: list = field(default_factory=list)
     database_results: list = field(default_factory=list)
+    included_records: list = field(default_factory=list)
+
+    def to_state_records(self) -> list[dict]:
+        """Gerçek `SearchRunResult.to_state_records` yüzeyini yansıtır.
+
+        Bu sahtenin `database_results`'u boştur (varsayılan `[]`);
+        gerçek yöntem de boş listede hiç kayıt üretmezdi. CLI'nin yazma
+        yolunun çağırdığı bu yüzeyin VAR olması sözleşmedir — içerik bu
+        sahte için boştur.
+        """
+        return []
 
     def to_dict(self) -> dict:
         return {

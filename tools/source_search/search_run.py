@@ -105,6 +105,14 @@ class SearchRunResult:
         `inclusion_criteria` / `exclusion_criteria` burada PICO
         bileşenlerinden türetilen insan-okur metinlerdir; PRISMA'da
         bunlar araştırmacının tanımladığı ölçütlerdir, PICO değil.
+
+        `included_source_ids` ve per-DB akış sayıları, dedup'lanmış
+        kayıtların ilk görüldüğü veritabanına atfedilmesiyle üretilir
+        (bkz. `_ilk_db_eslesmesi`). Aynı çalışma iki veritabanında da
+        bulunduysa yalnızca ilk görülen sayılır; böylece kayıtların
+        `studies_included` sayısı `included_source_ids` listeleriyle
+        her zaman örtüşür ve `exclude`'un PRISMA yeniden türetimi
+        kesirli kalmaz.
         """
         kayitlar: list[dict] = []
         try:
@@ -116,16 +124,23 @@ class SearchRunResult:
             # `to_state_records` çağıranı hata görür.
             taban = 0
 
+        eslesme = self._ilk_db_eslesmesi()
+
         for sira, db in enumerate(self.database_results):
-            akis = dict(self.prisma_flow)
-            akis["records_identified"] = db.records_found
-            akis["records_screened"] = db.records_found
-            akis["duplicates_removed"] = 0
-            akis["records_excluded"] = 0
-            akis["reports_sought"] = db.records_found
-            akis["reports_not_retrieved"] = 0
-            akis["reports_excluded"] = 0
-            akis["studies_included"] = db.records_returned
+            bu_db_kimlikler = [
+                k for k in self.included_source_ids
+                if eslesme.get(k) == db.database
+            ]
+            akis = {
+                "records_identified": db.records_found,
+                "duplicates_removed": db.records_found - len(bu_db_kimlikler),
+                "records_screened": len(bu_db_kimlikler),
+                "records_excluded": 0,
+                "reports_sought": len(bu_db_kimlikler),
+                "reports_not_retrieved": 0,
+                "reports_excluded": 0,
+                "studies_included": len(bu_db_kimlikler),
+            }
 
             kayitlar.append({
                 "id": format_id("SEARCH", taban + sira) if taban else self.search_run_id,
@@ -137,10 +152,36 @@ class SearchRunResult:
                 "exclusion_criteria": self._dislama_olcutleri(),
                 "prisma_flow": akis,
                 "exclusion_reasons": [],
-                "included_source_ids": [],
+                "included_source_ids": bu_db_kimlikler,
                 "executor": "agent",
             })
         return kayitlar
+
+    def _ilk_db_eslesmesi(self) -> dict[str, str]:
+        """Her dahil edilen kimliğin ilk görüldüğü veritabanını bulur.
+
+        Neden nesne kimliği
+        -------------------
+        `deduplicate_sources` unique listesine kayıt NESNELERİNİN
+        REFERANSINI ekler (kopya üretmez); orchestrator
+        `record["id"] = src_id` atamasını o nesneye yapar. Böylece
+        dedup'lanmış `included_records` içindeki bir kayıt, onu ilk
+        getiren veritabanının ham `database_results[*].records`
+        listesinde AYNI Python nesnesi olarak bulunur. Aynı çalışmanın
+        ikinci veritabanındaki kopya nesnesi kimliksiz kaldığı için
+        hiçbir veritabanına atfedilmez — çift sayım yoktur.
+
+        Kimliği bulunamayan kayıt (nadir: dışarıdan eklenen) hiçbir
+        veritabanına atfedilmez; `included_source_ids`'te görünmez.
+        """
+        eslesme: dict[str, str] = {}
+        for db in self.database_results:
+            ham_kimlikler = {id(k): k for k in db.records}
+            for kayit in self.included_records:
+                kimlik = kayit.get("id")
+                if kimlik and kimlik not in eslesme and id(kayit) in ham_kimlikler:
+                    eslesme[kimlik] = db.database
+        return eslesme
 
     def _dahil_olcutleri(self) -> list[str]:
         """PICO bileşenlerinden okunur metin dize listesi."""
