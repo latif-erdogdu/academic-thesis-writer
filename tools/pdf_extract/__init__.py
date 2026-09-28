@@ -16,7 +16,11 @@ from .extractor import (
     ExtractedEvidence,
 )
 from .downloader import download_pdf, check_unpaywall_oa, PDFDownloader
-from .similarity import compute_tfidf_similarity, rank_evidence_for_claim
+from .similarity import (
+    compute_tfidf_similarity,
+    query_coverage,
+    rank_evidence_for_claim,
+)
 
 __all__ = [
     "extract_text_from_pdf",

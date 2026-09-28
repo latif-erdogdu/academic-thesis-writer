@@ -259,8 +259,8 @@ class PDFExtractor:
         top_k: int = 5,
         min_similarity: float = 0.3,
     ) -> list[ExtractedEvidence]:
-        """İddia metni için en alakalı kanıtları bul (TF-IDF similarity)."""
-        from .similarity import compute_tfidf_similarity
+        """İddia metni için en alakalı kanıtları bul (TF-IDF + kelime kapsamı)."""
+        from .similarity import compute_tfidf_similarity, query_coverage
 
         if claim_keywords is None:
             # İddia metninden anahtar kelimeleri çıkar
@@ -279,23 +279,29 @@ class PDFExtractor:
                 if len(paragraph) < 50:  # Çok kısa paragrafları atla
                     continue
 
-                # TF-IDF benzerlik
+                # TF-IDF benzerlik. Kısa iddia - uzun paragraf korpusunda cosine
+                # yapısal olarak düşük kalır (0.05-0.15); gerçek eşleşmeyi dışarı
+                # atmamak için kelime kapsamı (query_coverage) da birincil sinyal
+                # olarak değerlendirilir. (Regresyon: yalnız cosine eşiği 0.3 ile
+                # extract komutu ilgili PDF'lerde bile hiç kanıt bulamıyordu.)
                 similarity = compute_tfidf_similarity(claim_text, paragraph)
+                coverage = query_coverage(claim_text, paragraph)
+                combined = max(similarity, coverage)
 
-                if similarity >= min_similarity:
+                if combined >= min_similarity:
                     # Anahtar kelime bonus
                     keyword_bonus = 0.0
                     if claim_keywords:
                         matches = sum(1 for kw in claim_keywords if kw.lower() in paragraph.lower())
                         keyword_bonus = min(matches * 0.05, 0.2)
 
-                    final_score = similarity + keyword_bonus
+                    final_score = min(combined + keyword_bonus, 1.0)
 
                     evidence = ExtractedEvidence(
                         text=paragraph[:1000],  # Max 1000 char
                         page=section.page_start,
                         section=section.title,
-                        subsection=current_subsection.title if current_subsection else None,
+                        subsection=None,
                         paragraph_index=para_idx,
                         char_start=section.char_start,
                         char_end=section.char_end,

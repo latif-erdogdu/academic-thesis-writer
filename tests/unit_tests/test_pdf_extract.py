@@ -186,6 +186,170 @@ def test_download_from_source_record_bos_url_dikkat():
     assert sonuc.success is False
 
 
+class _Yanit:
+    """requests.Response'un download() icin gereken yuzeyini taklit eder."""
+
+    def __init__(self, govde: bytes, content_type: str = "application/pdf"):
+        self.govde = govde
+        self.headers = {"Content-Type": content_type}
+
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        return {}
+
+    def iter_content(self, chunk_size=8192):
+        for i in range(0, len(self.govde), chunk_size):
+            yield self.govde[i : i + chunk_size]
+
+
+def test_download_html_govde_pdf_sayilmaz(tmp_path, monkeypatch):
+    """HTML hata sayfasi .pdf olarak kaydedilmemeli; success=False donmeli.
+
+    Regresyon: download(), Content-Type PDF degilse YALNIZCA uyari verip
+    HTML govdeyi .pdf olarak yaziyor ve success=True donuyordu. Kaynak
+    taramasinda 'indi=14' rapor edilirken dosyalarin cogu gercekte HTML
+    hata sayfasiydi ve sonraki asama 'PDF degil' diye cokuyordu.
+    """
+    from tools.pdf_extract.downloader import PDFDownloader
+
+    indirici = PDFDownloader(download_dir=str(tmp_path), max_retries=1)
+    monkeypatch.setattr(
+        indirici.session,
+        "get",
+        lambda *a, **k: _Yanit(b"<!DOCTYPE html><html>hata sayfasi</html>", "text/html"),
+    )
+
+    sonuc = indirici.download("https://ornek.org/makale.pdf?p=1", filename="test.pdf")
+
+    assert sonuc.success is False
+    assert "PDF" in sonuc.error
+    assert not (tmp_path / "test.pdf").exists()
+
+
+def test_download_gercek_pdf_kaydedilir(tmp_path, monkeypatch):
+    """Gecerli %PDF govde kaydedilmeli ve success=True donmeli."""
+    from tools.pdf_extract.downloader import PDFDownloader
+
+    govde = b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF\n"
+    indirici = PDFDownloader(download_dir=str(tmp_path), max_retries=1)
+    monkeypatch.setattr(
+        indirici.session,
+        "get",
+        lambda *a, **k: _Yanit(govde, "application/pdf"),
+    )
+
+    sonuc = indirici.download("https://ornek.org/makale.pdf", filename="test.pdf")
+
+    assert sonuc.success is True
+    assert (tmp_path / "test.pdf").read_bytes() == govde
+
+
+def test_download_mevcut_cop_dosya_guvenilmez(tmp_path, monkeypatch):
+    """Diskteki HTML/cop .pdf dosyasi guvenilmemeli; yeniden indirilmeli.
+
+    Regresyon: 'zaten var' kestirmesi YALNIZCA dosyanin varligina bakiyordu;
+    onceki hatali indirmelerle olusan HTML copu success=True olarak rapor
+    ediliyor ve gecerli gorsele yeniden denenmeden hiç indirilemiyordu.
+    """
+    from tools.pdf_extract.downloader import PDFDownloader
+
+    cop = tmp_path / "test.pdf"
+    cop.write_bytes(b"<!DOCTYPE html><html>onceki hata</html>")
+
+    govde = b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF\n"
+    indirici = PDFDownloader(download_dir=str(tmp_path), max_retries=1)
+    monkeypatch.setattr(
+        indirici.session,
+        "get",
+        lambda *a, **k: _Yanit(govde, "application/pdf"),
+    )
+
+    sonuc = indirici.download("https://ornek.org/makale.pdf", filename="test.pdf")
+
+    assert sonuc.success is True
+    assert (tmp_path / "test.pdf").read_bytes() == govde
+
+
+def test_check_unpaywall_email_siz_ag_istemez(monkeypatch):
+    """Unpaywall API email gerektirir; email yoksa ag cagrisi YAPILMAMALI.
+
+    Regresyon: email opsiyonel saniliyordu; email'siz her DOI icin API
+    422 ile reddediyor, bos bir ag turu yapiliyor ve OA kontrolu sessizce
+    kayboluyordu (her kaynak icin yaklasik 5 saniye bos bekleyis).
+    """
+    from tools.pdf_extract.downloader import PDFDownloader
+
+    cagrilar = []
+    indirici = PDFDownloader.__new__(PDFDownloader)
+    indirici.unpaywall_email = None
+    monkeypatch.setattr(
+        "tools.pdf_extract.downloader.requests.get",
+        lambda *a, **k: cagrilar.append(a) or _Yanit(b"{}"),
+    )
+
+    sonuc = indirici.check_unpaywall("10.1000/ornek")
+
+    assert sonuc is None
+    assert cagrilar == []
+
+
+def test_query_coverage_ortak_kelimeler():
+    """query_coverage, iddianin oz kelimelerinin metindeki kapsamini verir."""
+    from tools.pdf_extract.similarity import query_coverage
+
+    iddia = "Breeding seasonality, nesting and reproductive output of chukar partridges are associated with environmental conditions and habitat quality."
+    paragraf = ("Breeding seasonality of chukar partridges begins in early spring; "
+                "nesting success and reproductive output depend on habitat quality "
+                "and environmental conditions.")
+    alakasiz = "Exercise improves cardiovascular health in older adults who walk regularly."
+
+    kapsam = query_coverage(iddia, paragraf)
+    sifir = query_coverage(iddia, alakasiz)
+
+    assert 0.5 <= kapsam <= 1.0, f"Alakali paragraf kapsami cok dusuk: {kapsam}"
+    assert sifir == 0.0
+
+
+def test_find_evidence_ortak_kelime_kapsami_esigi_asar(tmp_path):
+    """Kisa iddia - uzun paragraf korpusunda cosine dusuk kalsa bile ortak
+    anahtar kelime kapsami esigi asmali ve kanit donmelidir.
+
+    Regresyon: yalnizca TF-IDF cosine esigi (0.3) kullaniliyordu. Kisa iddia
+    ile uzun paragraf arasinda cosine yapisal olarak 0.05-0.15 araliginda
+    kaldigindan, gercek ve iliskili bir PDF'te bile extract komutu hicbir
+    zaman 'kanit bulunamadi' diyordu (10/10 cift sifir sonuc).
+    """
+    from fpdf import FPDF
+    from tools.pdf_extract.extractor import find_evidence_for_claim
+
+    pdf = tmp_path / "deneme.pdf"
+    p = FPDF()
+    p.add_page()
+    p.set_font("Helvetica", size=10)
+    # Bölüm tespiti (SECTION_PATTERNS) gercek PDF'teki gibi baslik satiri ister
+    p.multi_cell(0, 5, "Abstract")
+    p.ln(2)
+    p.multi_cell(
+        0, 5,
+        "Breeding seasonality of chukar partridges is closely linked to the "
+        "environmental conditions of the study area. Nesting begins in early "
+        "spring and reproductive output is higher where habitat quality and "
+        "dense nesting cover are available, supporting the association between "
+        "habitat and breeding performance of this species.",
+    )
+    p.output(str(pdf))
+
+    iddia = ("Breeding seasonality, nesting and reproductive output of chukar "
+             "partridges are associated with environmental conditions and "
+             "habitat quality.")
+
+    bulgular = find_evidence_for_claim(str(pdf), iddia, top_k=1, min_similarity=0.3)
+
+    assert bulgular, "Ortak anahtar kelime kapsami olan paragraf bulunamadi"
+
+
 # --- similarity: saf mantik (ag/PDF gerekmez) ------------------------------
 
 # Aday metinleri >= 50 karakter olmali ve iddiayla ortak kelime icermeli,

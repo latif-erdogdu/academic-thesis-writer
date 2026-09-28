@@ -137,6 +137,28 @@ def compute_tfidf_similarity(text1: str, text2: str) -> float:
     return engine.similarity(text1, text2)
 
 
+def query_coverage(query: str, text: str) -> float:
+    """İddianın öz kelimelerinin metinde ne kadarı geçiyor (0..1).
+
+    Kısa sorgu ile uzun paragraftan oluşan iki belgeli korpusta TF-IDF
+    cosine yapısal olarak düşük kalır (0.05-0.15); kanıt eşleştirmede
+    birincil sinyal bu yüzden kelime kapsamıdır: iddianın kaç öz
+    kelimesi paragrafta gerçekten var.
+    """
+    if not query or not text:
+        return 0.0
+    q_kelimeler = {
+        w for w in re.findall(TOKEN_PATTERN, query.lower()) if w not in STOPWORDS
+    }
+    if not q_kelimeler:
+        return 0.0
+    metin_kelimeler = {
+        w for w in re.findall(TOKEN_PATTERN, text.lower()) if w not in STOPWORDS
+    }
+    ortak = q_kelimeler & metin_kelimeler
+    return len(ortak) / len(q_kelimeler)
+
+
 def rank_evidence_for_claim(
     claim_text: str,
     evidence_texts: list[str],

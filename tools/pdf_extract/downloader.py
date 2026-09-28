@@ -16,6 +16,15 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+# PDF başlık imzası: spec gereği %PDF- ilk 1024 byte içinde bulunmalıdır
+# (pdfminer de aynı kuralı uygular).
+_PDF_IMZASI = b"%PDF-"
+
+
+def _pdf_imzasi_var(icerik: bytes) -> bool:
+    """Gövdenin gerçek bir PDF olduğunu %PDF imzasıyla doğrular."""
+    return _PDF_IMZASI in icerik[:1024]
+
 
 @dataclass
 class DownloadResult:
@@ -76,8 +85,10 @@ class PDFDownloader:
 
         file_path = self.download_dir / filename
 
-        # Dosya zaten varsa atla
-        if file_path.exists():
+        # Dosya zaten varsa ve GERCEKTEN PDF'se atla. Yalnizca varliga
+        # bakmak tehlikeliydi: onceki hatali indirmelerle olusan HTML copu
+        # 'indi' sayiliyor ve gecerli gorunum asla yeniden denenmiyordu.
+        if file_path.exists() and _pdf_imzasi_var(file_path.read_bytes()):
             return DownloadResult(
                 success=True,
                 file_path=file_path,
@@ -97,14 +108,32 @@ class PDFDownloader:
                 response.raise_for_status()
 
                 content_type = response.headers.get("Content-Type", "")
-                if "pdf" not in content_type.lower() and not url.lower().endswith(".pdf"):
-                    logger.warning(f"Content-Type PDF değil: {content_type}")
+
+                # Govdeyi bellekte topla ve %PDF imzasini dogrula. Content-Type
+                # uyarisi yetmez: cogu yayinci HTML sayfayi 200 ile PDF mis gibi
+                # sunar; imza kontrolu olmadan o sayfa .pdf olarak kaydediliyordu.
+                parcalar = []
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        parcalar.append(chunk)
+                govde = b"".join(parcalar)
+
+                if not _pdf_imzasi_var(govde):
+                    # Kaynak URL'den gelen HTML hata/yonlendirme sayfasi PDF
+                    # degildir; kayit YAPILMAZ, indirme basarisiz sayilir.
+                    return DownloadResult(
+                        success=False,
+                        source_url=url,
+                        content_type=content_type,
+                        error=(
+                            "İçerik PDF değil (imza yok; "
+                            f"Content-Type: {content_type or 'bilinmiyor'})"
+                        ),
+                        download_time_ms=int((time.time() - start) * 1000),
+                    )
 
                 # Dosyayı yaz
-                with open(file_path, "wb") as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        if chunk:
-                            f.write(chunk)
+                file_path.write_bytes(govde)
 
                 file_size = file_path.stat().st_size
                 elapsed = int((time.time() - start) * 1000)
@@ -140,6 +169,16 @@ class PDFDownloader:
     def check_unpaywall(self, doi: str) -> Optional[OAStatus]:
         """Unpaywall API ile OA durumu kontrol et."""
         if not doi:
+            return None
+
+        # Unpaywall API email parametresini ZORUNLU tutar; email'siz her
+        # istek 422 ile reddedilir. Email yoksa bos ag turu yapmadan
+        # atla — aksi halde her DOI icin ~5 sn bos bekleyis oluyordu.
+        if not self.unpaywall_email:
+            logger.warning(
+                "Unpaywall API email gerektirir; UNPAYWALL_EMAIL bulunamadi, "
+                "OA kontrolu atlandi"
+            )
             return None
 
         try:
