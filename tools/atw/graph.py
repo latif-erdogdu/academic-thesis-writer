@@ -267,6 +267,12 @@ def kopuk_baglari(durum: dict[str, Any]) -> list[str]:
     kapsaniyordu.
     """
     bulunanlar: list[str] = []
+    # _var_mi her cagrida _kayitlar(durum) tariyor (~0.25s); kopuk_baglari
+    # icinde her (kayit, kenar) cifti icin cagrilirsa bu cok yavaslar.
+    # (Regresyon: record citations ~180s, zaman asimi.) Hedef varlik tipi
+    # bazinda bir kez hesapla.
+    var_mi_onbellek: dict[str, set[str]] = {}
+
     for varlik, kayit in _kayitlar(durum):
         for kenar in kenar_tablosu():
             if kenar.kayit_tipi != varlik:
@@ -280,12 +286,15 @@ def kopuk_baglari(durum: dict[str, Any]) -> list[str]:
             if deger is None:
                 continue
             referanslar = deger if kenar.coklu_mu else [deger]
-            var = _var_mi(durum, kenar.hedef_tipi)
+            hedef = kenar.hedef_tipi
+            if hedef not in var_mi_onbellek:
+                var_mi_onbellek[hedef] = _var_mi(durum, hedef)
+            var = var_mi_onbellek[hedef]
             for referans in referanslar:
                 if isinstance(referans, str) and referans not in var:
                     bulunanlar.append(
                         f"{varlik}.{kenar.alan_adi} -> {referans} "
-                        f"({kenar.hedef_tipi} bulunamadi)")
+                        f"({hedef} bulunamadi)")
     return sorted(set(bulunanlar))
 
 
