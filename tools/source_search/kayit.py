@@ -133,6 +133,17 @@ def sema_uyumlu(kayit: dict[str, Any], *, simdi: str | None = None) -> dict[str,
     if "doi" in duzeltilmis:
         duzeltilmis["doi"] = duzelt_doi(duzeltilmis["doi"])
 
+    # `authors` liste girdileri semada `minLength: 1`. API'ler isimsiz
+    # yazar girdisi döndürebiliyor (Crossref: family+given boş;
+    # OpenAlex: author.display_name boş). Boş girdiler listeden
+    # düşürülür; tamamı boşsa `[]` kalır (semada geçerli).
+    if "authors" in duzeltilmis:
+        duzeltilmis["authors"] = [
+            str(yazar).strip()
+            for yazar in duzeltilmis["authors"]
+            if yazar is not None and str(yazar).strip()
+        ]
+
     # `year` şemada isteğe bağlı ama varsa `integer` olmalı. Bazı
     # kayıtlarda yıl bilinmiyor; uydurma bir yıl yazmak yanlış künye
     # demektir, bu yüzden alan DÜŞÜRÜLÜR (şemada zorunlu değil).
