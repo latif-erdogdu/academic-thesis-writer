@@ -135,12 +135,14 @@ class SystematicSearchOrchestrator:
                     raw = search_crossref(
                         query=query.boolean_string,
                         max_results=self.max_results_per_db,
+                        filter_terms=query.filter_terms,
                     )
                     records = [w.to_source_dict() for w in raw]
                 elif db == "openalex":
                     raw = search_openalex(
                         query=query.boolean_string,
                         max_results=self.max_results_per_db,
+                        filter_terms=query.filter_terms,
                     )
                     records = [w.to_source_dict() for w in raw]
                 elif db == "semantic_scholar":

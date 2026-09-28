@@ -261,7 +261,7 @@ class OpenAlexClient:
 
     def works(
         self,
-        filter: dict | None = None,
+        filter: dict | str | None = None,
         search: str | None = None,
         per_page: int = 25,
         page: int = 1,
@@ -288,9 +288,13 @@ class OpenAlexClient:
             "sort": sort,
         }
         if filter:
-            # OpenAlex filter formatı: key:value,key:value
-            filter_str = ",".join(f"{k}:{v}" for k, v in filter.items())
-            params["filter"] = filter_str
+            # OpenAlex filter formatı: key:value,key:value. Aynı anahtar
+            # birden çok kez geçebilir (`title_and_abstract.search` VE
+            # zinciri), bu yüzden SÖZLÜK değil DİZE kabul edilir.
+            if isinstance(filter, str):
+                params["filter"] = filter
+            else:
+                params["filter"] = ",".join(f"{k}:{v}" for k, v in filter.items())
         if search:
             params["search"] = search
         if select:
@@ -347,17 +351,67 @@ def search_openalex(
     year_to: int | None = None,
     types: list[str] | None = None,
     email: str | None = None,
+    filter_terms: list[str] | None = None,
 ) -> list[OpenAlexWork]:
-    """OpenAlex'te arama yap ve OpenAlexWork listesi döndür."""
+    """OpenAlex'te arama yap ve OpenAlexWork listesi döndür.
+
+    Neden `filter_terms` var
+    -----------------------
+    `query` parametresi doğrudan `OpenAlexClient.works(search=...)` olur.
+    OpenAlex `search` **Boolean/alan sözdizimi desteklemez**: `title:` öneki
+    ve `AND`/`OR` işleçleri yok sayılır, terimler torbalanır. Ölçülen
+    sonuç: aynı PICO ile 47 sonuç, neredeyse tamamı gürültü ("Nutritional
+    modulation ... in poultry", "Chemical mutagenesis: a survey of the
+    1975-1976 literature").
+
+    `filter_terms` verilirse sorgu `title_and_abstract.search` filtrelerine
+    çevrilir; OpenAlex virgülle zincirlenen filtreleri **VE** olarak
+    uygular. Aynı PICO ile ölçülen doğru sonuç: 22 kayıt, hepsi konuyla
+    ilgili ("Chukar Seasonal Survival and Probable Causes of Mortality",
+    "Monitoring the survival rate of released chukars").
+
+    Args:
+        query: Boolean dizgesi (yalnızca `filter_terms` verilmezse kullanılır).
+        max_results: En çok kaç kayıt.
+        year_from: Başlangıç yılı.
+        year_to: Bitiş yılı.
+        types: OpenAlex kayıt tipleri.
+        email: Politika e-postası için.
+        filter_terms: VE ile zincirlenecek ham ifadeler.
+    """
     client = OpenAlexClient(email=email)
 
-    filter_dict = {}
+    # OpenAlex aynı filtre anahtarını iki kez kabul ETMEZ; AND zinciri
+    # virgülle kurulur, anahtar tekrarlanmaz.
+    zincili: list[tuple[str, str]] = []
     if year_from:
-        filter_dict["from_publication_date"] = f"{year_from}-01-01"
+        zincili.append(("from_publication_date", f"{year_from}-01-01"))
     if year_to:
-        filter_dict["until_publication_date"] = f"{year_to}-12-31"
+        zincili.append(("until_publication_date", f"{year_to}-12-31"))
     if types:
-        filter_dict["type"] = "|".join(types)
+        zincili.append(("type", "|".join(types)))
+
+    aranacak: str | None = query
+    if filter_terms:
+        # `search` gönderilirse gürültü geri gelir: filtreler AND işler,
+        # `search` ise VE zincirini bozup torbalıyordu.
+        aranacak = None
+
+    filter_dict = {anahtar: deger for anahtar, deger in zincili}
+    if filter_terms:
+        # Aynı anahtar (`title_and_abstract.search`) birden çok kez geçtiği
+        # için SÖZLÜK KULLANILAMAZ: dict ikinciyi birincinin üstüne yazar
+        # ve VE zinciri tek terime düşer (ölçüldü: yalnız 'survival
+        # mortality' gitti, popülasyon terimi kayboldu). Ham dize kurulur.
+        #
+        # `zincili`ye ayrıca eklenmez: iki yol birden doldurulursa her
+        # terim iki kez yazılır (ölçülen arıza: filtre
+        # '...productivity,alectoris chukar,...productivity' oldu).
+        parcalar = [f"{anahtar}:{deger}" for anahtar, deger in filter_dict.items()]
+        parcalar += [f"title_and_abstract.search:{t}" for t in filter_terms if t]
+        filter_str = ",".join(parcalar)
+    else:
+        filter_str = ",".join(f"{k}:{v}" for k, v in filter_dict.items()) or None
 
     all_works = []
     per_page = 200
@@ -365,8 +419,8 @@ def search_openalex(
 
     while len(all_works) < max_results:
         data = client.works(
-            filter=filter_dict or None,
-            search=query,
+            filter=filter_str,
+            search=aranacak,
             per_page=per_page,
             page=page,
             sort="relevance_score:desc",

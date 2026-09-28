@@ -6,6 +6,7 @@ Docs: https://github.com/CrossRef/rest-api-doc
 """
 from __future__ import annotations
 
+import re
 import time
 import logging
 from dataclasses import dataclass
@@ -262,11 +263,14 @@ class CrossrefClient:
         sort: str = "relevance",
         order: str = "desc",
         select: list[str] | None = None,
+        bibliographic: str | None = None,
     ) -> dict:
         """Works endpoint'ini sorgula.
 
         Args:
             query: Arama sorgusu (title, author, keyword vb.)
+            bibliographic: `query.bibliographic` — alan öneksiz serbest
+                metin. Boolean/alan sözdizimi `query` ile karıştırılmamalı.
             filter: Filtreler (örn: {"type": "journal-article", "from-pub-date": "2020-01-01"})
             rows: Sayfa başına sonuç sayısı (max 1000)
             offset: Offset
@@ -281,7 +285,14 @@ class CrossrefClient:
             "order": order,
         }
         if query:
+            # DİKKAT: Crossref `query` parametresi Boolean/alan sözdizimi
+            # DESTEKLEMEZ. Ölçüldü: `query="((title:alectoris OR x) AND
+            # (title:survival))"` -> `total-results: 0`, yani kayıt yok.
+            # Alan bazlı aramanın ayrı parametreleri vardır; en geneli
+            # `query.bibliographic`. Çağıranlar `bibliographic=` kullanmalı.
             params["query"] = query
+        if bibliographic:
+            params["query.bibliographic"] = bibliographic
         if filter:
             # Crossref filter formatı: key:value,key:value
             filter_str = ",".join(f"{k}:{v}" for k, v in filter.items())
@@ -332,6 +343,22 @@ class CrossrefClient:
         return data["message"]
 
 
+def _duz_bibliografik_sorgu(query: str) -> str:
+    """Boolean dizgesini Crossref'in anladığı düz metne indirger.
+
+    Crossref `query`/`query.bibliographic` Boolean işleci (`AND`, `OR`,
+    `NOT`) ve alan öneki (`title:`, `author:`) YORUMLAMAZ; ölçülen sonuç
+    `total-results: 0`. Bu yüzden önekler ve işleçler atılır, geriye
+    terimler kalır. AND **uygulanamaz** — bu, Crossref'in gerçek bir
+    kısıtıdır ve dokümante edilmiştir; alaka sıralaması ilk terimlere
+    göre yapılır.
+    """
+    metin = re.sub(r"\b[a-zA-Z_]+:", " ", query)
+    metin = re.sub(r"[()]", " ", metin)
+    metin = re.sub(r"\b(?:AND|OR|NOT)\b", " ", metin, flags=re.IGNORECASE)
+    return re.sub(r"\s+", " ", metin).strip()
+
+
 def search_crossref(
     query: str,
     databases: list[str] | None = None,
@@ -340,12 +367,27 @@ def search_crossref(
     year_to: int | None = None,
     article_types: list[str] | None = None,
     mailto: str = "research@example.com",
+    filter_terms: list[str] | None = None,
 ) -> list[CrossrefWork]:
     """Crossref'te arama yap ve CrossrefWork listesi döndür.
 
     Kolaylık fonksiyonu: CLI ve üst seviye modüller için.
+
+    Boolean dizgesi `query=` olarak GÖNDERİLMEZ; ölçülen sonuç 0 kayıt.
+    Sorgu `query.bibliographic`'a, alan önekleri temizlenmiş halde yazılır.
     """
     client = CrossrefClient(mailto=mailto)
+
+    if filter_terms:
+        bibliographic = " ".join(t for t in filter_terms if t)
+    else:
+        bibliographic = _duz_bibliografik_sorgu(query)
+
+    if not bibliographic:
+        # Sorgulanabilir terim yoksa istek atılmaz. Crossref'e boş
+        # sorgu göndermek tüm külliyatı döndürür ve `sources`'a
+        # alakasız kaynak yazar.
+        return []
 
     filter_dict = {}
     if year_from:
@@ -361,7 +403,7 @@ def search_crossref(
 
     while len(all_works) < max_results:
         data = client.works(
-            query=query,
+            bibliographic=bibliographic,
             filter=filter_dict or None,
             rows=rows,
             offset=offset,

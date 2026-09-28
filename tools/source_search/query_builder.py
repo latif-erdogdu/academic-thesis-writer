@@ -59,6 +59,11 @@ class SearchQuery:
     databases: list[str]
     filters: dict = field(default_factory=dict)
     synonyms_used: list[str] = field(default_factory=list)
+    #: Bileşen başına BİR temiz ifade. `boolean_string` API'lerin
+    #: desteklemediği kütüphane-genel sözdizimidir; hedef API'nin
+    #: gerçekten anladığı parametreler bundan kurulur (bkz.
+    #: `search_openalex`). Sıra `PICO.to_dict()` sırasıdır.
+    filter_terms: list[str] = field(default_factory=list)
 
     def __str__(self) -> str:
         return self.boolean_string
@@ -190,6 +195,23 @@ def _etiketli_bilesenler(metin: str) -> dict[str, str]:
     return sonuc
 
 
+def _etiketleri_sidir(metin: str) -> str:
+    """Metinden `etiket:` öneklerini siler; heuristik bunu görmemeli.
+
+    Neden: etiketli yazımda anahtar kelime ETİKETİN İÇİNDE kalır.
+    `--pico "pop: keklik, outcome: hayatta kalma, design: saha"` metninde
+    heuristik `saha` kelimesini `design:` etiketinin içinde bulur ve
+    `context` alanına şunu yazar (ölçüldü):
+
+        'tcome: hayatta kalma, design: saha'
+
+    Bu değer OpenAlex'e VE filtresi olarak gönderilir ve arama 0 sonuç
+    verir. Etiket metni olmayan bir ham metinde böyle bir kirlilik
+    oluşamaz.
+    """
+    return _ETIKET_DESENI.sub(" ", metin)
+
+
 def parse_pico(text: str) -> PICO:
     """Metinden PICO bileşenlerini çıkar.
 
@@ -212,7 +234,7 @@ def parse_pico(text: str) -> PICO:
     for alan, deger in etiketli.items():
         setattr(pico, alan, deger)
 
-    text_lower = text.lower()
+    text_lower = _etiketleri_sidir(text).lower()
     for component, patterns_list in ANAHTAR_KELIMELER.items():
         # Açık etiketle gelmiş bileşen heuristiğe YENİLİR.
         if getattr(pico, component):
@@ -347,6 +369,11 @@ def build_boolean_query(
         databases=[database],
         filters=filters,
         synonyms_used=list(set(all_synonyms)),
+        # Bileşen başına ham ifade. Eş anlamlı genişletmesi ve
+        # durak kelime temizliği UYGULANMAZ: OpenAlex filtresi ham ifadeyi
+        # bekler, genişletilmiş terim havuzu tek bir ifadeyi yüzlerce
+        # kelimeye dönüştürüp hiçbir kayıt bulmayı garanti ederdi.
+        filter_terms=[deger.lower().strip() for deger in pico_dict.values()],
     )
 
 
