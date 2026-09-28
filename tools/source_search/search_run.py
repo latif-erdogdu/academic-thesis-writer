@@ -6,18 +6,46 @@ import time
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Iterable, Optional
 
 from .crossref import search_crossref, CrossrefWork
-from .openalex import search_openalex, OpenAlexWork
+from .openalex import search_openalex, OpenAlexWork, filtre_dizgesi
 from .semantic_scholar import search_semantic_scholar
 from .pubmed import search_pubmed, PubMedArticle
 from .google_scholar import search_google_scholar
 from .query_builder import build_multi_database_queries, PICO, parse_pico, SearchQuery
 from .deduplicate import deduplicate_sources, merge_duplicate_records, DedupResult
 
-from tools.atw.ids import format_id
+from tools.atw.ids import IdError, format_id, next_id, parse_id
 from tools.atw.state import load_state, save_state
+
+
+def _sentelen_sorgu(
+    db: str,
+    query: SearchQuery,
+    *,
+    year_from: int | None = None,
+    year_to: int | None = None,
+    types: list[str] | None = None,
+) -> str:
+    """API'ye fiilen gönderilen metni döndürür (arama kaydı için).
+
+    Arama kaydı, gönderilmesi *gereken* metni yazmak denetimi
+    yanıltır. Ölçülen ayrım: Crossref/PubMed gerçekten Boolean dizgesi
+    gönderir; OpenAlex ise `filter_terms`'ten kurduğu
+    `title_and_abstract.search` zincirini. OpenAlex için dize
+    `openalex.filtre_dizgesi` ile üretilir — istemciyle AYNI fonksiyon
+    çağrılır, kopya değil.
+    """
+    terimler = [t for t in (query.filter_terms or []) if t]
+    if db == "openalex":
+        return filtre_dizgesi(
+            year_from=year_from, year_to=year_to, types=types, filter_terms=terimler
+        ) or ""
+    if db == "crossref":
+        # `search_crossref` `filter_terms`'i boşlukla birleştirir.
+        return " ".join(terimler) if terimler else query.boolean_string
+    return query.boolean_string
 
 
 @dataclass
@@ -30,6 +58,12 @@ class DatabaseSearchResult:
     records: list[dict]  # source.json formatında
     execution_time_ms: int
     errors: list[str] = field(default_factory=list)
+    #: API'ye fiilen gönderilen metin. `query.boolean_string` DENETLENEBİLİR
+    #: değildir: Crossref/PubMed Boolean dizgesini gerçekten gönderir,
+    #: OpenAlex ise `title_and_abstract.search` süzgeç zinciri gönderir.
+    #: Arama kaydı ne gönderildiğini değil, ne gönderilmesi *gerektiğini*
+    #: yazıyorsa denetim yanlış yönlendirir.
+    sent_query: str = ""
 
 
 @dataclass
@@ -44,21 +78,110 @@ class SearchRunResult:
     deduplication: DedupResult
     included_source_ids: list[str]
     excluded_reasons: dict[str, int] = field(default_factory=dict)
+    #: Tekilleştirilmiş ve kimlik atanmış kayıtlar. Yazma yolu BUNLARI
+    #: ekler; `database_results[*].records` ham, veritabanı başına kopya
+    #: içeren listelerdir.
+    included_records: list[dict] = field(default_factory=list)
+
+    def to_state_records(self) -> list[dict]:
+        """Veritabanı başına bir `search_run.json` kaydı üretir.
+
+        Neden kayıt başına değil koşu başına
+        ------------------------------------
+        `schemas/search_run.json` tanımı şunu diyor: *"Tek bir
+        veritabanında çalıştırılan tek bir aramanın denetlenebilir
+        kaydı."* Yani PRISMA akışı da, `results_returned` da tek bir
+        veritabanına aittir. İki veritabanı tarayan bir koşuyu tek
+        kayda sıkıştırmak, hangi veritabanının kaç kayıt döndürdüğünü
+        denetlenemez kılar ve `database` alanı (`crossref | openalex |
+        ...` tekil bir değer) yalan söyler.
+
+        Ölçülen ihlaller (3 arama koşusunda 12 hata):
+          * `deduplication_stats` — şemada tanımsız alan
+          * `inclusion_criteria` — nesne yazılıyordu, dizi isteniyor
+          * `exclusion_criteria` — boş dizi, `minItems: 1`
+          * `exclusion_reasons` — nesne yazılıyordu, dizi isteniyor
+
+        `inclusion_criteria` / `exclusion_criteria` burada PICO
+        bileşenlerinden türetilen insan-okur metinlerdir; PRISMA'da
+        bunlar araştırmacının tanımladığı ölçütlerdir, PICO değil.
+        """
+        kayitlar: list[dict] = []
+        try:
+            _, taban = parse_id(self.search_run_id)
+        except IdError:
+            # Kimlik desene uymuyorsa kayıt kimlikleri türetilemez.
+            # Sessizce ilk kaydı korumak, ikinci veritabanının kaydını
+            # kimliksiz bırakmaktan iyidir ama yine de görünür olmalı:
+            # `to_state_records` çağıranı hata görür.
+            taban = 0
+
+        for sira, db in enumerate(self.database_results):
+            akis = dict(self.prisma_flow)
+            akis["records_identified"] = db.records_found
+            akis["records_screened"] = db.records_found
+            akis["duplicates_removed"] = 0
+            akis["records_excluded"] = 0
+            akis["reports_sought"] = db.records_found
+            akis["reports_not_retrieved"] = 0
+            akis["reports_excluded"] = 0
+            akis["studies_included"] = db.records_returned
+
+            kayitlar.append({
+                "id": format_id("SEARCH", taban + sira) if taban else self.search_run_id,
+                "database": db.database,
+                "query": db.sent_query or db.query.boolean_string,
+                "timestamp": self.timestamp,
+                "results_returned": db.records_returned,
+                "inclusion_criteria": self._dahil_olcutleri(),
+                "exclusion_criteria": self._dislama_olcutleri(),
+                "prisma_flow": akis,
+                "exclusion_reasons": [],
+                "included_source_ids": [],
+                "executor": "agent",
+            })
+        return kayitlar
+
+    def _dahil_olcutleri(self) -> list[str]:
+        """PICO bileşenlerinden okunur metin dize listesi."""
+        pico = getattr(self.query, "pico", None)
+        if pico is None:
+            return ["Alandaki kayitlar (PICO ayristirilamadi)"]
+        etiketler = (
+            ("population", "Populasyon"),
+            ("intervention", "Mudahale"),
+            ("comparison", "Karsilastirma"),
+            ("outcome", "Sonuc"),
+            ("context", "Baglam"),
+            ("study_design", "Calisma tasarimi"),
+        )
+        olcutler = [
+            f"{etiket}: {deger}"
+            for alan, etiket in etiketler
+            if (deger := getattr(pico, alan, "") or "")
+        ]
+        return olcutler or ["PICO bos; alan sinirlari uygulanmadi"]
+
+    def _dislama_olcutleri(self) -> list[str]:
+        """Dahil edilen kayitlarda uygulanan dislama olcutleri.
+
+        Bu kosuda otomatik dislama YAPILMAZ. Bos bir liste semayi
+        gecersiz kildigi icin, gercegi yazar: hangi olcutlerin
+        uygulanmadigi burada gorunur olur.
+        """
+        return ["Otomatik dislama uygulanmadi; eleme asagidaki akista yapilir"]
 
     def to_dict(self) -> dict:
-        return {
-            "id": self.search_run_id,
-            "query": self.query.boolean_string,
-            "database": self.query.databases[0] if self.query.databases else "multi",
-            "timestamp": self.timestamp,
-            "results_returned": sum(r.records_returned for r in self.database_results),
-            "inclusion_criteria": self.query.pico.to_dict() if hasattr(self.query, 'pico') else {},
-            "exclusion_criteria": [],
-            "prisma_flow": self.prisma_flow,
-            "exclusion_reasons": self.excluded_reasons,
-            "included_source_ids": self.included_source_ids,
-            "deduplication_stats": self.deduplication.stats,
-        }
+        """Tek veritabanlı koşu için kayıt; çok veritabanlıysa ilki.
+
+        Geriye dönük uyumluluk katmanıdır. Çok veritabanlı koşularda
+        kayıt sıkıştırması yanıltıcı olduğu için çağıranlar
+        `to_state_records()` kullanmalıdır.
+        """
+        kayitlar = self.to_state_records()
+        if not kayitlar:
+            raise ValueError("to_state_records() boş döndü: database_results yok")
+        return kayitlar[0]
 
 
 class SystematicSearchOrchestrator:
@@ -93,8 +216,16 @@ class SystematicSearchOrchestrator:
         inclusion_criteria: dict | None = None,
         exclusion_criteria: list[str] | None = None,
         thesis_id: str = "THESIS-2026-001",
+        mevcut_kimlikler: Iterable[str] = (),
     ) -> SearchRunResult:
-        """Sistematik arama çalıştır ve PRISMA akışı üret."""
+        """Sistematik arama çalıştır ve PRISMA akışı üret.
+
+        Args:
+            mevcut_kimlikler: Durumda ZATEN kullanılan `SRC-*` kimlikleri.
+                Yeni kimlikler buradan devam eder. Boş bırakılırsa her
+                koşu `SRC-001`'den başlar ve kayıtlar çakışır (ölçüldü:
+                3 arama -> 72 kayıt / 24 kimlik, her biri 3 kez).
+        """
 
         if isinstance(pico, str):
             pico = parse_pico(pico)
@@ -182,6 +313,9 @@ class SystematicSearchOrchestrator:
                 records=records,
                 execution_time_ms=exec_time,
                 errors=errors,
+                sent_query=_sentelen_sorgu(
+                    db, query, year_from=year_from, year_to=year_to
+                ),
             ))
 
             all_records.extend(records)
@@ -214,9 +348,30 @@ class SystematicSearchOrchestrator:
         prisma_counts["studies_included"] = len(included)
 
         # Source ID'leri ata (SRC-XXX formatında)
+        #
+        # Neden `format_id("SRC", i + 1)` DEĞİL
+        # ---------------------------------------
+        # `format_id` yalnızca numarayı biçimlendirir; durumu GÖRMEZ.
+        # Arama içi 1..N sayacı olduğu için her koşu SRC-001'den başlar.
+        # Ölçülen sonuç (gerçek tez verisi, 3 arama):
+        #   72 kayıt, ama yalnızca 24 ayrı kimlik, her biri 3 kez —
+        #   ve aynı kimliğin 3 kaydı FARKLI kaynak:
+        #       SRC-001 -> 1994 10.2737/feis-species-review-alch
+        #               -> 2024 10.15641/bo.1573
+        #               -> 2016 10.1111/1749-4877.12195
+        # Kimlik anahtarlı her eşleme (`write._kimlikle_esles`,
+        # `graph.kenar_tablosu`, `verify`) çakışanları üstüne yazıp
+        # yalnızca SON kaydı tutar. 72 kayıt yazıldı, "Dahil edilen: 24"
+        # raporlandı, doğrulama ve atıf yalnızca son 8'i gördü — hiçbir
+        # hata üretilmedi.
+        #
+        # `tools/atw/record.py` aynı işi `next_id` ile zaten doğru
+        # yapıyor; burada da onun kullanılması gerekiyor.
+        havuz = list(mevcut_kimlikler)
         included_ids = []
-        for i, record in enumerate(included):
-            src_id = format_id("SRC", i + 1)
+        for record in included:
+            src_id = next_id(havuz, "SRC")
+            havuz.append(src_id)
             record["id"] = src_id
             included_ids.append(src_id)
 
@@ -232,20 +387,46 @@ class SystematicSearchOrchestrator:
             deduplication=dedup_result,
             included_source_ids=included_ids,
             excluded_reasons=exclusion_reasons,
+            included_records=included,
         )
 
         return result
 
     def save_search_run(self, result: SearchRunResult, thesis_state_path: str = "thesis_state.json") -> None:
-        """Search run sonucunu thesis_state.json'a kaydet."""
-        state = load_state(thesis_state_path)
-        state["search_runs"].append(result.to_dict())
+        """Search run sonucunu `thesis_state.json`'a kaydet.
 
-        # Sources registry'e ekle
-        for db_result in result.database_results:
-            for record in db_result.records:
-                if "id" in record and record["id"]:
-                    state["sources"].append(record)
+        Yazılan iki küme vardır ve ikisi de BİRER KEZ yazılır:
+
+          * `result.to_state_records()` — veritabanı başına bir arama
+            kaydı. `to_dict()` (ilk kaydı döndürür) kullanılmaz: iki
+            veritabanlı bir koşuda ikinci veritabanının kaydı sessizce
+            kaybolur.
+          * `result.included_records` — TEKİLLEŞTİRİLMİŞ kayıtlar.
+
+        Neden `database_results[*].records` DEĞİL
+        ---------------------------------------
+        O liste veritabanı başına HAM kayıtları taşır; aynı kaynak iki
+        veritabanında da bulunduysa iki kez bulunur. Önceden bu yol
+        kullanılıyordu ama kopya kayıtlar boş `id` alanı sayesinde
+        `if record["id"]` denetiminde düşüyordu — yani tekilleştirme
+        KAZARA çalışıyordu, kural koda bağlı değildi. `included_records`
+        kuralı açık hale getirir.
+        """
+        state = load_state(thesis_state_path)
+        state["search_runs"].extend(result.to_state_records())
+
+        varolan = {k.get("id") for k in state["sources"] if k.get("id")}
+        eklenen = [r for r in result.included_records if r.get("id")]
+        cakisan = sorted({r["id"] for r in eklenen} & varolan)
+        if cakisan:
+            # Kimlik çakışması sessiz veri kaybıdır; yazmadan dur.
+            raise ValueError(
+                f"Kaynak kimliği çakışıyor: {cakisan}. "
+                "Arama, durumda kullanılan kimlikleri görmüyor. "
+                "Kimlikler çakışırsa kimlik anahtarlı her eşleme yalnızca "
+                "son kaydı tutar ve atıflar sessizce yanlış kaynağa bağlanır."
+            )
+        state["sources"].extend(eklenen)
 
         save_state(thesis_state_path, state)
 
@@ -281,4 +462,27 @@ def run_systematic_search(
         databases=databases,
         year_from=year_from,
         year_to=year_to,
+        mevcut_kimlikler=durumdaki_kimlikler(thesis_state_path),
     )
+
+
+def durumdaki_kimlikler(thesis_state_path: str = "thesis_state.json") -> list[str]:
+    """Durumda kullanılan `SRC-*` kimliklerini döndürür.
+
+    Aramanın nereye devam edeceğini belirleyen tek bilgidir. Dosya yoksa
+    veya okunamazsa boş liste döner: yeni bir tezde kimlik çakışması
+    olma olasılığı yoktur, okunamayan dosyada ise `save_search_run`
+    zaten doğrulamayla reddedecektir.
+    """
+    yol = Path(thesis_state_path)
+    if not yol.exists():
+        return []
+    try:
+        durum = json.loads(yol.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return []
+    return [
+        k.get("id")
+        for k in durum.get("sources", [])
+        if isinstance(k, dict) and k.get("id")
+    ]

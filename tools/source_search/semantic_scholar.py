@@ -13,6 +13,8 @@ from typing import Any, Optional
 
 import requests
 
+from .kayit import sema_uyumlu
+
 logger = logging.getLogger(__name__)
 
 
@@ -115,7 +117,7 @@ class SemanticScholarPaper:
             except (ValueError, IndexError):
                 pass
 
-        return {
+        return sema_uyumlu({
             "id": "",
             "title": self.title,
             "authors": author_strings,
@@ -154,7 +156,7 @@ class SemanticScholarPaper:
             "access_date": "",
             "language": "en",
             "peer_reviewed": True,
-        }
+        })
 
     def _map_type(self) -> str:
         if self.publication_types:

@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from typing import Any, Optional
 from urllib.parse import quote_plus
 
+from .kayit import sema_uyumlu
+
 import requests
 
 logger = logging.getLogger(__name__)
@@ -128,7 +130,7 @@ class CrossrefWork:
         # Dergi adı
         journal = self.journal or (self.container_title[0] if self.container_title else None)
 
-        return {
+        return sema_uyumlu({
             "id": "",  # SRC-XXX formatında atanacak
             "title": self.title,
             "authors": author_strings,
@@ -167,7 +169,7 @@ class CrossrefWork:
             "access_date": "",
             "language": "en",
             "peer_reviewed": self.type in ("journal-article", "proceedings-article"),
-        }
+        })
 
     def _map_type(self) -> str:
         """Crossref type -> source_type enum."""

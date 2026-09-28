@@ -16,6 +16,8 @@ import os
 from dataclasses import dataclass
 from typing import Any, Optional
 
+from .kayit import sema_uyumlu
+
 try:
     import requests
 except ImportError:
@@ -45,7 +47,7 @@ class GoogleScholarResult:
 
     def to_source_dict(self) -> dict:
         """source.json şemasına uygun dict'e dönüştür."""
-        return {
+        return sema_uyumlu({
             "id": "",
             "title": self.title,
             "authors": self.authors,
@@ -84,7 +86,7 @@ class GoogleScholarResult:
             "access_date": "",
             "language": "en",
             "peer_reviewed": True,
-        }
+        })
 
 
 class SerpAPIClient:

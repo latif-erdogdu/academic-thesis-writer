@@ -15,6 +15,8 @@ from urllib.parse import quote_plus
 
 import requests
 
+from .kayit import sema_uyumlu
+
 logger = logging.getLogger(__name__)
 
 # NCBI E-utilities base URLs
@@ -203,7 +205,7 @@ class PubMedArticle:
             except (ValueError, IndexError):
                 pass
 
-        return {
+        return sema_uyumlu({
             "id": "",
             "title": self.title,
             "authors": author_strings,
@@ -242,7 +244,7 @@ class PubMedArticle:
             "access_date": "",
             "language": self.language[0] if self.language else "en",
             "peer_reviewed": True,
-        }
+        })
 
     def _map_type(self) -> str:
         for pt in self.publication_types:

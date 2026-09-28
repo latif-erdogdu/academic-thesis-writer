@@ -14,6 +14,8 @@ from urllib.parse import quote_plus
 
 import requests
 
+from .kayit import sema_uyumlu
+
 logger = logging.getLogger(__name__)
 
 
@@ -154,7 +156,7 @@ class OpenAlexWork:
             except (ValueError, IndexError):
                 pass
 
-        return {
+        return sema_uyumlu({
             "id": "",
             "title": self.title,
             "authors": author_strings,
@@ -193,7 +195,7 @@ class OpenAlexWork:
             "access_date": "",
             "language": "en",
             "peer_reviewed": self.type in ("journal-article", "peer-review"),
-        }
+        })
 
     def _map_type(self) -> str:
         mapping = {
@@ -344,6 +346,37 @@ class OpenAlexClient:
         return data
 
 
+def filtre_dizgesi(
+    *,
+    year_from: int | None = None,
+    year_to: int | None = None,
+    types: list[str] | None = None,
+    filter_terms: list[str] | None = None,
+) -> str | None:
+    """`filter=` parametresine gönderilecek ham dizeyi üretir.
+
+    Arama kaydının denetlenebilir olması için `search_openalex` ile
+    `search_run._sentelen_sorgu` AYNI fonksiyonu çağırır. Sorgu
+    dizesi burada kopyalanırsa denetim kaydı gerçeği yansıtmaz.
+
+    Neden sözlük değil
+    ------------------
+    Aynı anahtar (`title_and_abstract.search`) birden çok kez geçtiği
+    için sözlük kullanılamaz: ikinciyi birincinin üstüne yazar ve VE
+    zinciri tek terime düşer (ölçüldü: yalnız 'survival mortality'
+    gitti, popülasyon terimi kayboldu).
+    """
+    parcalar: list[str] = []
+    if year_from:
+        parcalar.append(f"from_publication_date:{year_from}-01-01")
+    if year_to:
+        parcalar.append(f"until_publication_date:{year_to}-12-31")
+    if types:
+        parcalar.append(f"type:{'|'.join(types)}")
+    parcalar += [f"title_and_abstract.search:{t}" for t in (filter_terms or []) if t]
+    return ",".join(parcalar) or None
+
+
 def search_openalex(
     query: str,
     max_results: int = 100,
@@ -382,36 +415,21 @@ def search_openalex(
     client = OpenAlexClient(email=email)
 
     # OpenAlex aynı filtre anahtarını iki kez kabul ETMEZ; AND zinciri
-    # virgülle kurulur, anahtar tekrarlanmaz.
-    zincili: list[tuple[str, str]] = []
-    if year_from:
-        zincili.append(("from_publication_date", f"{year_from}-01-01"))
-    if year_to:
-        zincili.append(("until_publication_date", f"{year_to}-12-31"))
-    if types:
-        zincili.append(("type", "|".join(types)))
-
+    # virgülle kurulur, anahtar tekrarlanmaz. Dize `filtre_dizgesi`
+    # tarafından üretilir; arama kaydı da aynı fonksiyonu çağırır,
+    # böylece denetim kaydı gönderilen metinle aynı kalır.
     aranacak: str | None = query
     if filter_terms:
         # `search` gönderilirse gürültü geri gelir: filtreler AND işler,
         # `search` ise VE zincirini bozup torbalıyordu.
         aranacak = None
 
-    filter_dict = {anahtar: deger for anahtar, deger in zincili}
-    if filter_terms:
-        # Aynı anahtar (`title_and_abstract.search`) birden çok kez geçtiği
-        # için SÖZLÜK KULLANILAMAZ: dict ikinciyi birincinin üstüne yazar
-        # ve VE zinciri tek terime düşer (ölçüldü: yalnız 'survival
-        # mortality' gitti, popülasyon terimi kayboldu). Ham dize kurulur.
-        #
-        # `zincili`ye ayrıca eklenmez: iki yol birden doldurulursa her
-        # terim iki kez yazılır (ölçülen arıza: filtre
-        # '...productivity,alectoris chukar,...productivity' oldu).
-        parcalar = [f"{anahtar}:{deger}" for anahtar, deger in filter_dict.items()]
-        parcalar += [f"title_and_abstract.search:{t}" for t in filter_terms if t]
-        filter_str = ",".join(parcalar)
-    else:
-        filter_str = ",".join(f"{k}:{v}" for k, v in filter_dict.items()) or None
+    filter_str = filtre_dizgesi(
+        year_from=year_from,
+        year_to=year_to,
+        types=types,
+        filter_terms=filter_terms,
+    )
 
     all_works = []
     per_page = 200
