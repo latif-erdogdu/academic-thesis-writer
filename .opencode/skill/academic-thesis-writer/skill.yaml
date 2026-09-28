@@ -11,11 +11,52 @@ opencode_version: ">=0.2.0"
 entry:
   skill: "SKILL.md"
 
+# Çalıştırma modeli. Bu blok YORUM DEĞİL, SÖZLEŞMEDİR: değerleri diskteki
+# gerçeklikle karşılaştırılır
+# (tests/contract_tests/test_skill_paketi_sozlesmesi.py).
+#
+# execution_root: repo  ->  skill dizini TEK BAŞINA çalıştırılamaz.
+# 10 komutun handler'ı `python -m tools.atw.cli`; 4 hook'un komutu
+# `python .opencode/skill/.../hooks/x.py`. `tools/` depo kökündedir ve
+# skill dizininde bulunmaz. Bu yüzden skill dizinini ~/.agents/skills/
+# altına aynalamak YALNIZCA metadatası yükler, hiçbir komut
+# çalıştıramaz.
+#
+# skill dizini yalnızca ŞU dört şeyi tutar: SKILL.md, skill.yaml,
+# agents/, hooks/. agents[].file yolları buradan çözülür. Diğer her yol
+# (references/ workflows/ templates/ schemas/ tools/) DEPO KÖKÜNDEN
+# çözülür. Bu ayrım SOKMAYI önlemek için testle zorlanır: skill
+# dizinine içerik ağacı kopyalanırsa ikinci kaynak oluşur ve kopya
+# sessizce baylar — aynı tuzak daha önce `agents/` için yaşandı.
+runtime:
+  execution_root: repo
+  skill_dir_contents:
+    - SKILL.md
+    - skill.yaml
+    - agents/
+    - hooks/
+  # Bunlar skill dizininden cozulur:
+  skill_relative_roots:
+    - agents/
+  # Bunlar depo kokunden cozulur:
+  repo_relative_roots:
+    - references/
+    - workflows/
+    - templates/
+    - schemas/
+    - tools/
+
 # Agent tanımları.
 # DİKKAT: file yolları SKILL DİZİNİNE göre çözümlenir (tools[] ise depo
 # köküne göre — bkz. aşağıdaki not).
 # Depo kökünde agents/ altında aynı 10 dosyanın kaynak kopyası durur.
-# Bu kopya KASITLIDIR: skill dizini kendi başına taşınabilir olmalıdır.
+# Bu kopya KASITLIDIR ama nedeni baska: skill yukleyicisi agents[].file
+# yollarını SKILL DİZİNİNE göre çözer, o yüzden dosyalar
+# orada olmak ZORUNDA. Kaynak depo köküdür.
+# Skill dizini tek basina bir calistirma ortami DEGILDIR (bkz. runtime
+# blogu): 10 komutun handler'i `python -m tools.atw.cli` ve `tools/` bu
+# dizinde yoktur. Kopya calistirilabilirlik icin degil, skill'in ajanlari
+# okuyabilmesi icin vardir.
 # Senkron 4 testle zorlanır (tests/integration_tests/test_plan1_integrity.py):
 # ajan kümeleri eşit, kök SKILL.md ile kopya aynı, her ajan dosyası
 # byte-özdeş. Kayma daha önce gerçekleştiği için bu testler yazıldı.
