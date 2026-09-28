@@ -706,7 +706,10 @@ def _kanit_kaydi(bulgu, source_id: str, claim_id: str, sira: int) -> dict:
         "location": {
             "page": bulgu.page,
             "section": bulgu.section or "",
-            "paragraph": bulgu.paragraph_index,
+            # paragraph_index 0-bazlidir; evidence semasi (min 1) 1-bazli
+            # insan-okur konum bekler. (Regresyon: 0 yazilinca kayit semadan
+            # dusup dosyaya hic yazilmiyordu.)
+            "paragraph": bulgu.paragraph_index + 1,
         },
         "text": bulgu.text,
         "evidence_type": bulgu.evidence_type,

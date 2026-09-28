@@ -125,6 +125,29 @@ def test_extract_kayit_evidence_semasina_uyar(kurulum, monkeypatch):
     )
 
 
+def test_extract_ilk_paragraf_konumu_1_bazli_kaydedilir(kurulum, monkeypatch):
+    """Ilk paragrafin (index 0) konum alani semaya uygun 1-bazli yazilir.
+
+    Regresyon: _kanit_kaydi 0-bazli paragraph_index'i oldugu gibi yaziyordu;
+    gercek cikarmada ilk paragraf 'paragraph: 0' olusuyor ve evidence.json
+    (min 1) dogrulamasini geciremiyordu — extracts 'kanit bulundu' diyor ama
+    kayit dosyaya hic yazilmiyordu.
+    """
+    tmp_path, pdf = kurulum
+    _durum_yaz(tmp_path, _temel_durum())
+    kanit = _ornek_kanit()
+    kanit.paragraph_index = 0
+    monkeypatch.setattr(
+        "tools.pdf_extract.find_evidence_for_claim", lambda *a, **k: [kanit]
+    )
+    cli.cmd_extract(_args(pdf=str(pdf)))
+    durum = json.loads((tmp_path / "thesis_state.json").read_text(encoding="utf-8"))
+    assert durum["evidence_registry"][0]["location"]["paragraph"] == 1
+    jsonschema.Draft202012Validator(_sema_yukle("evidence")).validate(
+        durum["evidence_registry"][0]
+    )
+
+
 def test_extract_kanit_idleri_saymayla_ilerler(kurulum, monkeypatch):
     """Ikinci cagrida EVD-002 kimligi uretilmelidir."""
     tmp_path, pdf = kurulum
