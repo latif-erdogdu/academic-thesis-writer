@@ -185,7 +185,7 @@ class OpenAlexWork:
             "journal": journal,
             "publisher": self.host_venue_publisher() if hasattr(self, 'host_venue_publisher') else None,
             "doi": self.doi,
-            "url": f"https://openalex.org{self.id.split('/')[-1]}" if self.id else None,
+            "url": f"https://openalex.org/{self.id.split('/')[-1]}" if self.id else None,
             "source_type": self._map_type(),
             "publication_status": "published",
             "retraction_status": "not_retracted",
