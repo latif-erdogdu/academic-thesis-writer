@@ -6,9 +6,12 @@ Neden bu test
 yapilandirmasidir, reponun parcasi degildir. Bu yuzden bu testin asil
 sozlesmesi repoda TUTULAN gercekler uzerine kuruludur:
 
-  1. Skill, config kaydina gerek kalmadan `.opencode/skill/<id>/SKILL.md`
+  1. Skill, config kaydina gerek kalmadan `.opencode/skills/<id>/SKILL.md`
      altindan otomatik kesfedilir (V2 migration rehberi: "V2 discovers
      skills from both `.opencode/skill/` and `.opencode/skills/`.").
+     Ayrica `.claude/skills` ve `.agents/skills` OpenCode'un project
+     compatibility kaynaklaridir — ikiz kopyalar cakismaz, ayni ID
+     ayni icerigi verir.
   2. `opencode.json` YEREL KOPYADA varsa, `skills` blogu (varsa) yayinlanan
      semaninkinden farkli bir bicimde olamaz.
 
@@ -88,13 +91,15 @@ def test_skills_blogu_sema_sekillerinden_birini_tasiyor() -> None:
 
 
 def test_skill_config_kaydina_gerek_kalmadan_kesfedilir() -> None:
-    """`.opencode/skill/<id>/SKILL.md` var oldugu surece kayit gereksizdir.
+    """`.opencode/skills/<id>/SKILL.md` var oldugu surece kayit gereksizdir.
 
     V2 migration rehberi hem `.opencode/skill/` (V1-uyum) hem
     `.opencode/skills/` (V2 tercih) altindaki skill'leri otomatik kesfeder.
+    Repo yalnizca V2 yolunu tasir (`.opencode/skills/`); `.claude/skills`
+    project-compatibility kaynagidir ve ikiz kopya ayni icerigi verir.
     Bu yuzden `opencode.json`'daki skills kaydi kaldirilabilir.
     """
-    skill_md = REPO_ROOT / ".opencode" / "skill" / "academic-thesis-writer" / "SKILL.md"
+    skill_md = REPO_ROOT / ".opencode" / "skills" / "academic-thesis-writer" / "SKILL.md"
     assert skill_md.is_file(), (
         f"kesif dosyasi yok: {skill_md}. Skill yalnizca config kaydina "
         "baglanmissa kayit kaldirilamaz."

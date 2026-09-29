@@ -17,7 +17,7 @@ entry:
 #
 # execution_root: repo  ->  skill dizini TEK BAŞINA çalıştırılamaz.
 # 10 komutun handler'ı `python -m tools.atw.cli`; 4 hook'un komutu
-# `python .opencode/skill/.../hooks/x.py`. `tools/` depo kökündedir ve
+# `python .opencode/skills/.../hooks/x.py`. `tools/` depo kökündedir ve
 # skill dizininde bulunmaz. Bu yüzden skill dizinini ~/.agents/skills/
 # altına aynalamak YALNIZCA metadatası yükler, hiçbir komut
 # çalıştıramaz.
@@ -151,28 +151,28 @@ hooks:
   - name: thesis-init
     event: "session_start"
     condition: "not exists(thesis_state.json)"
-    command: "python .opencode/skill/academic-thesis-writer/hooks/thesis-init.py"
+    command: "python .opencode/skills/academic-thesis-writer/hooks/thesis-init.py"
     description: "Yeni tez için thesis_state.json şablonu oluştur"
 
   # Her yazım oturumunda Evidence Gate kontrolü
   - name: evidence-gate
     event: "pre_write"
     condition: "matches(path, '.*chapter.*\\.md$')"
-    command: "python .opencode/skill/academic-thesis-writer/hooks/evidence_gate.py {file}"
+    command: "python .opencode/skills/academic-thesis-writer/hooks/evidence_gate.py {file}"
     description: "Bölüm yazımından önce kanıt kapısı kontrolü"
 
   # Atıf ekleme sonrası Writing Gate kontrolü
   - name: writing-gate
     event: "post_write"
     condition: "matches(path, '.*citation.*\\.json$')"
-    command: "python .opencode/skill/academic-thesis-writer/hooks/writing_gate.py {file}"
+    command: "python .opencode/skills/academic-thesis-writer/hooks/writing_gate.py {file}"
     description: "Atıf ekleme sonrası format/bütünlük kontrolü"
 
   # Otomatik kaynak doğrulama (source.json değiştiğinde)
   - name: auto-verify-source
     event: "post_write"
     condition: "matches(path, '.*source\\.json$')"
-    command: "python .opencode/skill/academic-thesis-writer/hooks/auto_verify.py {file}"
+    command: "python .opencode/skills/academic-thesis-writer/hooks/auto_verify.py {file}"
     description: "Yeni kaynak eklendiğinde otomatik DOI/bibliyografik doğrulama"
 
 # Komutlar (OpenCode slash command olarak kayıtlı)

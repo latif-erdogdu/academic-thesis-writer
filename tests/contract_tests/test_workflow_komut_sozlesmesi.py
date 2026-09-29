@@ -37,7 +37,7 @@ import pytest
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SKILL_YAML = REPO_ROOT / ".opencode" / "skill" / "academic-thesis-writer" / "skill.yaml"
+SKILL_YAML = REPO_ROOT / ".opencode" / "skills" / "academic-thesis-writer" / "skill.yaml"
 WORKFLOW_DIZIN = REPO_ROOT / "workflows"
 ANA_AKIS = WORKFLOW_DIZIN / "thesis_creation.md"
 

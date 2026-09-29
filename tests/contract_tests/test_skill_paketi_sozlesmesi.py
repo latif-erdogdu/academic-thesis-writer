@@ -2,7 +2,7 @@
 
 Neden bu test
 -------------
-`.opencode/skill/academic-thesis-writer/` dizini otomatik kesifle
+`.opencode/skills/academic-thesis-writer/` dizini otomatik kesifle
 yukleniyor. Bu dizinin ne OLDUGU konusunda skill.yaml'da iki birbiriyle
 celisan iddia vardi:
 
@@ -13,7 +13,7 @@ celisan iddia vardi:
 
 Ikinci iddia dogrulanabilir degildi. On komutun handler'i
 `python -m tools.atw.cli …`; dort hook'un komutu
-`python .opencode/skill/…/hooks/x.py`. Yani skill dizini TEK BIR komut
+`python .opencode/skills/…/hooks/x.py`. Yani skill dizini TEK BIR komut
 calistiramaz — `tools/` dizini onda yok. Buna rağmen "tasinabilir" yaziyordu.
 Bunun sonucu: skill, `~/.agents/skills/` altina aynalandiginda metadatasi
 yukleniyor ama hicbir komutu calistiramayan bir kopya olusuyor.
@@ -44,12 +44,12 @@ import pytest
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SKILL_DIR = REPO_ROOT / ".opencode" / "skill" / "academic-thesis-writer"
+SKILL_DIR = REPO_ROOT / ".opencode" / "skills" / "academic-thesis-writer"
 SKILL_YAML = SKILL_DIR / "skill.yaml"
 
 # handler: "python -m tools.atw.cli new {args[0]} {args[1]}"
 _MODUL_DESEN = re.compile(r"-m\s+([\w.]+)")
-# command: "python .opencode/skill/…/hooks/thesis-init.py"
+# command: "python .opencode/skills/…/hooks/thesis-init.py"
 _SCRIPT_DESEN = re.compile(r"^python\s+([\w./-]+\.py)")
 # Bir dosya yolu gibi gorunen sey.
 _YOL_DESEN = re.compile(

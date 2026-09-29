@@ -3,12 +3,12 @@
 Bu dosya iki sinif hatayi kapatir.
 
 1) YOL COZUMLEME HATASI — dort hook'un tamaminda `parents[3]` kullaniliyordu.
-   Betikler `.opencode/skill/academic-thesis-writer/hooks/` altinda, yani
+   Betikler `.opencode/skills/academic-thesis-writer/hooks/` altinda, yani
    deger zinciri 4 derinlikte:
 
        parents[0] = hooks
        parents[1] = academic-thesis-writer
-       parents[2] = skill
+       parents[2] = skills
        parents[3] = .opencode      <- hesaplanan (YANLIS)
        parents[4] = <depo koku>    <- olmasi gereken
 
@@ -39,7 +39,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-HOOKS_DIR = REPO_ROOT / ".opencode" / "skill" / "academic-thesis-writer" / "hooks"
+HOOKS_DIR = REPO_ROOT / ".opencode" / "skills" / "academic-thesis-writer" / "hooks"
 
 HOOK_ADLARI = ["auto_verify", "evidence_gate", "writing_gate", "thesis-init"]
 

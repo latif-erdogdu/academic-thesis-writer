@@ -4,10 +4,12 @@ Problem
 -------
 Bu depoda skill'in iki farkli yukleme yolu var:
 
-  1. `.opencode/skill/academic-thesis-writer` otomatik kesifle gelir
-     (bu depoda calisirken; V2 migration, `.opencode/skill/` yolunu kesfeder)
+  1. `.opencode/skills/academic-thesis-writer` otomatik kesifle gelir
+     (bu depoda calisirken); ikiz kopya `.claude/skills/academic-thesis-writer`
+     hem Claude Code hem OpenCode project-compatibility kaynagidir.
   2. `~/.agents/skills/academic-thesis-writer/`
-     (Claude Code / Agent Skills dizini)
+     (Agent Skills standart dizini — OpenCode compatibility; Claude Code
+     ise `~/.claude/skills/` okur, bu yuzden betik hedefi secilebilir)
 
 (2) yolu daha once ad-hoc `robocopy /MIR` ile bir kez aynalandi. Iki
 sonuc oldu:
@@ -43,7 +45,7 @@ import pytest
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SKILL_DIR = REPO_ROOT / ".opencode" / "skill" / "academic-thesis-writer"
+SKILL_DIR = REPO_ROOT / ".opencode" / "skills" / "academic-thesis-writer"
 SKILL_YAML = SKILL_DIR / "skill.yaml"
 SCRIPT = REPO_ROOT / "scripts" / "install_skill.ps1"
 

@@ -1,6 +1,7 @@
 <#
 .SYNOPSIS
-    Skill paketini ~/.agents/skills/ altina tekrarlanabilir sekilde aynalar.
+    Skill paketini Agent Skills (`~/.agents/skills/`) ve Claude Code
+    (`~/.claude/skills/`) dizinlerine tekrarlanabilir sekilde aynalar.
 
 .DESCRIPTION
     Aynalama daha once ad-hoc `robocopy /MIR` ile yapiliyordu. Iki sonuc
@@ -16,6 +17,10 @@
          calistirilabilir degildir; onlar deponun kokunden calisir.
          Bu, skill.yaml'daki `runtime.execution_root` degeriyle ayni
          kaynaktan okunur, ayri bir iddia degildir.
+      4. Iki platform dizinine birden aynalar: OpenCode `~/.agents/skills/`
+         (Agent Skills) project-compatibility kaynagindan, Claude Code
+         `~/.claude/skills/` dizininden kesfeder. `-Target` verilirse
+         yalnizca o hedefe yazilir.
 
     Satirlar ASCII yazildi: Windows PowerShell 5.1, BOM'suz dosyayi
     ANSI okur ve Turkce karakterleri bozar. Turkce metin iceren bir
@@ -25,7 +30,8 @@
     Hicbir sey yazmaz; yalnizca kopyalanacak dosyalari listeler.
 
 .PARAMETER Target
-    Aynalama hedefi. Varsayilan: ~/.agents/skills/academic-thesis-writer
+    Tek hedef aynalamasi. Verilirse varsayilan iki hedef yerine yalnizca
+    bu hedefe yazilir. Ornek: -Target "C:\temp\deneme"
 
 .EXAMPLE
     .\scripts\install_skill.ps1 -DryRun
@@ -39,11 +45,15 @@ param(
 $ErrorActionPreference = 'Stop'
 
 # --- kaynak: depo koku degil, skill dizini --------------------------------
-$Kaynak = Join-Path $PSScriptRoot '..\.opencode\skill\academic-thesis-writer'
+$Kaynak = Join-Path $PSScriptRoot '..\.opencode\skills\academic-thesis-writer'
 $Kaynak = (Resolve-Path $Kaynak).Path
 
-if (-not $Target) {
-    $Target = Join-Path $HOME '.agents\skills\academic-thesis-writer'
+$Hedefler = @()
+if ($Target) {
+    $Hedefler += $Target
+} else {
+    $Hedefler += (Join-Path $HOME '.agents\skills\academic-thesis-writer')
+    $Hedefler += (Join-Path $HOME '.claude\skills\academic-thesis-writer')
 }
 
 if (-not (Test-Path $Kaynak)) {
@@ -74,7 +84,10 @@ $Atlanan = Get-ChildItem -Path $Kaynak -Recurse -File | Where-Object {
 }
 
 Write-Output "Kaynak : $Kaynak"
-Write-Output "Hedef  : $Target"
+Write-Output "Hedefler:"
+foreach ($h in $Hedefler) {
+    Write-Output "  - $h"
+}
 Write-Output ""
 
 if ($DryRun) {
@@ -84,23 +97,25 @@ if ($DryRun) {
         Write-Output "  + $Goreli"
     }
 } else {
-    if (-not (Test-Path $Target)) {
-        New-Item -ItemType Directory -Path $Target -Force | Out-Null
-    }
-    foreach ($d in $Dosyalar) {
-        $Goreli = $d.FullName.Substring($Kaynak.Length).TrimStart('\', '/')
-        $HedefYol = Join-Path $Target $Goreli
-        $HedefDizin = Split-Path $HedefYol -Parent
-        if (-not (Test-Path $HedefDizin)) {
-            New-Item -ItemType Directory -Path $HedefDizin -Force | Out-Null
+    foreach ($Target in $Hedefler) {
+        if (-not (Test-Path $Target)) {
+            New-Item -ItemType Directory -Path $Target -Force | Out-Null
         }
-        Copy-Item $d.FullName $HedefYol -Force
-    }
-    Write-Output "Aynalandi: $($Dosyalar.Count) dosya -> $Target"
+        foreach ($d in $Dosyalar) {
+            $Goreli = $d.FullName.Substring($Kaynak.Length).TrimStart('\', '/')
+            $HedefYol = Join-Path $Target $Goreli
+            $HedefDizin = Split-Path $HedefYol -Parent
+            if (-not (Test-Path $HedefDizin)) {
+                New-Item -ItemType Directory -Path $HedefDizin -Force | Out-Null
+            }
+            Copy-Item $d.FullName $HedefYol -Force
+        }
+        Write-Output "Aynalandi: $($Dosyalar.Count) dosya -> $Target"
 
-    # Onceki aynalamadan kalan derleme artiklarini temizle.
-    Get-ChildItem -Path $Target -Recurse -Directory -Filter '__pycache__' -ErrorAction SilentlyContinue |
-        ForEach-Object { Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue }
+        # Onceki aynalamadan kalan derleme artiklarini temizle.
+        Get-ChildItem -Path $Target -Recurse -Directory -Filter '__pycache__' -ErrorAction SilentlyContinue |
+            ForEach-Object { Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue }
+    }
 }
 
 if ($Atlanan) {

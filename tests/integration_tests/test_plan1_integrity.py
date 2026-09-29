@@ -12,7 +12,8 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SKILL_COPY = REPO_ROOT / ".opencode" / "skill" / "academic-thesis-writer"
+SKILL_COPY = REPO_ROOT / ".opencode" / "skills" / "academic-thesis-writer"
+CLAUDE_COPY = REPO_ROOT / ".claude" / "skills" / "academic-thesis-writer"
 
 
 def test_opencode_kopya_yeni_ajanlari_iceriyor():
@@ -32,6 +33,48 @@ def test_opencode_skill_kopyasi_kok_ile_ayni():
     kopya = (SKILL_COPY / "SKILL.md").read_text(encoding="utf-8")
     kok = (REPO_ROOT / "SKILL.md").read_text(encoding="utf-8")
     assert kopya == kok, "SKILL.md kopyasi guncel degil"
+
+
+def test_claude_skill_kopyasi_kok_ile_ayni():
+    """`.claude/skills/<id>/SKILL.md` Claude Code'un kesif yoludur.
+
+    OpenCode ayni SKILL.md'i `.claude/skills` project-compatibility
+    kaynagindan da okur. Bu ikiz, kok SKILL.md ile birebir ayni
+    olmali; ayri bir metin kopyasi iki kaynagi zamanla ayirir.
+    """
+    kopya = (CLAUDE_COPY / "SKILL.md").read_text(encoding="utf-8")
+    kok = (REPO_ROOT / "SKILL.md").read_text(encoding="utf-8")
+    assert kopya == kok, "`.claude` SKILL.md kopyasi guncel degil"
+
+
+def test_claude_kopya_agentleri_birebir_ayni():
+    """`.claude` ikizindeki ajanlar kok agents/ ile byte-ozdes olmali."""
+    kok_ajanlar = {p.stem for p in (REPO_ROOT / "agents").glob("*.md")}
+    ikiz_ajanlar = {p.stem for p in (CLAUDE_COPY / "agents").glob("*.md")}
+    assert ikiz_ajanlar == kok_ajanlar, (
+        f"`.claude` ikizinde ajan seti farkli. Icinde: {ikiz_ajanlar}"
+    )
+    for yol in (REPO_ROOT / "agents").glob("*.md"):
+        ikiz = CLAUDE_COPY / "agents" / yol.name
+        assert ikiz.is_file(), f"`.claude` ikizinde eksik: {ikiz}"
+        assert ikiz.read_text(encoding="utf-8") == yol.read_text(
+            encoding="utf-8"
+        ), yol.name
+
+
+def test_claude_kopya_icerik_agaci_tasimiyor():
+    """`.claude` ikizi de yalnizca SKILL.md + agents/ tutar.
+
+    `references/ workflows/ templates/ schemas/` icerik agaci depo
+    kokundedir (execution_root: repo). Iki kopyalarına yola cikmak,
+    ikinci kaynak olusturur; ayni kural `.opencode` ikizi icin de
+    gecerli (test_skill_paketi_sozlesmesi.py).
+    """
+    for ad in ("references", "workflows", "templates", "schemas", "tools"):
+        assert not (CLAUDE_COPY / ad).exists(), (
+            f"`.claude` ikizi icerik agaci tasiyor: {ad}/. Icerik agaci "
+            "depo kokundedir; ikiz yalnizca SKILL.md + agents/ tutar."
+        )
 
 
 def test_ajan_dosyalari_kopya_ile_birebir_ayni():
@@ -176,18 +219,18 @@ def test_planda_surum_ibaresi_yok():
 
 
 def test_opencode_kopyasinda_surum_ibaresi_yok():
-    """`.opencode` senkron kopyasi da yasaga tabidir.
+    """`.opencode` ve `.claude` senkron kopyalari da yasaga tabidir.
 
-    Kopya ayri bir dosya agacidir; kok SKILL.md duzeltildiginde kopya
-    geride kalabilir. Boyle bir kayma daha once gerceklesmis ve hicbir
-    test yakalamamisti: `test_ajan_dosyasi_surum_ibaresi_yok` yalnizca
-    `agents/` dizinine bakiyordu.
+    Kopyalar ayri dosya agaclaridir; kok SKILL.md duzeltildiginde
+    kopyalar geride kalabilir. Boyle bir kayma daha once gerceklesmis ve
+    hicbir test yakalamamisti: `test_ajan_dosyasi_surum_ibaresi_yok`
+    yalnizca `agents/` dizinine bakiyordu.
     """
-    kopya = REPO_ROOT / ".opencode" / "skill" / "academic-thesis-writer"
     suclar = []
-    for yol in sorted(kopya.rglob("*.md")):
-        metin = yol.read_text(encoding="utf-8")
-        m = SURUM_DESENI.search(metin)
-        if m is not None:
-            suclar.append(f"{yol.relative_to(REPO_ROOT)}: {m.group(0)!r}")
+    for kopya in (SKILL_COPY, CLAUDE_COPY):
+        for yol in sorted(kopya.rglob("*.md")):
+            metin = yol.read_text(encoding="utf-8")
+            m = SURUM_DESENI.search(metin)
+            if m is not None:
+                suclar.append(f"{yol.relative_to(REPO_ROOT)}: {m.group(0)!r}")
     assert not suclar, "Surum ibaresi: " + "; ".join(suclar)

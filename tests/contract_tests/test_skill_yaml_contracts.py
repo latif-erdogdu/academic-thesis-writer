@@ -32,7 +32,7 @@ import pytest
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SKILL_DIR = REPO_ROOT / ".opencode" / "skill" / "academic-thesis-writer"
+SKILL_DIR = REPO_ROOT / ".opencode" / "skills" / "academic-thesis-writer"
 SKILL_YAML = SKILL_DIR / "skill.yaml"
 HOOKS_DIR = SKILL_DIR / "hooks"
 

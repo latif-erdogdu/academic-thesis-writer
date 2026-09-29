@@ -10,7 +10,7 @@ Geçmişte DOI dalı hiçbir ağ çağrısı yapmadan `["crossref", "openalex"]`
 yazıyordu (kodun kendi yorumu: "# Şimdilik placeholder"). `status` değeri
 `pending` olduğu için durustu, ama kaynak listesi kalıcı bir yalandı.
 
-Yol çözümlemesi: bu betik `.opencode/skill/academic-thesis-writer/hooks/`
+Yol çözümlemesi: bu betik `.opencode/skills/academic-thesis-writer/hooks/`
 altındadır, yani değer zinciri 4 derinlikte:
 
     parents[0] = hooks
