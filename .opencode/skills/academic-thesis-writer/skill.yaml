@@ -57,7 +57,7 @@ runtime:
 # blogu): 10 komutun handler'i `python -m tools.atw.cli` ve `tools/` bu
 # dizinde yoktur. Kopya calistirilabilirlik icin degil, skill'in ajanlari
 # okuyabilmesi icin vardir.
-# Senkron 4 testle zorlanır (tests/integration_tests/test_plan1_integrity.py):
+# Senkron 4 testle zorlanır (tests/integration_tests/test_repo_butunlugu.py):
 # ajan kümeleri eşit, kök SKILL.md ile kopya aynı, her ajan dosyası
 # byte-özdeş. Kayma daha önce gerçekleştiği için bu testler yazıldı.
 # (Bu satırda önce ".opencode/agent/ altına kopyalanır" yazıyordu; o dizin

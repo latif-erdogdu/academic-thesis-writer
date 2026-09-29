@@ -31,7 +31,7 @@ ayni tuzak daha once agents/ icin yasandi.
 
 Kayma notu
 ----------
-`agents/` kopyasi KASITLIDIR ve `test_plan1_integrity.py` her iki kopyanin
+`agents/` kopyasi KASITLIDIR ve `test_repo_butunlugu.py` her iki kopyanin
 byte-ozdes oldugunu zorlar. Burada o test tekrarlanmaz; bu dosya farkli
 soruya bakar: paketin ne olmadigini (calistirilabilir) zorlar.
 """

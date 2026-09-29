@@ -1,7 +1,7 @@
-"""P0-1 butunlugunun uctan uca dogrulamasi.
+"""Cekirdek butunlugunun uctan uca dogrulamasi.
 
 Bu test ayri bir varlik modeli kurmaz; yalnizca butunluk iliskilerini
-denetler. Fonksiyonel testler Task 1-9'un kendi testlerindedir.
+denetler. Fonksiyonel testler bilesenlerin kendi testlerindedir.
 """
 from __future__ import annotations
 
@@ -135,7 +135,7 @@ def test_ozyeleme_yok():
 
 
 def test_gercek_ag_cagrisi_yapilmiyor():
-    """P0-1 testleri ag bagimliliği olmadan calismalidir.
+    """Testler ag bagimliliği olmadan calismalidir.
 
     Bu dosya kendi kaynak metninde `@pytest.mark.live` diye yazili
     oldugu icin, denetlenen dosya disarida tutulmazsa arama kendini

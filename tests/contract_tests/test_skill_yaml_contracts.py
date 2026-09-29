@@ -220,7 +220,7 @@ def test_ajan_dosyasi_diskte_var(ajan: dict):
 
     Bu yol SKILL_DIR'e gore cozumlenir: ajan .md'leri skill dizininde
     tutulur. Depo kokundeki agents/ kopyasi vardir ve
-    test_plan1_integrity.py her ikisinin birebir ayni oldugunu ve
+    test_repo_butunlugu.py her ikisinin birebir ayni oldugunu ve
     senkron kaldigini denetler; buradaki asil olan skill'in okudugu
     yolun var olmasi.
     """

@@ -25,7 +25,7 @@ yolunun diskte gercekten var oldugunu ve frontmatter'in her iki
 semaya da uydugunu zorlar.
 
 Ikiz kopyaların byte-ozdesligi burada tekrarlanmaz; o
-`test_plan1_integrity.py`deki isin (kok SKILL.md ↔ .opencode ↔ .claude).
+`test_repo_butunlugu.py`deki isin (kok SKILL.md ↔ .opencode ↔ .claude).
 """
 from __future__ import annotations
 
@@ -108,7 +108,7 @@ def test_claude_code_support_dosyalari_yaninda() -> None:
     """Claude Code destekleyici dosyalari SKILL.md'nin yaninda bekler.
 
     `agents/` ikizi bu dizinde durur (kok agents/ ile byte-ozdes,
-    test_plan1_integrity.py zorlar). Icerik agaci (references/ workflows/
+    test_repo_butunlugu.py zorlar). Icerik agaci (references/ workflows/
     templates/ schemas/) burada OLMAMALI — o depo kokundedir.
     """
     ikiz = CLAUDE_SKILL.parent

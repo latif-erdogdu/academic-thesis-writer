@@ -23,7 +23,7 @@ DISINA cikan bir yol tanimina izin verilmedigini denetlemektir:
   3. IKKINCI KAYNAK YASAGI — `.claude/` ikizi yalnizca SKILL.md + agents/
      tasiyabilir. Icerik agaci (references/ workflows/ templates/ schemas/)
      kopyalanirsa, ikiz "calisiyor" gorunen ama sessizce baylayan ikinci
-     bir kaynak olur. Bu, test_plan1_integrity.py'deki byte-ozdeslik
+     bir kaynak olur. Bu, test_repo_butunlugu.py'deki byte-ozdeslik
      testlerini tamamlar: burada IZIN VERILEN kume denetlenir.
 """
 from __future__ import annotations
