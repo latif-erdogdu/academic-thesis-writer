@@ -885,7 +885,9 @@ def cmd_approve(args, durum) -> int:
         OnayHatasi,
         acik_olanlar,
         hazirlik_engelleri,
+        kapi_detay,
         onay_geri_al,
+        onay_reddet,
         onay_ver,
         ozet,
     )
@@ -900,7 +902,15 @@ def cmd_approve(args, durum) -> int:
             # sorusunun cevabı ikinci engelde olabilir.
             for engel in engeller:
                 print(f"       • {engel}")
-        print(f"   → {len(acik_olanlar(durum))}/{len(durum.get('human_approvals') or {})} aşama onaylı")
+        toplam = len(durum.get("human_approvals") or {})
+        acik = len(acik_olanlar(durum))
+        bayat = [k for k, acik_mi, _ in ozet(durum) if acik_mi and _bayat_mi(durum, k)]
+        print(f"   → {acik}/{toplam} aşama onaylı")
+        if bayat:
+            # Bayat onay "açık" sayılmaz; sessizce geçilirse kullanıcı
+            # neden yazılamadığını anlamaz.
+            print(f"   ⚠️ Bayat onay (içerik onaydan sonra değişti): {', '.join(bayat)}")
+        print("   Not: `--by` ile onaylayan kişiyi yaz; kayıt `approved_by` alanına girer.")
         return CIKIS_OK
 
     kapi = getattr(args, "kapi", None)
@@ -917,15 +927,36 @@ def cmd_approve(args, durum) -> int:
         print(f"   Geçerli kapılar: {gecerli}")
         return CIKIS_SORUN
 
+    by = getattr(args, "by", None)
+    yorum = getattr(args, "comment", None)
+    gerekce = getattr(args, "reason", None)
+
     if getattr(args, "revoke", False):
         kapanan = [
             k
             for k, acik_mi, _ in ozet(durum)
             if acik_mi and _kapi_sirasi(k) > _kapi_sirasi(kapi)
         ]
-        onay_geri_al(durum, kapi)
+        onay_geri_al(durum, kapi, gerekce=gerekce)
         save_state(durum)
         print(f"🔒 '{kapi}' kapısı geri alındı.")
+        if kapanan:
+            print(f"   Bağımlı olduğu kapılar da kapatıldı: {', '.join(kapanan)}")
+        return CIKIS_OK
+
+    if getattr(args, "reject", False):
+        try:
+            onay_reddet(durum, kapi, gerekce=gerekce or "", onaylayan=by, yorum=yorum)
+        except ValueError as hata:
+            print(f"🚧 {hata}")
+            print("   Örnek: approve methodology --reject --reason \"Arama kayıtları eksik\"")
+            return CIKIS_SORUN
+        kapanan = [
+            k for k, acik_mi, _ in ozet(durum) if not acik_mi and _kapi_sirasi(k) > _kapi_sirasi(kapi)
+        ]
+        save_state(durum)
+        print(f"⛔ '{kapi}' kapısı reddedildi.")
+        print(f"   Gerekçe kaydedildi: {gerekce}")
         if kapanan:
             print(f"   Bağımlı olduğu kapılar da kapatıldı: {', '.join(kapanan)}")
         return CIKIS_OK
@@ -939,14 +970,30 @@ def cmd_approve(args, durum) -> int:
         return CIKIS_SORUN
 
     try:
-        onay_ver(durum, kapi)
+        onay_ver(durum, kapi, onaylayan=by, yorum=yorum)
     except OnayHatasi as hata:
         print(f"🚧 {hata}")
         return CIKIS_SORUN
 
+    detay = kapi_detay(durum, kapi)
     save_state(durum)
     print(f"✅ '{kapi}' kapısı açıldı.")
+    if detay["revision"] and detay["revision"] > 1:
+        print(f"   Revizyon: {detay['revision']}")
+    if detay["approved_by"]:
+        print(f"   Onaylayan: {detay['approved_by']}")
+    print(f"   İçerik özeti: {detay['content_hash']}")
     return CIKIS_OK
+
+
+def _bayat_mi(durum: dict, kapi: str) -> bool:
+    """`kapi` onayi acik mi ama bayat mi? `status` ciktisi icin."""
+    from tools.atw.approval import onay_stale_mi
+
+    try:
+        return onay_stale_mi(durum, kapi)
+    except ValueError:
+        return False
 
 
 def _kapi_sirasi(kapi: str) -> int:
@@ -1289,7 +1336,8 @@ def cmd_status(args, durum) -> int:
     # Onay akisi: bu blok daha once YALNIZCA sayi yaziyordu, kapilarin
     # gercekten zorlandigi yeri degil. Simdi akis motorundan tek kaynak
     # alinir.
-    from tools.atw.approval import acik_olanlar, ozet
+    from tools.atw.approval import acik_olanlar, kapi_detay, ozet
+    from tools.atw.state import APPROVAL_GATES
 
     print("\n🔐 Onay kapıları (PRISMA):")
     for kapi, acik_mi, engeller in ozet(state):
@@ -1300,7 +1348,28 @@ def cmd_status(args, durum) -> int:
         elif not acik_mi and engeller:
             satir += f"  — {engeller[0]}"
         print(satir)
-    print(f"   → {len(acik_olanlar(state))}/7 aşama onaylı")
+    # `7` sabiti yerine `APPROVAL_GATES` boyutu: yeni kapı eklendiğinde
+    # rapor "6/7" gibi yalan söylemezdi.
+    print(f"   → {len(acik_olanlar(state))}/{len(APPROVAL_GATES)} aşama onaylı")
+
+    # Tazelik ve imza durumu. Onay "acik" gorunur ama bayat olabilir
+    # (icerik onaydan sonra degisti); eski `true` bicimli onaylar ise
+    # icerik ozeti tasimaz, yani elle yazilmis olabilir.
+    bayat = []
+    imzasiz = []
+    for kapi in APPROVAL_GATES:
+        detay = kapi_detay(state, kapi)
+        if detay["stale"]:
+            bayat.append(kapi)
+        elif detay["acik"] and not detay["attested"]:
+            imzasiz.append(kapi)
+    if bayat:
+        print(f"   ⚠️ Bayat onay (içerik onaydan sonra değişti): {', '.join(bayat)}")
+    if imzasiz:
+        print(
+            f"   ⚠️ İçerik özeti taşımayan onay (eski biçim veya elle düzenleme):"
+            f" {', '.join(imzasiz)}"
+        )
     return 0
 
 
@@ -1433,17 +1502,39 @@ def build_parser() -> argparse.ArgumentParser:
     p_write.set_defaults(func=cmd_write)
 
     # thesis:approve
-    p_approve = sub.add_parser("approve", help="Onay kapısı aç/kapat")
+    p_approve = sub.add_parser("approve", help="Onay kapısı aç / ret / geri al")
+    # Yardım metnindeki kapı adları `APPROVAL_GATES`'ten üretilir; liste
+    # elle yazıldığında yeni bir kapı eklenince metin sessizce yanlış kalır.
+    from tools.atw.state import APPROVAL_GATES as _KAPI_ADLARI
+
     p_approve.add_argument(
         "kapi",
         nargs="?",
-        help="Kapı adı (research_question, search_strategy, source_set, "
-             "research_gap, methodology, findings, final_thesis)",
+        help="Kapı adı: " + ", ".join(_KAPI_ADLARI),
     )
     p_approve.add_argument(
         "--revoke",
         action="store_true",
         help="Kapıyı kapat; ona dayanan kapılar da kapanır",
+    )
+    p_approve.add_argument(
+        "--reject",
+        action="store_true",
+        help="Kapıyı RET ile kapat; --reason zorunludur. Onayın "
+             "karşıtıdır: gerekçe neyin düzeltilmesi gerektiğini söyler",
+    )
+    p_approve.add_argument(
+        "--reason",
+        help="Ret gerekçesi (--reject ile zorunlu) veya geri alma notu",
+    )
+    p_approve.add_argument(
+        "--by",
+        help="Kararı veren insanın adı. Onay kaydının `approved_by` "
+             "alanına yazılır; ajan kendi onayını yazamaz",
+    )
+    p_approve.add_argument(
+        "--comment",
+        help="Karara eklenecek serbest not (en fazla 2000 karakter)",
     )
     p_approve.add_argument(
         "--list",

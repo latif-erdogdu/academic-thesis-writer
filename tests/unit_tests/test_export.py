@@ -105,8 +105,29 @@ def _bolum(kimlik: str, numara: int, baslik: str, paragraflar: list) -> dict:
     }
 
 
+def _temiz_denetimler() -> list[dict]:
+    """Bes denetim turunun da bulundugu, bulgusuz kayitlar.
+
+    `final_thesis` kapisi onay + denetim ister: "denetim gecmesi onay
+    degildir, ikisi de saglanmalidir" (references/approval_gates.md §1).
+    Fixture gercekci olsun diye burada temiz denetim kayitlari bulunur.
+    """
+    return [
+        {
+            "audit_id": f"AUD-{indeks:03d}",
+            "thesis_id": "THESIS-2026-001",
+            "audit_type": tur,
+            "date": "2026-09-30",
+            "findings": [],
+        }
+        for indeks, tur in enumerate(
+            ("citation", "methodology", "consistency", "integrity", "evidence"), start=1
+        )
+    ]
+
+
 def _tez(*bolumler, **ek) -> dict:
-    """final_thesis kapisi acilmis, butunlugu temiz bir tez durumu."""
+    """final_thesis kapisi acilmis, butunlugu ve denetimleri temiz bir tez durumu."""
     durum = empty_state("THESIS-2026-001", "Ornek Tez")
     durum["chapters"] = list(bolumler)
     durum["human_approvals"] = {
@@ -118,6 +139,7 @@ def _tez(*bolumler, **ek) -> dict:
         "findings": True,
         "final_thesis": True,
     }
+    durum["audit_registry"] = _temiz_denetimler()
     durum.update(ek)
     return durum
 

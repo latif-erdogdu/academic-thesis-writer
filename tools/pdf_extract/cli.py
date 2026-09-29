@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -309,8 +310,14 @@ def cmd_batch_evidence(args) -> int:
         state["evidence_registry"] = existing
         state["updated_at"] = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(timespec="seconds")
 
-        with open(state_file, "w", encoding="utf-8") as f:
-            json.dump(state, f, ensure_ascii=False, indent=2)
+        # Atomik yazim: gecici dosyaya yaz, sonra yerine kon. Dogrudan
+        # `open(..., "w")` ile yazmak, islem yarida kesildiginde butun tez
+        # durumunu yarim JSON olarak birakirdi.
+        gecici = Path(state_file).with_name(f"{Path(state_file).name}.tmp")
+        gecici.write_text(
+            json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        os.replace(gecici, state_file)
 
         print(f"\n✅ {len(all_evidence)} kanıt eklendi, state güncellendi: {state_file}")
 

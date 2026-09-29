@@ -6,6 +6,8 @@ kadar engeldir.
 """
 from __future__ import annotations
 
+import copy
+
 import pytest
 
 from tools.atw.approval import (
@@ -27,18 +29,123 @@ def _kapili_durum() -> dict:
     return empty_state("THESIS-2026-001", "Deneme Tezi")
 
 
+#: `final_thesis` kapısı beş denetim turunun da geçmiş olmasını ister
+#: (spec §1: "denetim geçmesi onay değildir, ikisi de sağlanmalıdır").
+#: Test fixture'ları gerçekçi olsun diye burada temiz kayıtlar bulunur.
+_DENETIM_TURLERI = ("citation", "methodology", "consistency", "integrity", "evidence")
+
+
+def _temiz_denetimler() -> list[dict]:
+    return [
+        {
+            "audit_id": f"AUD-{indeks:03d}",
+            "thesis_id": "THESIS-2026-001",
+            "audit_type": tur,
+            "date": "2026-09-30",
+            "findings": [],
+        }
+        for indeks, tur in enumerate(_DENETIM_TURLERI, start=1)
+    ]
+
+
+#: On kosul denetimi kayit duzeyinde calistigi icin fixture kayitlari
+#: kendi SEMALARINA UYGUN olmak ZORUNDA. `{"id": "SR-001"}` gibi yarim
+#: kayitlar uretimde yazilamaz; testte kullanilmamalari da ayni sebeple
+#: yanlistir.
+_ORNEK_KAYITLAR: dict[str, list[dict]] = {
+    "research_questions": [
+        {"id": "RQ-001", "text": "Araştırma sorusu?", "type": "main", "status": "pending"},
+    ],
+    "search_runs": [
+        {
+            "id": "SEARCH-001", "database": "crossref", "query": "kurgusal sorgu",
+            "timestamp": "2026-09-30T09:00:00+00:00", "results_returned": 1,
+            "inclusion_criteria": ["akademik makale"], "exclusion_criteria": ["derleme"],
+            "prisma_flow": {
+                "records_identified": 1, "duplicates_removed": 0, "records_screened": 1,
+                "records_excluded": 0, "reports_sought": 1, "reports_excluded": 0,
+                "studies_included": 1,
+            },
+        },
+    ],
+    "sources": [
+        {
+            "id": "SRC-001", "title": "Kurgusal kaynak", "doi": "10.1234/ornek",
+            "source_type": "article", "verified": True, "retraction_status": "not_retracted",
+            "verification": {
+                "status": "verified", "bibliographic_match": 1.0,
+                "verified_at": "2026-09-30T09:00:00+00:00",
+                "verification_sources": ["crossref"],
+            },
+        },
+    ],
+    "evidence_registry": [
+        {
+            "id": "EVD-001", "source_id": "SRC-001",
+            "location": {"page": 1, "section": "3.1", "paragraph": None},
+            "text": "Kurgusal alıntı.", "evidence_type": "literature", "strength": "direct",
+        },
+    ],
+    "gap_registry": [
+        {
+            "id": "GAP-001", "statement": "Kurgusal boşluk beyanı.",
+            "gap_type": "unanswered_question", "evidence_ids": ["EVD-001"],
+            "supporting_source_ids": ["SRC-001"], "confidence": "high",
+        },
+    ],
+    "findings_registry": [
+        {
+            "id": "FND-001", "rq_id": "RQ-001", "statement": "Kurgusal bulgu.",
+            "evidence_ids": ["EVD-001"],
+        },
+    ],
+    "chapters": [
+        {
+            "id": "CH-001", "number": 1, "title": "Giriş",
+            "paragraphs": [
+                {"id": "P-001", "type": "introduction", "text": "Bu bölüm teze giriş yapar."},
+            ],
+        },
+    ],
+}
+
+#: `ek` ile verilen alan kisaltmalari. Anahtar eski testlerle uyumlu.
+_KISALTMA = {
+    "rq": "research_questions",
+    "sr": "search_runs",
+    "src": "sources",
+    "gap": "gap_registry",
+    "fnd": "findings_registry",
+    "ch": "chapters",
+    "evd": "evidence_registry",
+}
+
+
 def _acik_durum(**ek) -> dict:
-    """Tum kapiları açık, gerekli registry'ler dolu bir durum."""
+    """Tum kapilari acik, on kosullari saglanmis, denetimleri temiz bir durum."""
     durum = _kapili_durum()
     for kapi in APPROVAL_GATES:
         durum["human_approvals"][kapi] = True
-    durum["research_questions"] = ek.get("rq", [{"id": "RQ-001", "text": "Soru"}])
-    durum["search_runs"] = ek.get("sr", [{"id": "SR-001"}])
-    durum["sources"] = ek.get("src", [{"id": "SRC-001", "doi": "10.1/x"}])
-    durum["gap_registry"] = ek.get("gap", [{"id": "GAP-001"}])
-    durum["chapters"] = ek.get("ch", [{"id": "CH-001", "title": "Bölüm"}])
-    durum["findings_registry"] = ek.get("fnd", [{"id": "FND-001", "statement": "B"}])
+    for alan, kayitlar in _ORNEK_KAYITLAR.items():
+        durum[alan] = copy.deepcopy(kayitlar)
+    for kisaltma, alan in _KISALTMA.items():
+        if kisaltma in ek:
+            durum[alan] = copy.deepcopy(ek[kisaltma])
+    if "audit" in ek:
+        durum["audit_registry"] = copy.deepcopy(ek["audit"])
+    else:
+        durum["audit_registry"] = _temiz_denetimler()
     return durum
+
+
+def _akis_durumu() -> dict:
+    """Kapilari sirayla acmak icin gereken on kosullari tasiyan durum.
+
+    `onay_ver` artik on kosulu KENDISI denetler; test de ayni sirayi
+    takip etmelidir. Yoksa "yedi kapi sirayla acilabilir" testi, gecmeyi
+    bir kapi atlama sanirdi.
+    """
+    return _acik_durum()
 
 
 # --- temel davranis -------------------------------------------------------
@@ -56,7 +163,9 @@ def test_yedi_kapi_tanimli():
 
 
 def test_kapi_acma_durumu_degistirir():
-    durum = _kapili_durum()
+    durum = _akis_durumu()
+    for kapi in APPROVAL_GATES:
+        durum["human_approvals"][kapi] = False
     onay_ver(durum, "research_question")
     assert acik_mi(durum, "research_question")
     assert kapali_olanlar(durum) == list(APPROVAL_GATES[1:])
@@ -65,14 +174,19 @@ def test_kapi_acma_durumu_degistirir():
 # --- akis sirasi -----------------------------------------------------------
 
 def test_onceki_kapi_kapaliyken_sonraki_kapi_ilan_edilemez():
-    durum = _kapili_durum()
+    durum = _akis_durumu()
+    for kapi in APPROVAL_GATES:
+        durum["human_approvals"][kapi] = False
     with pytest.raises(OnayHatasi, match="research_question"):
         onay_ver(durum, "search_strategy")
 
 
 def test_sirayla_acilabilir():
-    durum = _kapili_durum()
+    durum = _akis_durumu()
     for kapi in APPROVAL_GATES:
+        if kapi == "final_thesis":
+            # Teslim kapisi oncesinde bes denetim de calismis olmali.
+            durum["audit_registry"] = _temiz_denetimler()
         onay_ver(durum, kapi)
     assert acik_olanlar(durum) == list(APPROVAL_GATES)
 

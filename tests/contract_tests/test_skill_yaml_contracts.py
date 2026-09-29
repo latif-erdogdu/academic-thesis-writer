@@ -341,14 +341,15 @@ def test_thesis_init_hook_gecerli_durum_ure_tir(tmp_path):
     assert durum["sources"] == [] and durum["citations"] == []
     assert durum["schema_version"] == "1.0"
 
-    from tools.atw.state import APPROVAL_GATES
+    from tools.atw.state import APPROVAL_GATES, validate_state
 
     assert sorted(durum["human_approvals"]) == sorted(APPROVAL_GATES)
+    assert durum["approval_events"] == [], "onay olay günlüğü boş başlamalı"
 
-    sema = json.loads(
-        (REPO_ROOT / "schemas" / "thesis_state.json").read_text(encoding="utf-8")
-    )
-    jsonschema.Draft202012Validator(sema).validate(durum)
+    # `validate_state` uretimde kullanilan dogrulayicinin KENDISIDIR. Burada
+    # `Draft202012Validator(sema)` denemek `human_approvals` -> `approval.json`
+    # capraz referansini cozemez ve semayi agdan indirmeye calisir.
+    assert validate_state(durum) == []
 
 
 def test_thesis_init_hook_mevcut_dosyaya_ezmez(tmp_path):

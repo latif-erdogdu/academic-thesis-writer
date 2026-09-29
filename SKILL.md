@@ -336,6 +336,7 @@ Minimum veri:
 
 ## 10. REFERANSLAR (References)
 
+- `references/approval_gates.md` - **Onay kapılarının kanonik sözleşmesi** (onay kaydı, bağımlılık grafiği, tazelik, ret, olay günlüğü)
 - `references/citation_rules.md` - Atıf kuralları (APA, MLA, Chicago, IEEE, Harvard)
 - `references/source_verification.md` - Kaynak doğrulama süreçleri
 - `references/evidence_rules.md` - Kanıt kuralları

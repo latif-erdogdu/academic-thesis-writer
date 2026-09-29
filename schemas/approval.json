@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/approval.json",
+  "title": "İnsan onay kaydı",
+  "description": "Bir onay kapısının kararını taşıyan nesne. `human_approvals.<kapı>` ya bu nesne ya da geriye uyum için eski `true`/`false` boolean'ıdır. Boolean biçim içerik özeti taşımadığından tazelik denetimi yapılamaz; bu yüzden `approve` komutu daima nesne yazar.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["approved", "revision"],
+  "properties": {
+    "$comment": {
+      "type": "string"
+    },
+    "approved": {
+      "type": "boolean",
+      "description": "İnsan kararının olumlu olup olmadığı. `false` değeri ya kapı hiç açılmamış ya da ret edilmiş demektir; ikisini `rejection_reason` ayırır."
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Bu kapının kaçıncı onay kararı. Ret ve geri alma sayacı sıfırlamaz."
+    },
+    "approved_by": {
+      "type": ["string", "null"],
+      "maxLength": 120,
+      "description": "Kararı veren insanın adı. Ajan kendi onayını yazamaz."
+    },
+    "approved_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Karar anı (RFC 3339)."
+    },
+    "content_hash": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{16}$",
+      "description": "Onay anında kapsanan içeriğin kısaltılmış SHA-256 özeti. İçerik sonradan değişirse onay bayatlar."
+    },
+    "comment": {
+      "type": ["string", "null"],
+      "maxLength": 2000,
+      "description": "Kararı açıklayan serbest not."
+    },
+    "rejection_reason": {
+      "type": ["string", "null"],
+      "maxLength": 2000,
+      "description": "Ret gerekçesi. `onay_reddet` boş gerekçeyi kabul etmez; bu zorunluluk Python tarafındadır, çünkü şema 'hiç açılmamış' ile 'reddedilmiş' durumlarını ayırt edemez."
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^AUD-[0-9]{3,}$"
+      },
+      "description": "Kararın dayandığı denetim kayıtlarının kimlikleri."
+    }
+  },
+  "allOf": [
+    {
+      "comment": "Olumlu kararın üç alanı da bulunmalıdır. `null` olabilirler (kimlik bilinmiyorsa) ama KESİNLİKLE olmalıdırlar: eksik alan, kaydın elden geçirilerek yazıldığının işaretidir.",
+      "if": { "properties": { "approved": { "const": true } }, "required": ["approved"] },
+      "then": { "required": ["approved_by", "approved_at", "content_hash"] }
+    }
+  ],
+  "examples": [
+    {
+      "$comment": "KURGUSAL ORNEK. Gerekçe, kişi ve zaman uydurmadir; yalnizca sema dogrulamak icin kullanilir.",
+      "approved": true,
+      "revision": 1,
+      "approved_by": "Danışma Kurulu Üyesi (kurgusal)",
+      "approved_at": "2026-09-30T09:14:22+00:00",
+      "content_hash": "sha256:0123456789abcdef",
+      "comment": "Taslak incelendi, kapsam uygun.",
+      "rejection_reason": null,
+      "audit_refs": ["AUD-007"]
+    },
+    {
+      "$comment": "Ret kaydi: gerekce zorunludur, cunku 'ne duzeltilmeli' sorusunun cevabidir.",
+      "approved": false,
+      "revision": 2,
+      "approved_by": "Danışma Kurulu Üyesi (kurgusal)",
+      "approved_at": "2026-09-30T11:02:05+00:00",
+      "content_hash": null,
+      "comment": null,
+      "rejection_reason": "Arama kayıtları eksik; arama stratejisi yeniden tanımlansın.",
+      "audit_refs": []
+    }
+  ]
+}

@@ -233,6 +233,7 @@ commands:
 # kalmamalıdır. (Önce "agents/references/ içinden kopyalanır" yazıyordu; o
 #  dizin hiç var olmadı.)
 references:
+  - approval_gates.md
   - citation_rules.md
   - source_verification.md
   - evidence_rules.md

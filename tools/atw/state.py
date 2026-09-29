@@ -8,6 +8,7 @@ tutar. Semalarin Python karsiliklari burada tanimlanmaz.
 from __future__ import annotations
 
 import json
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -62,9 +63,15 @@ _RFC3339_DATETIME = re.compile(
 
 
 @_FORMAT_CHECKER.checks("date-time")
-def _rfc3339_datetime_checker(value: str) -> bool:
+def _rfc3339_datetime_checker(value: object) -> bool:
+    # JSON Schema'ya gore `format` YALNIZCA string degerlere uygulanir; diger
+    # tiplerin gecerliligi `type` anahtarinin isidir. Onceki surum burada
+    # `False` donuyordu, bu da `{"type": ["string", "null"], "format":
+    # "date-time"}` alanlarinin `null` degerini reddediyordu — semada
+    # nullable olan bir alan, koda yazilinca gecersiz hale geliyordu.
+    # `approval.approved_at` bunu ilk ortaya cikardi.
     if not isinstance(value, str):
-        return False
+        return True
     return bool(_RFC3339_DATETIME.match(value))
 
 
@@ -152,6 +159,9 @@ def empty_state(thesis_id: str, title: str = "") -> dict[str, Any]:
         "open_questions": [],
         "quality_issues": [],
         "human_approvals": {kapili: False for kapili in APPROVAL_GATES},
+        # Append-only onay gunlugu. `human_approvals` anlık durumu tutar,
+        # bu dizi gecmisi; kayitlar silinmez veya guncellenmez.
+        "approval_events": [],
         "style_profile": "apa7",
         "created_at": simdi,
         "updated_at": simdi,
@@ -225,9 +235,19 @@ def load_state(path: str | Path) -> dict[str, Any]:
 
 
 def save_state(path: str | Path, state: dict[str, Any]) -> None:
-    """Durumu dogrular ve diskte yazar.
+    """Durumu dogrular ve ATOMIK olarak diskte yazar.
 
     Dogrulama basarisizsa hicbir dosya yazilmaz.
+
+    Neden atomik
+    ------------
+    Onceki surum `write_text` ile dogrudan yaziyordu. Islem ortasinda
+    (disk doldu, surec olduruldu, elektrik kesildi) yarim bir JSON kalirdi;
+    `load_state` bir sonraki acilista `json.JSONDecodeError` firlatirdi ve
+    butun tez durumu — 41 kaynak, 9 iddia, 8 bolum — tek bir yazma
+    hatasindan sonra okunamaz hale gelirdi. Simdi gecici dosyaya yazilip
+    `os.replace` ile yerine konur: ya eski dosya durur, ya yeni dosya
+    tamamen durur. Yarim dosya hicbir zaman gorunmez.
 
     Raises:
         ValueError: Belge semaya uymuyorsa.
@@ -238,10 +258,17 @@ def save_state(path: str | Path, state: dict[str, Any]) -> None:
         raise ValueError(f"Durum semaya uymuyor ({len(hatalar)} hata): {detay}")
     yol = Path(path)
     yol.parent.mkdir(parents=True, exist_ok=True)
-    yol.write_text(
-        json.dumps(state, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    govde = json.dumps(state, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    # Ayni dizinde gecici dosya: `os.replace` yalnizca ayni dosya sisteminde
+    # atomiktir. `delete=False` + elle temizlik: hata halinde gecici dosya
+    # diskte kalir ama gorunmez durum dosyasi degil, yarim gecici dosyadir.
+    gecici = yol.with_name(f"{yol.name}.tmp-{os.getpid()}")
+    try:
+        gecici.write_text(govde, encoding="utf-8")
+        os.replace(gecici, yol)
+    except OSError:
+        gecici.unlink(missing_ok=True)
+        raise
 
 
 def validate_prisma_flow(flow: dict[str, Any]) -> list[str]:

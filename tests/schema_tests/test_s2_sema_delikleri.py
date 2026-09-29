@@ -177,10 +177,10 @@ def test_fulltext_available_null_gecerli():
     dogrulayici.evolve(schema=sema).validate({**temel, "fulltext_available": False})
 
 
-def test_sema_sayisi_yirmi_bir():
-    """Toplam 21 şema (eski 18 + 3 yeni)."""
+def test_sema_sayisi_yirmi_iki():
+    """Toplam 22 şema (eski 18 + 3 yeni + `approval.json`)."""
     dosyalar = list(SCHEMA_DIR.glob("*.json"))
-    assert len(dosyalar) == 21, f"Beklenen 21, bulunan {len(dosyalar)}: {[d.name for d in dosyalar]}"
+    assert len(dosyalar) == 22, f"Beklenen 22, bulunan {len(dosyalar)}: {[d.name for d in dosyalar]}"
 
 
 if __name__ == "__main__":

@@ -239,6 +239,7 @@
       }
     },
     "human_approvals": {
+      "description": "Yedi onay kapısının anlık durumu. Değer ya eski `true`/`false` boolean'ıdır (geriye uyum; içerik özeti yoktur, tazelik denetlenemez) ya da `approval.json` onay nesnesidir.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -251,33 +252,55 @@
         "final_thesis"
       ],
       "properties": {
-        "research_question": {
-          "type": "boolean",
-          "default": false
-        },
-        "search_strategy": {
-          "type": "boolean",
-          "default": false
-        },
-        "source_set": {
-          "type": "boolean",
-          "default": false
-        },
-        "research_gap": {
-          "type": "boolean",
-          "default": false
-        },
-        "methodology": {
-          "type": "boolean",
-          "default": false
-        },
-        "findings": {
-          "type": "boolean",
-          "default": false
-        },
-        "final_thesis": {
-          "type": "boolean",
-          "default": false
+        "research_question": { "$ref": "#/$defs/kapi" },
+        "search_strategy": { "$ref": "#/$defs/kapi" },
+        "source_set": { "$ref": "#/$defs/kapi" },
+        "research_gap": { "$ref": "#/$defs/kapi" },
+        "methodology": { "$ref": "#/$defs/kapi" },
+        "findings": { "$ref": "#/$defs/kapi" },
+        "final_thesis": { "$ref": "#/$defs/kapi" }
+      }
+    },
+    "approval_events": {
+      "description": "Onay olay günlüğü. Yalnızca EKLENİR, silinmez veya güncellenmez. `human_approvals` anlık durumu, bu dizi geçmişi tutar.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event_id", "gate", "action", "at"],
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "pattern": "^EVT-[0-9]{4,}$"
+          },
+          "gate": {
+            "type": "string",
+            "enum": [
+              "research_question",
+              "search_strategy",
+              "source_set",
+              "research_gap",
+              "methodology",
+              "findings",
+              "final_thesis"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": ["approve", "reject", "revoke", "stale", "block"]
+          },
+          "actor": { "type": ["string", "null"], "maxLength": 120 },
+          "at": { "type": "string", "format": "date-time" },
+          "content_hash": {
+            "type": ["string", "null"],
+            "pattern": "^sha256:[0-9a-f]{16}$"
+          },
+          "reason": { "type": ["string", "null"], "maxLength": 2000 },
+          "comment": { "type": ["string", "null"], "maxLength": 2000 },
+          "audit_refs": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^AUD-[0-9]{3,}$" }
+          }
         }
       }
     }
@@ -286,6 +309,13 @@
     "id": {
       "type": "string",
       "pattern": "^[A-Z]+-\\d{3,}$"
+    },
+    "kapi": {
+      "description": "Bir kapının durumu: ya eski boolean biçimi ya da tam onay kaydı.",
+      "oneOf": [
+        { "type": "boolean" },
+        { "$ref": "https://github.com/latif-erdogdu/academic-thesis-writer/schemas/approval.json" }
+      ]
     }
   }
 }

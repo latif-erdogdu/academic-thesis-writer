@@ -46,7 +46,12 @@ def _kapili(depo: Path) -> dict:
 
 
 def _onayli(depo: Path) -> dict:
-    """Tüm kapıları açık ve içlikleri dolu bir tez."""
+    """Tüm kapıları açık, içlikleri dolu ve denetimleri temiz bir tez.
+
+    `final_thesis` kapısı beş denetim turunun da geçmiş olmasını ister
+    (denetim geçmesi onay değildir, ikisi de gerekir). Fixture gerçekçi
+    olsun diye temiz denetim kayıtları içerir.
+    """
     durum = empty_state("THESIS-2026-001", "Deneme Tezi")
     for kapi in durum["human_approvals"]:
         durum["human_approvals"][kapi] = True
@@ -56,6 +61,18 @@ def _onayli(depo: Path) -> dict:
     durum["gap_registry"] = [{"id": "GAP-001"}]
     durum["chapters"] = [{"id": "CH-001", "title": "B"}]
     durum["findings_registry"] = [{"id": "FND-001", "statement": "S"}]
+    durum["audit_registry"] = [
+        {
+            "audit_id": f"AUD-{indeks:03d}",
+            "thesis_id": "THESIS-2026-001",
+            "audit_type": tur,
+            "date": "2026-09-30",
+            "findings": [],
+        }
+        for indeks, tur in enumerate(
+            ("citation", "methodology", "consistency", "integrity", "evidence"), start=1
+        )
+    ]
     _yaz(depo, durum)
     return durum
 

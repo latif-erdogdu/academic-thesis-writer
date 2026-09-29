@@ -22,9 +22,9 @@ def test_tum_semalar_draft_2020_12_uyumlu(schema_dir):
         Draft202012Validator.check_schema(sema), sema_dosyasi.name
 
 
-def test_sema_sayisi_yirmi_bir():
+def test_sema_sayisi_yirmi_iki():
     from tools.atw.state import SCHEMA_DIR
-    assert len(list(SCHEMA_DIR.glob("*.json"))) == 21
+    assert len(list(SCHEMA_DIR.glob("*.json"))) == 22
 
 
 def test_her_semanin_id_alani_var(schema_dir):

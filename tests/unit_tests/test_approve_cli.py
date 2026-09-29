@@ -110,6 +110,19 @@ def _ns(kapi=None, liste=False, geri_al=False) -> Namespace:
     return Namespace(kapi=kapi, list=liste, revoke=geri_al)
 
 
+def _acik_mi(depo: Path, kapi: str) -> bool:
+    """Kapının insan onayı acik mi?
+
+    `human_approvals[kapi]` ya eski `true`/`false` boolean'idir ya da tam
+    onay kaydi (`schemas/approval.json`). Testler `is True` demek yerine bu
+    yardimciyi kullanir; boylece onay kaydinin alanlari degisse de kapi
+    durumu denetlenebilir.
+    """
+    from tools.atw.approval import kapi_acik_mi
+
+    return kapi_acik_mi(_oku(depo), kapi)
+
+
 # --- varlik -----------------------------------------------------------------
 
 def test_parser_approve_komutunu_kaydeder():
@@ -136,7 +149,7 @@ def test_hazirligi_olmayan_kapi_acilmaz(depo, capsys):
 
     cikti = capsys.readouterr().out
     assert "research_questions" in cikti
-    assert _oku(depo)["human_approvals"]["research_question"] is False, (
+    assert not _acik_mi(depo, "research_question"), (
         "hazırlığı olmayan kapı onaylanmış olarak yazıldı"
     )
 
@@ -152,7 +165,11 @@ def test_hazirligi_olan_kapi_acilir(depo, capsys):
     assert cli.cmd_approve(_ns("research_question")) == 0
 
     assert "✅" in capsys.readouterr().out
-    assert _oku(depo)["human_approvals"]["research_question"] is True
+    kayit = _oku(depo)["human_approvals"]["research_question"]
+    assert kayit["approved"] is True, "onay kaydı yazılmadı"
+    assert kayit["content_hash"].startswith("sha256:"), (
+        "onay kaydı içerik özeti taşımıyor — onay bayatlatılamaz"
+    )
 
 
 # --- akis sirasi ------------------------------------------------------------
@@ -168,7 +185,7 @@ def test_onceki_kapi_onayli_degilse_acilmaz(depo, capsys):
 
     cikti = capsys.readouterr().out
     assert "research_question" in cikti
-    assert _oku(depo)["human_approvals"]["search_strategy"] is False
+    assert not _acik_mi(depo, "search_strategy")
 
 
 def test_oncekiler_onayliysa_kapi_acilir(depo):
@@ -176,7 +193,7 @@ def test_oncekiler_onayliysa_kapi_acilir(depo):
     _onayli_oncekiler(depo, "search_strategy")
 
     assert cli.cmd_approve(_ns("search_strategy")) == 0
-    assert _oku(depo)["human_approvals"]["search_strategy"] is True
+    assert _acik_mi(depo, "search_strategy")
 
 
 # --- hazirliksiz kapi (methodology) -----------------------------------------
@@ -191,7 +208,7 @@ def test_hazirlik_denetimi_olmayan_kapi_hazirligi_sormaz(depo, capsys):
     _onayli_oncekiler(depo, "methodology")
 
     assert cli.cmd_approve(_ns("methodology")) == 0
-    assert _oku(depo)["human_approvals"]["methodology"] is True
+    assert _acik_mi(depo, "methodology")
 
 
 # --- geri alma --------------------------------------------------------------
@@ -200,13 +217,12 @@ def test_geri_alma_sonraki_kapilari_da_kapatir(depo, capsys):
     """`research_question` geri alınınca aşağıdaki tüm onaylar düşmeli."""
     _onayli_oncekiler(depo, "search_strategy")
     assert cli.cmd_approve(_ns("search_strategy")) == 0
-    assert _oku(depo)["human_approvals"]["search_strategy"] is True
+    assert _acik_mi(depo, "search_strategy")
 
     assert cli.cmd_approve(_ns("research_question", geri_al=True)) == 0
 
-    onaylar = _oku(depo)["human_approvals"]
-    assert onaylar["research_question"] is False
-    assert onaylar["search_strategy"] is False, (
+    assert not _acik_mi(depo, "research_question")
+    assert not _acik_mi(depo, "search_strategy"), (
         "ona dayanan onay düşmedi — akış tutarsız"
     )
     assert "search_strategy" in capsys.readouterr().out
@@ -222,7 +238,7 @@ def test_geri_alma_hazirlik_sormaz(depo):
     assert cli.cmd_approve(_ns("methodology")) == 0
 
     assert cli.cmd_approve(_ns("methodology", geri_al=True)) == 0
-    assert _oku(depo)["human_approvals"]["methodology"] is False
+    assert not _acik_mi(depo, "methodology")
 
 
 # --- listeleme --------------------------------------------------------------
