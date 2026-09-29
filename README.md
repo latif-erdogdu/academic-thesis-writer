@@ -82,16 +82,24 @@ academic-thesis-writer/
 │   ├── gap_analysis.md               # Boşluk analizi
 │   └── quality_report.md             # Kalite denetim raporu
 │
-├── tools/                            # Araç arayüzleri (README)
+├── tools/                            # Çalıştırılabilir araçlar
+│   ├── atw/                          # Tez CLI (`python -m tools.atw.cli`)
 │   ├── source_search/                # Kaynak arama (Crossref, OpenAlex, Semantic Scholar, PubMed, Google Scholar)
 │   ├── source_verify/                # Kaynak doğrulama (DOI, bibliyografik karşılaştırma)
 │   ├── pdf_extract/                  # PDF'ten kanıt çıkarma (sayfa/bölüm düzeyinde)
 │   └── citation_check/               # Atıf-kaynakça bütünlük denetimi
 │
+├── scripts/
+│   └── install_skill.ps1             # Skill paketini OpenCode + Claude Code'a kurar
+│
+├── .opencode/skills/academic-thesis-writer/   # OpenCode V2 skill paketi (SKILL.md + skill.yaml + agents/ + hooks/)
+├── .claude/skills/academic-thesis-writer/     # Claude Code skill ikizi (SKILL.md + agents/)
+├── .claude/commands/thesis-*.md               # Claude Code slash komutları (10)
+│
 └── tests/                            # Test senaryoları
     ├── fixtures/                     # Kurgusal örnek kayıtlar
     ├── schema_tests/                 # Şema ve durum testleri
-    ├── contract_tests/               # Sözleşme testleri (ajan blokları)
+    ├── contract_tests/               # Sözleşme testleri (ajan blokları, sızma engelleri, çift platform)
     ├── unit_tests/                   # Birim testleri (graph, ids, state)
     └── integration_tests/            # Uçtan uca bütünlük testleri
 ```
@@ -163,24 +171,30 @@ Denetim?
 
 **Toplam: 10 ajan**
 
-## P0-1: Çekirdek ve Veri Modeli
+## 🧪 Çalıştırma ve Doğrulama
 
-Bu katman, tezin tüm varlıklarını tanımlayan veri modelini ve bunu
-doğrulayan çalıştırılabilir test altyapısını kurar.
-
-### Doğruluk Kaynağı
+### Bağımlılıklar ve Testler
 
 Kalıcı varlıkların tek doğruluk kaynağı `schemas/*.json` dosyalarıdır
-(JSON Schema draft 2020-12). Doğrulama `jsonschema` paketiyle yapılır.
-Python tarafında şemaların kopyası tutulmaz; `tools/atw/` yalnızca
-şemaları okur.
-
-### Çalıştırma
+(JSON Schema draft 2020-12). Doğrulama `jsonschema` paketiyle yapılır;
+Python tarafında şemaların kopyası tutulmaz, `tools/atw/` şemaları okur.
 
 ```bash
 pip install -r requirements.txt
 python -m pytest -q
 ```
+
+### Tez CLI
+
+Tez yaşam döngüsü `tools/atw/` paketi üzerinden yürütülür:
+
+```bash
+python -m tools.atw.cli new --title "Tez Başlığı" --lang tr
+python -m tools.atw.cli status
+```
+
+Alt komutlar: `new`, `search`, `verify`, `extract`, `write`, `approve`,
+`record`, `audit`, `exclude`, `status`, `export`.
 
 ### Kimlik Standardı
 
@@ -188,7 +202,7 @@ python -m pytest -q
 `CLM`, `CIT`, `P`, `RQ`, `HYP`, `FND`, `DSC`, `CON`, `GAP`, `AUD`,
 `SEARCH`, `DS`, `ANL`, `STAT`, `TBL`, `FIG`.
 
-### Ajanlar
+### Denetim Bileşenleri
 
 | Ajan | Görev |
 |------|-------|
@@ -207,8 +221,8 @@ python -m pytest -q
 
 ### Yeni Tez Başlatma
 
-1. `schemas/thesis_state.json` dosyasını kopyalayın ve doldurun
-2. Araştırma problemini ve sorularını tanımlayın
+1. Örnek durumu kopyalayın: `python -c "import shutil; shutil.copy('schemas/thesis_state.json', 'thesis_state.json')"`
+2. Araştırma problemini ve sorularını tanımlayın (CLI: `python -m tools.atw.cli new`)
 3. `workflows/thesis_creation.md` akışını takip edin
 
 ### Literatür Taraması (Sistematik İnceleme)
@@ -262,7 +276,9 @@ Her bölüm için (`workflows/chapter_writing.md`):
 - ✅ **Çoklu atıf stili**: APA, MLA, Chicago, IEEE, Harvard
 - ✅ **Tez Durumu persistence**: Oturumlar arası tutarlılık (JSON)
 - ✅ **Orchestrator mimarisi**: SKILL koordinatör, 10 modüler ajan
-- ✅ **4 araç arayüzü**: source_search, source_verify, pdf_extract, citation_check
+- ✅ **Çift platform**: OpenCode V2 skill paketi (`.opencode/skills/`) + Claude Code ikizi (`.claude/skills/`) + 10 slash komut
+- ✅ **4 araç + tez CLI**: source_search, source_verify, pdf_extract, citation_check + `tools/atw/` (`new`, `search`, `verify`, `extract`, `write`, `approve`, `record`, `audit`, `exclude`, `status`, `export`)
+- ✅ **Kurulum betiği**: `scripts/install_skill.ps1` her iki hedefe de byte-özdeş kopya kurar
 - ✅ **4 bileşenli denetim**: Terminoloji, Sayılar, Örneklem, Yöntem-Bulgular
 - ✅ **Kalite denetim raporu**: Yapısal, atıf, metodoloji, tutarlılık, akademik yazım
 
@@ -272,11 +288,17 @@ Her bölüm için (`workflows/chapter_writing.md`):
 # Repo'yu klonla
 git clone https://github.com/latif-erdogdu/academic-thesis-writer.git
 
+# Bağımlılıkları kur
+pip install -r requirements.txt
+
+# Skill paketini kur (OpenCode + Claude Code)
+powershell -ExecutionPolicy Bypass -File scripts/install_skill.ps1
+
 # Thesis State'i başlat (cross-platform)
 python -c "import shutil; shutil.copy('schemas/thesis_state.json', 'thesis_state.json')"
 
-# İlk tez için bilgileri doldur
-# workflows/thesis_creation.md akışını takip et
+# Testler
+python -m pytest -q
 ```
 
 ## 📖 Dokümantasyon
@@ -287,7 +309,8 @@ python -c "import shutil; shutil.copy('schemas/thesis_state.json', 'thesis_state
 - [templates/](./templates/) - 5 kullanıma hazır şablon
 - [schemas/](./schemas/) - 21 veri şeması (JSON)
 - [references/](./references/) - 7 akademik bütünlük referansı
-- [tools/](./tools/) - 4 araç arayüzü
+- [tools/](./tools/) - 4 araç + tez CLI (`tools/atw/`)
+- [scripts/](./scripts/) - `install_skill.ps1` (çift hedefli kurulum)
 - [tests/](./tests/) - 5 test kategorisi
 
 ## 🤝 Katkı

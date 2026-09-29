@@ -193,7 +193,7 @@ def test_requirements_txt_asgari_dependenslari_iceriyor():
         assert paket in metin, paket
 
 
-def test_readme_p0_1_mimarisini_anlatiyor():
+def test_readme_mimarisini_anlatiyor():
     metin = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     assert "jsonschema" in metin
     assert "pytest" in metin
@@ -204,18 +204,21 @@ def test_readme_p0_1_mimarisini_anlatiyor():
 SURUM_DESENI = re.compile(r"(?<![\w/.])v(?:ersion)?\s*[0-9]+(?!\w)", re.IGNORECASE)
 
 
-def test_planda_surum_ibaresi_yok():
-    """Planin kendisi de surum soyutlamasi yasagina tabidir.
+def test_kok_belgelerde_surum_ibaresi_yok():
+    """Kok SKILL.md ve ajan dosyalari surum soyutlamasi yasagina tabidir.
 
-    Plan yasagi adlariyla anmaz; aksi halde kendi kuralini ihlal ederdi.
-    Yalnizca kuralin metni denetlenir, kod blogu icindeki desen degil --
-    desen zaten harf ve rakam olarak ayri yazildigi icin eslesmez.
+    Ust duzey belgeler surum adlariyla anmaz; aksi halde kendi
+    kuralini ihlal ederdi. Yalnizca kuralin metni denetlenir, kod
+    blogu icindeki desen degil -- desen zaten harf ve rakam olarak
+    ayri yazildigi icin eslesmez.
     """
-    plan = REPO_ROOT / "docs" / "superpowers" / "plans" / "2026-09-26-p0-1-core-data-model.md"
-    assert plan.is_file()
-    metin = plan.read_text(encoding="utf-8")
-    eslesme = SURUM_DESENI.search(metin)
-    assert eslesme is None, f"Planda surum ibaresi: {eslesme.group(0)!r}"
+    hedefler = [REPO_ROOT / "SKILL.md", *sorted((REPO_ROOT / "agents").glob("*.md"))]
+    for yol in hedefler:
+        metin = yol.read_text(encoding="utf-8")
+        eslesme = SURUM_DESENI.search(metin)
+        assert (
+            eslesme is None
+        ), f"{yol.name} dokumaninda surum ibaresi: {eslesme.group(0)!r}"
 
 
 def test_opencode_kopyasinda_surum_ibaresi_yok():

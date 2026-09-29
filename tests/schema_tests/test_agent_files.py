@@ -86,7 +86,7 @@ def test_ajan_dosyasi_surum_ibaresi_yok(ajan):
     ifadeler geçmemeli.
 
     Bu docstring yasağı adıyla anmaz, çünkü dosyanın kendisi
-    `test_planda_surum_ibaresi_yok` testi tarafından taranır:
+    `test_kok_belgelerde_surum_ibaresi_yok` testi tarafından taranır:
     yasağı betimlemek için yasaklı dizeleri yazmak, kendi
     kuralını ihlal etmek olurdu. Desen bu yüzden tek kaynaktır.
 

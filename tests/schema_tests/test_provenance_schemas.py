@@ -124,9 +124,7 @@ def test_istatistik_etki_olcerisi_enum_disi_reddedilir():
     Cohen's d 3'u asabilir, odds ratio 100'u asabilir, r-squared 1'i
     asamaz. Tek bir blanket sinir akademiktir yanlis olurdu.
     Aralik siralamasi (ci_lower <= value <= ci_upper) da JSON Schema
-    ile ifade edilemedigi icin arac katmanina birakilir; bu iliski
-    P0-3'te `tools/evidence/validate.py` tarafindan denetlenecektir.
-    P0-1'de bu denetim YOKTUR.
+    ile ifade edilemedigi icin arac katmanina birakilir.
     """
     dogrulayici = _dogrulayici("statistic.json")
     ornek = _ornek("statistic.json")

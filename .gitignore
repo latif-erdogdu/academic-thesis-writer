@@ -1,6 +1,9 @@
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 /graft/
 
+# yerel geliştirme durumu (superpowers SDD izleri) — sürüm kontrolü dışı
+/.superpowers/
+
 # Tez yazıcı için ek ignore kuralları:
 *.log
 .DS_Store
