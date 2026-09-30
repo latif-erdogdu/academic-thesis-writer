@@ -1375,16 +1375,23 @@ def cmd_status(args, durum) -> int:
 
 @_durum_gerekir
 def cmd_export(args, durum) -> int:
-    """Tezi md / docx / pdf olarak dışa aktarır.
+    """Tezi md / docx / pdf olarak disa aktarir.
 
-    Dışa aktarma, tezin İNSAN ONAYLI bitmiş halini paylaşmak demektir.
-    Bu yüzden en katı kapı sorulur: 'final_thesis' — bütünlük, kanıtsız
+    Disa aktarma, tezin INSAN ONAYLI bitmis halini paylasmak demektir.
+    Bu yuzden en kati kapi sorulur: 'final_thesis' - butunluk, kanitsiz
     iddia ve retraksiyon denetimi de burada devreye girer.
 
-    Çıktı dizini varsayılan olarak veri kökünün kendisidir; `--out` ile
-    başka bir dizin verilebilir. Dizin yoksa oluşturulur.
+    Cikti dizini varsayilan olarak veri kokunun kendisidir; `--out` ile
+    baska bir dizin verilebilir. Dizin yoksa olusturulur.
+
+    `--format` verilmezse IKILI uretilir: `md` (okunabilir metin, farki
+    incelenebilir) ve `docx` (teslim edilebilir). Markdown TEK basina
+    yeterli degildir; yalniz Markdown uretmek, kullanici "export
+    calisti" dedikten sonra teslim edilebilir bicimi aramak zorunda
+    birakti.
     """
     from tools.atw.export import (
+        DEFAULT_BICIMLER,
         DESTEKLENEN_BICIMLER,
         ExportHatasi,
         disa_aktar,
@@ -1393,31 +1400,34 @@ def cmd_export(args, durum) -> int:
     if not _kapi_raporu(durum, "final_thesis"):
         return CIKIS_SORUN
 
-    fmt = args.format or "md"
-    if fmt not in DESTEKLENEN_BICIMLER:
-        # argparse `choices` zaten eler; bu yol programatik cagri icin.
-        print(
-            "✗ Desteklenmeyen biçim: {0}. Desteklenen: {1}".format(
-                fmt, ", ".join(sorted(DESTEKLENEN_BICIMLER))
+    bicimler = list(getattr(args, "format", None) or DEFAULT_BICIMLER)
+    for fmt in bicimler:
+        if fmt not in DESTEKLENEN_BICIMLER:
+            # argparse `choices` zaten eler; bu yol programatik cagri icin.
+            print(
+                "✗ Desteklenmeyen biçim: {0}. Desteklenen: {1}".format(
+                    fmt, ", ".join(sorted(DESTEKLENEN_BICIMLER))
+                )
             )
-        )
-        return CIKIS_SORUN
+            return CIKIS_SORUN
 
     dizin = _cozumle(args.out) if getattr(args, "out", None) else veri_koku()
 
     try:
         dizin.mkdir(parents=True, exist_ok=True)
-        yol, notlar = disa_aktar(durum, fmt, dizin)
+        yollar, notlar = disa_aktar(durum, bicimler, dizin)
     except ExportHatasi as hata:
-        # Disa aktarim hicbir dosya yazmadan once reddedilir; yarim dosya
-        # birakilmaz.
+        # Disa aktarim hicbir dosya yazmadan once reddedilir; yarim
+        # teslim birakilmaz.
         print("✗ {0}".format(hata))
         return CIKIS_SORUN
     except OSError as hata:
         print("✗ Dosya yazılamadı: {0}".format(hata))
         return CIKIS_SORUN
 
-    print("📤 Dışa aktarıldı: {0}".format(yol))
+    print("✓ Dışa aktarıldı ({0} biçim):".format(len(yollar)))
+    for yol in yollar:
+        print("   {0}".format(yol))
     for not_ in notlar:
         print("   - {0}".format(not_))
     return CIKIS_OK
@@ -1590,7 +1600,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     # thesis:export
     p_export = sub.add_parser("export", help="Tez dışa aktar")
-    p_export.add_argument("--format", choices=["md", "docx", "pdf"], default="md")
+    p_export.add_argument(
+        "--format",
+        nargs="+",
+        choices=["md", "docx", "pdf"],
+        metavar="BICIM",
+        help="Cikti bicimleri. Varsayilan: md docx (okunabilir metin + teslim edilebilir Word).",
+    )
     p_export.add_argument(
         "--out",
         help="Çıktı dizini (varsayılan: tez durumunun bulunduğu dizin)",

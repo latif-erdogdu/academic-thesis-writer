@@ -452,7 +452,7 @@ def test_markdown_bos_paragraf_metni_atlanir(dolu_tez):
 # --- 5) disa aktarma: gercek dosya -----------------------------------------
 
 def test_markdown_dosyasi_yazilir(dolu_tez, tmp_path):
-    yol, _ = disa_aktar(dolu_tez, "md", tmp_path)
+    yol = disa_aktar(dolu_tez, "md", tmp_path)[0][0]
     assert yol.is_file()
     assert yol.suffix == ".md"
     assert yol.parent == tmp_path
@@ -460,15 +460,20 @@ def test_markdown_dosyasi_yazilir(dolu_tez, tmp_path):
 
 
 def test_docx_dosyasi_gecerli_soz_belgesidir(dolu_tez, tmp_path):
-    yol, _ = disa_aktar(dolu_tez, "docx", tmp_path)
+    yol = disa_aktar(dolu_tez, "docx", tmp_path)[0][0]
     assert yol.suffix == ".docx"
     assert zipfile.is_zipfile(yol), "docx zip tabanli OOXML olmali"
     with zipfile.ZipFile(yol) as z:
         adlar = z.namelist()
         assert "word/document.xml" in adlar
+        assert "word/settings.xml" in adlar, (
+            "w:updateFields ayari settings.xml'de yasar; dosya yoksa "
+            "icindekiler alani dosya acildiginda BOS gorunur"
+        )
         govde = z.read("word/document.xml").decode("utf-8")
     assert "Ornek Tez" in govde
-    assert "Kaynak" in govde
+    # Baslik artik buyuk harfle: "KAYNAKÇA" (universite teslim duzeni).
+    assert "KAYNAKÇA" in govde
 
 
 def test_docx_turkce_karakterler_korunur(dolu_tez, tmp_path):
@@ -477,14 +482,14 @@ def test_docx_turkce_karakterler_korunur(dolu_tez, tmp_path):
     OOXML Unicode'tur; bir kodlama hatasi ciktiyi sessizce bozardi.
     """
     dolu_tez["title"] = "Şiddet ve Çelişki Gözden Geçirmesi"
-    yol, _ = disa_aktar(dolu_tez, "docx", tmp_path)
+    yol = disa_aktar(dolu_tez, "docx", tmp_path)[0][0]
     with zipfile.ZipFile(yol) as z:
         govde = z.read("word/document.xml").decode("utf-8")
     assert "Şiddet ve Çelişki" in govde
 
 
 def test_pdf_dosyasi_yazilir(dolu_tez, tmp_path):
-    yol, _ = disa_aktar(dolu_tez, "pdf", tmp_path)
+    yol = disa_aktar(dolu_tez, "pdf", tmp_path)[0][0]
     assert yol.suffix == ".pdf"
     ham = yol.read_bytes()
     assert ham.startswith(b"%PDF-"), "PDF imzasi yok"
@@ -513,7 +518,7 @@ def test_pdf_turkce_harfleri_kapsar(dolu_tez, tmp_path):
         sources=[kaynak],
         citations=[_atif("CIT-001", "SRC-001")],
     )
-    yol, _ = disa_aktar(durum, "pdf", tmp_path)
+    yol = disa_aktar(durum, "pdf", tmp_path)[0][0]
     assert yol.is_file() and yol.stat().st_size > 800
 
 
@@ -567,14 +572,14 @@ def test_tez_kimligi_yol_kacisi_uretmez(dolu_tez, tmp_path):
     deger dosyayi hedef disinin disina yazardi.
     """
     dolu_tez["thesis_id"] = "../../kotu"
-    yol, _ = disa_aktar(dolu_tez, "md", tmp_path)
+    yol = disa_aktar(dolu_tez, "md", tmp_path)[0][0]
     assert yol.parent == tmp_path, f"hedef disina cikildi: {yol}"
     assert ".." not in yol.name
 
 
 def test_tez_kimligi_ayirici_karakterler_temizlenir(dolu_tez, tmp_path):
     dolu_tez["thesis_id"] = "THESIS/2026:001 *v2?"
-    yol, _ = disa_aktar(dolu_tez, "md", tmp_path)
+    yol = disa_aktar(dolu_tez, "md", tmp_path)[0][0]
     assert yol.parent == tmp_path
     for kotu in '/\\:*?"<>|':
         assert kotu not in yol.name, f"dosya adinda kotu karakter: {yol.name}"
@@ -582,8 +587,8 @@ def test_tez_kimligi_ayirici_karakterler_temizlenir(dolu_tez, tmp_path):
 
 def test_ayni_bicim_ikinci_kez_yazilir(dolu_tez, tmp_path):
     """Ayni bicim tekrar calistirilirsa ustune yazmali, cogaltmamali."""
-    ilk, _ = disa_aktar(dolu_tez, "md", tmp_path)
-    ikinci, _ = disa_aktar(dolu_tez, "md", tmp_path)
+    ilk = disa_aktar(dolu_tez, "md", tmp_path)[0][0]
+    ikinci = disa_aktar(dolu_tez, "md", tmp_path)[0][0]
     assert ilk == ikinci
     assert len(list(tmp_path.glob("*.md"))) == 1
 
@@ -597,7 +602,7 @@ def test_uc_bicim_destekleniyor():
 def test_parser_pdf_formatini_kabul_eder():
     from tools.atw.cli.main import build_parser
     args = build_parser().parse_args(["export", "--format", "pdf"])
-    assert args.format == "pdf"
+    assert args.format == ["pdf"]
 
 
 # --- 9) CLI baglantisi ----------------------------------------------------
@@ -766,7 +771,7 @@ def test_yazi_tipi_bulunamazsa_none_doner(monkeypatch):
 def test_tez_kimligi_bos_ise_yedek_ad(dolu_tez, tmp_path):
     """Kimlik bos/ayirici ise dosya yine de uretilir."""
     dolu_tez["thesis_id"] = "///"
-    yol, _ = disa_aktar(dolu_tez, "md", tmp_path)
+    yol = disa_aktar(dolu_tez, "md", tmp_path)[0][0]
     assert yol.name == "tez_tez.md", yol.name
     assert yol.parent == tmp_path
 
@@ -778,14 +783,14 @@ def test_tez_kimligi_cift_alt_cizgi_birlesir(dolu_tez, tmp_path):
     `__` uretilmez; kaynakta zaten var olan cift alt cizgi birlestirilir.
     """
     dolu_tez["thesis_id"] = "A__B"
-    yol, _ = disa_aktar(dolu_tez, "md", tmp_path)
+    yol = disa_aktar(dolu_tez, "md", tmp_path)[0][0]
     assert yol.name == "tez_A_B.md", yol.name
 
 
 def test_ayirici_dizileri_tek_karaktere_indirgenir(dolu_tez, tmp_path):
     """Ardisik ayiricilar regex `+` sayesinde TEK `_` olur."""
     dolu_tez["thesis_id"] = "A   B///C"
-    yol, _ = disa_aktar(dolu_tez, "md", tmp_path)
+    yol = disa_aktar(dolu_tez, "md", tmp_path)[0][0]
     assert yol.name == "tez_A_B_C.md", yol.name
 
 

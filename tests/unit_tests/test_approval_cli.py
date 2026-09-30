@@ -128,7 +128,7 @@ def test_write_engel_mesaji_hangi_kapiyi_soyluyor(depo, capsys):
 
 def test_export_final_kapisi_kapaliyken_engellenir(depo, capsys):
     _kapili(depo)
-    assert cli.cmd_export(Namespace(format="md")) == 1
+    assert cli.cmd_export(Namespace(format=["md"])) == 1
     cikti = capsys.readouterr().out
     assert "final_thesis" in cikti
     assert "Henüz implemente edilmedi" not in cikti
@@ -146,7 +146,7 @@ def test_export_kayitli_ama_butunluk_bozukken_engellenir(depo, capsys):
     ]  # kanıtı yok
     _yaz(depo, durum)
 
-    assert cli.cmd_export(Namespace(format="md")) == 1
+    assert cli.cmd_export(Namespace(format=["md"])) == 1
     assert "kanıtsız" in capsys.readouterr().out
 
 
@@ -172,13 +172,42 @@ def test_export_her_şey_hazirken_dosya_doker(depo, capsys):
     }]
     _yaz(depo, durum)
 
-    assert cli.cmd_export(Namespace(format="md")) == 0
+    assert cli.cmd_export(Namespace(format=["md"])) == 0
 
     cikti = capsys.readouterr().out
     assert "Dışa aktarıldı" in cikti
     dokumler = list(depo.glob("tez_*.md"))
     assert len(dokumler) == 1, f"tek dosya beklenirken: {dokumler}"
     assert "Deneme giris metni." in dokumler[0].read_text(encoding="utf-8")
+
+
+def test_export_bicim_verilmezse_md_ve_docx_doker(depo, capsys):
+    """`--format` verilmediginde IKILI uretilir: md + docx.
+
+    Markdown insaya teslim bicimi DEGILDIR. Yalniz Markdown uretmek,
+    kullanici "export calisti" gorup teslim edilebilir bicimi aramak
+    zorunda birakti.
+    """
+    durum = _onayli(depo)
+    durum["chapters"] = [{
+        "id": "CH-001",
+        "number": 1,
+        "title": "B",
+        "paragraphs": [{
+            "id": "P-001",
+            "type": "introduction",
+            "text": "Deneme giris metni.",
+            "chapter": "CH-001",
+        }],
+    }]
+    _yaz(depo, durum)
+
+    assert cli.cmd_export(Namespace(format=None)) == 0
+
+    cikti = capsys.readouterr().out
+    assert "2 biçim" in cikti, cikti
+    assert len(list(depo.glob("tez_*.md"))) == 1
+    assert len(list(depo.glob("tez_*.docx"))) == 1
 
 
 def test_export_metni_olmayan_tez_reddedilir(depo, capsys):
@@ -190,7 +219,7 @@ def test_export_metni_olmayan_tez_reddedilir(depo, capsys):
     """
     _onayli(depo)  # bolum var, ama paragraf metni YOK
 
-    assert cli.cmd_export(Namespace(format="md")) == 1
+    assert cli.cmd_export(Namespace(format=["md"])) == 1
     assert "paragraf" in capsys.readouterr().out
     assert list(depo.glob("tez_*")) == [], "reddedilen export dosya birakti"
 
