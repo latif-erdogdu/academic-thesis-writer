@@ -26,7 +26,11 @@ etki sentezi içindir.
 Tek cümle, ölçülebilir, kapsamı sınırlı. Varsayım test edilebilir
 değilse bu adımda durulur.
 
-**İnsan onayı:** `human_approvals.research_question`
+**İnsan onayı:** `research_question` kapısı
+(`references/approval_gates.md` §4.1). Onay kaydı
+`human_approvals.research_question` alanında durur ve onaylayanın adını,
+zamanını ve kapsanan içeriğin özetini taşır; `true` yazmak onay yerine
+geçmez.
 
 ### 2. search_strategy
 
@@ -193,11 +197,18 @@ Preprint, hakemli sürümü yayınlanmış kaynağın yerine
 
 ## İnsan Onayı
 
-| Adım | `human_approvals` alanı |
-|------|--------------------------|
-| 2. search_strategy | `search_strategy` |
-| 5-6. dahil/dışlama ölçütleri | `search_strategy` |
-| 9. tam metin | `source_set` |
+Her satır bir onay **kapısı**dır. Kayıt, `human_approvals` sözlüğünde
+o kapı adıyla durur; kapının sözleşmesi `references/approval_gates.md`
+§4'te tanımlıdır.
+
+| Adım | Kapı | Hazırlık denetimi |
+|------|------|--------------------|
+| 2. search_strategy | `search_strategy` | her `search_runs` kaydı `search_run` şemasına uygun olmalı |
+| 5-6. dahil/dışlama ölçütleri | `search_strategy` | — (aynı kapı; onay hâlâ taze olmalı) |
+| 9. tam metin | `source_set` | her `sources` kaydı `source` şemasına uygun olmalı |
+
+Kayıt düzeyinde şema doğrulamasının gerekçesi §4.8'dedir: "dolu mu"
+denetimi zayıftır — `[{}]` doludur ama hiçbir şey taşımaz.
 
 ## Bağlı Olduğu Şemalar
 

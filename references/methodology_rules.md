@@ -127,9 +127,20 @@ Yöntem türü belirlenemiyorsa denetim yapılamaz. Bu durumda bulgu
 
 ## İnsan Onayı
 
-`workflows/methodology.md` akışında `human_approvals.methodology`
-kapısı bu kuralların tamamı uygulandıktan **sonra** açılır.
-Ölçeklerden biri eksik uygulanmışsa kapı açılmaz.
+`workflows/methodology.md` akışında `methodology` kapısı bu kuralların
+tamamı uygulandıktan **sonra** açılır.
+
+Bu kapının kanonik sözleşmesi `references/approval_gates.md` §4.5'tir.
+İki nokta buradan bilinmelidir:
+
+- **Hazırlık denetimi yoktur.** `methodology`, yedi kapının tek denetimsiz
+  olanıdır: çıktısı olan `chapters` bu kapının *arkasındaki* `thesis:write`
+  ile yazılır, denetim kapının arkasındaki komuta bakarsa akış kilitlenir.
+  Kapıyı açmadan önce kuralların gerçekten uygulandığını **siz**
+  doğrulamalısınız; otomatik denetim bunu yapamaz.
+- **Onay bir nesnedir.** `human_approvals.methodology` artık `true/false`
+  değil; onaylayanın adını, zamanını ve kapsanan içeriğin özetini taşıyan
+  bir kayıttır. `thesis:approve methodology --by "<adınız>"` ile verilir.
 
 ## Bağlı Olduğu Şemalar
 
