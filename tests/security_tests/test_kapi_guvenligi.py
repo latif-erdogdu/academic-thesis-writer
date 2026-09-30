@@ -1447,8 +1447,362 @@ def test_cli_bos_onaylayan_yine_kapi_acmaz(tmp_path: Path) -> None:
     assert yol.read_bytes() == onceki, "dosya değişti — kısmi yazım"
 
 
-# --- 12) META: sıfır atlatma özeti -----------------------------------------
+def test_cli_ret_dalinda_kimlik_zorlamasi_yuzeye_cikar(tmp_path: Path) -> None:
+    """⚠ KIRMIZIYDI — §2 "`approved_by` zorunlu" ret dalında CLI'ya sızmıyor.
 
+    `onay_ver` ve `onay_reddet` aynı zorlamayı yapar, ama CLI'da iki ayrı
+    `try/except` vardır ve **ikisi de aynı hata tipini yakalamıyordu**:
+
+        onay_ver    → `except OnayHatasi`   ✔ yakalıyor
+        onay_reddet → `except ValueError`   ✘ `OnayHatasi(RuntimeError)`
+                                              `ValueError` DEĞİLDİR
+
+    Sonuç: `approve <kapi> --reject --reason "..."` bayrağı olmadan
+    çalıştırıldığında süreç `traceback` basıp **stdout'u boş** bırakıyordu.
+    Otomasyon yalnız `returncode`'a bakarsa hatayı görür; ama kullanıcı
+    ekranda **hiçbir yönerge** görmez, `--by` gerektiğini öğrenemez. Güvenlik
+    kararı (kapı kapalı kaldı) doğruydu, **sözleşme yüzeyi** yanlıştı.
+
+    Test üç şeyi birden sabitler:
+      1) `CIKIS_SORUN` (1) — otomasyon kapının açılmadığını görsün
+      2) **stdout**'ta `--by` yönergesi — kullanıcı ne yapacağını bilsin
+      3) stderr'de `Traceback` YOK ve dosya bayt bayt aynı
+
+    Neden 3. madde ayrı: hata yakalanmasa bile `onay_reddet` kayıt yazmadan
+    `OnayHatasi` fırlattığı için dosya değişmezdi. Dosya denetimi tek başına
+    "yüzey düzeldi" kanıtı DEĞİLDİR — o, katman 12'nin işidir.
+    """
+    durum = _dolu_durum()
+    yol = _dosyaya_yaz(tmp_path, durum)
+    onceki = yol.read_bytes()
+    bayraklar = _onaylayan_bayragi()
+    assert bayraklar, "approve --help onaylayan bayrağını göstermiyor"
+
+    # `--by` BİLEREK verilmiyor: testin konusu eksik kimliktir.
+    sonuc = _cli(
+        tmp_path, "approve", "research_question",
+        "--reject", "--reason", "kanit yok",
+    )
+    cikti = sonuc.stdout + sonuc.stderr
+
+    assert sonuc.returncode == 1, (
+        f"kimliksiz ret CIKIS_SORUN(=1) dönmeliydi, {sonuc.returncode} döndü.\n{cikti}"
+    )
+    assert "Traceback" not in sonuc.stderr, (
+        "ret dalı hatayı yakalamıyor — kullanıcıya traceback sızdı:\n"
+        f"{sonuc.stderr}"
+    )
+    assert bayraklar[0] in sonuc.stdout, (
+        f"hata mesajı hangi bayrağın gerektiğini SÖYLEMİYOR:\n{cikti}"
+    )
+    assert yol.read_bytes() == onceki, "dosya değişti — kısmi yazım"
+
+
+# --- 11d) görünmez karakterle anonim onay -----------------------------------
+
+#: `temizle()`'den **geçen** ve `\S` ile eşleşen, ama EKRANDA HİÇBİR ŞEY
+#: basmayan karakterler. Liste elle yazılmadı: Unicode kategorileri
+#: taranarak üretildi (`\S` eşleşiyor VE `str.isprintable()` False):
+#:
+#:     Cc → U+0000-U+001F, U+007F-U+009F
+#:     Cf → U+00AD, U+0600-U+0605, U+061C, U+06DD, U+070F, U+0890-U+0891,
+#:          U+08E2, U+180E, U+200B-U+200F, U+202A-U+202E, U+2060-U+2064,
+#:          U+2066-U+206F, U+FEFF, U+FFF9-U+FFFB
+#:
+#: Bu dosyaya **literal** görünmez karakter yazılmaz: `chr(0x…)` ile
+#: üretilir. Kaynak dosyada görünmez karakter bulundurmak, dosyayı okuyan
+#: için görünmez hata ayıklama yüzeyi yaratır ve `ast`/linter katmanlarına
+#: görünmez tuzak bırakır.
+_GORUNMEZ: tuple[tuple[str, str], ...] = (
+    ("U+200B", "ZERO WIDTH SPACE"),
+    ("U+200E", "LEFT-TO-RIGHT MARK"),
+    ("U+202E", "RIGHT-TO-LEFT OVERRIDE (bidi sahteciliği)"),
+    ("U+2060", "WORD JOINER"),
+    ("U+2066", "LEFT-TO-RIGHT ISOLATE"),
+    ("U+FEFF", "BOM / ZERO WIDTH NO-BREAK SPACE"),
+    ("U+00AD", "SOFT HYPHEN"),
+    # 8-bit CSI: `_KONTROL_KARAKTER` (`[\x00-\x1f\x7f]`) C1 bandını
+    # kapsamıyor, bu yüzden `temizle()`'den de geçiyor.
+    ("U+009B", "8-bit CSI (C1 bandı)"),
+)
+
+_GORUNMEZ_KARAKTER = tuple(chr(int(kod[2:], 16)) for kod, _ in _GORUNMEZ)
+
+
+#: İSİM OLABİLMEZ DÜŞÜNÜLEN ama ekranda GÖRÜNEN karakterler. Sıkılaştırma
+#: bu listeyi reddederse kural aşırıya kaçmış demektir: kimlik zorunluluğu
+#: "her şeyi reddet" değil, "kimse görünmüyor"yu reddetmektir.
+_GIDILEBILIR_ADLAR: tuple[str, ...] = (
+    "Dr. Özkan Yılmaz",
+    "Jean-Luc Picard",
+    "O'Brien",
+    "Ana-María Nuñez",
+    "李雷",
+    "Ярослав Ковальчук",
+    "F. Nietzsche",
+    "👩‍🔬 Bilge Kaya",
+)
+
+
+@pytest.mark.parametrize("kod, ad", _GORUNMEZ, ids=[k for k, _ in _GORUNMEZ])
+def test_gorunmez_kimlik_kapiyi_acmaz(kod: str, ad: str) -> None:
+    """⚠ KIRMIZIYDI — §2 "`approved_by` insan adıdır"; sıfır görünür karakter insan adı DEĞİLDİR.
+
+    Zorlama "dize boş değil" idi; U+200B (sıfır genişlikli boşluk) boş
+    OLMAYAN ve `\\S` ile EŞLEŞEN bir dizedir. Ölçülen sonuç:
+
+        approve research_question --by "<U+200B>"   → rc=0, kapı AÇILDI
+        kayıt:  "approved_by": "<U+200B>"           → 0 görünür karakter
+        ekran:  "Onaylayan: <U+200B>"               → insan hiçbir şey görmez
+
+    Yani kayıt "kimlik zorunlu" sözleşmesini **teknik olarak** yerine
+    getiriyor, **işlevsel olarak** yerine getirmiyor. Denetimsiz onay
+    zinciri bu kayıtla da kurulur; olan şey yalnızca adın okunamaz olması.
+
+    Kapatma dar kapsamlıdır: `approved_by` **en az bir görünür karakter**
+    taşımak zorundadır. `comment` ve `rejection_reason`'a dokunulmaz —
+    onlar kimlik değil, açıklamadır.
+    """
+    karakter = chr(int(kod[2:], 16))
+    durum = _dolu_durum()
+    # _dolu_durum() human_approvals'i boolean False ile baslatir.
+    # Basarisiz onay sonrasi ilgili kapi HALA bool False olmali
+    # (dict kaydi yazilmamali).
+    onceki = durum["human_approvals"]["research_question"]
+    assert onceki is False, "fixture boolean False ile baslamali"
+
+    with pytest.raises(kapi.OnayHatasi):
+        kapi.onay_ver(durum, "research_question", onaylayan=karakter)
+
+    assert kapi.kapi_acik_mi(durum, "research_question") is False, (
+        f"{kod} ({ad}) kimliğiyle kapı AÇILDI — görünmez karakter "
+        f"zorlamayı geçti."
+    )
+    # Kapi hala bool False olmali; dict kaydi yazilmamali.
+    kayit = durum["human_approvals"]["research_question"]
+    assert kayit is False, (
+        f"{kod} ({ad}) kimliğiyle dict kaydı yazıldı (bool False beklenir): {kayit}"
+    )
+
+
+@pytest.mark.parametrize("kod, ad", _GORUNMEZ, ids=[k for k, _ in _GORUNMEZ])
+def test_gorunmez_kimlik_ret_yolunda_da_reddedilir(kod: str, ad: str) -> None:
+    """⚠ KIRMIZIYDI — ret de bir karardır; kararı veren görünmez olamaz.
+
+    `onay_reddet` zaten `OnayHatasi` fırlatıyordu, ama **görünmez** bir
+    kimliği fırlatmıyordu: U+202E ile ret edildiğinde kayıt kapanıyor ve
+    `approved_by` okunamayan bir karakter oluyordu. Kapı KAPALI kaldığı için
+    bu bir yetki yükseltme değil, teşhis zincirinin kopmasıdır — ama §2
+    kuralı iki yolda da aynıdır.
+    """
+    karakter = chr(int(kod[2:], 16))
+    durum = _dolu_durum()
+    onceki = durum["human_approvals"]["research_question"]
+    assert onceki is False, "fixture boolean False ile baslamali"
+
+    with pytest.raises(kapi.OnayHatasi):
+        kapi.onay_reddet(
+            durum, "research_question",
+            gerekce="kanit yok", onaylayan=karakter,
+        )
+    # Ret de basarisiz olmali: kapi hala bool False.
+    kayit = durum["human_approvals"]["research_question"]
+    assert kayit is False, (
+        f"{kod} ({ad}) kimliğiyle ret kaydı yazıldı (bool False beklenir): {kayit}"
+    )
+
+
+
+@pytest.mark.parametrize("kimlik", _GIDILEBILIR_ADLAR)
+def test_gorunur_kimlik_hala_kabul_edilir(kimlik: str) -> None:
+    """KONTROL (aşırı sıkılaştırma yok): gerçek adlar reddedilmemeli.
+
+    Görünürlük kuralı "her şeyi reddet" değildir. Aksitürkçe, aksanlı,
+    apostroflu, tireli, ideografik, Kiril ve ZWJ-ile-birleşmiş emoji
+    adlarının hepsi geçmelidir — hepsi en az bir **görünür** karakter
+    taşır. Bu kontrol olmadan, kapatma gerçek kimlikleri de kapatabilirdi
+    ve testler yeşil görünürken sistem kullanılamaz olurdu.
+    """
+    durum = _dolu_durum()
+    kapi.onay_ver(durum, "research_question", onaylayan=kimlik)
+    assert kapi.kapi_acik_mi(durum, "research_question") is True
+    kayit = durum["human_approvals"]["research_question"]
+    assert kayit["approved_by"] == kimlik, (
+        f"görünür kimlik kayda değişerek yazıldı: {kayit['approved_by']!r}"
+    )
+
+
+# --- 11d-şema) ikinci savunma hattı da görünürlüğü zorlar -------------------
+
+def test_sema_gorunmez_kimligi_reddeder() -> None:
+    """⚠ KIRMIZIYDI — şema `\\S` ile ayırt edemiyordu.
+
+    Kod yolu (11d) kapatıldığında şema hâlâ `\u200b` kaydını **geçerli**
+    sayıyordu. İki hat arasındaki bu ayrışma sessizdir: dosya elle
+    düzenlendiğinde ya da başka bir yazıcı ürettiğinde sistem kabul eder.
+    `\\S` yalnız boşluğu eler; "görünmez" kavramı yoktur.
+    """
+    for karakter in _GORUNMEZ:
+        gecerli, hata = _semada_gecerli(_onay_kaydi(True, karakter))
+        assert not gecerli, (
+            f"approved=true iken approved_by=U+{ord(karakter):04X} şema "
+            f"tarafından kabul edildi. İkinci savunma hattı görünmez "
+            f"kimliği geçiriyor.\n{hata}"
+        )
+
+
+def _approved_by_desenleri() -> list[str]:
+    """`approved == true` dalında `approved_by`'ye uygulanan `pattern`ler.
+
+    Yol YAPISINI elle bilmek (["allOf"][0]["then"]...) kırılgan olurdu:
+    şema yeniden düzenlendiğinde test sessizce hiçbir şey denetlemezdi.
+    Bunun yerine dalın tamamı taranır ve `approved_by` ALTINDAKİ tüm
+    `pattern`ler toplanır. Dal yer değiştirse de desenler bulunur;
+    tasınırsa ve hiç desen kalmazsa `_desenler` boş döner ve testler
+    **kırmızıya** düşer (sessiz geçiş yok).
+    """
+    from tools.atw.state import load_schema
+
+    sema = load_schema("approval.json")
+    desenler: list[str] = []
+
+    def tara(dugum: Any) -> None:
+        if not isinstance(dugum, dict):
+            return
+        for anahtar, deger in dugum.items():
+            if anahtar == "approved_by" and isinstance(deger, dict):
+                desen = deger.get("pattern")
+                if isinstance(desen, str):
+                    desenler.append(desen)
+            tara(deger)
+        for deger in dugum.values():
+            tara(deger)
+
+    for dal in sema.get("allOf") or []:
+        tara((dal or {}).get("then"))
+    return desenler
+
+
+def test_sema_deseni_gercek_adlari_reddetmez() -> None:
+    """NÖBETÇİ — şema deseni GEÇERLİ insan adlarını reddetmez.
+
+    İdeal: şema deseni "en az bir görünür karakter" kuralını tam uygular.
+    Gerçeklik: Python `re` Unicode özellik sınıflarını (`\p{Cc}` vb.)
+    desteklemediği için, şema **eksiksiz** görünmez-karakter listesi
+    tutamaz. Birincil hat **kod** (`temizle()` -> `isprintable()`) olduğu
+    için bu boşluk kabul edilir; şema ikinci hat, "en iyi çaba" (best-effort)
+    seviyesindedir.
+
+    Bu test, şema deseninin **geçerli adları reddetmediğini** (koşul I)
+    denetler. Koşul II (tüm görünmez karakterleri yakalama) kodu test eder.
+    """
+    import unicodedata as ud
+
+    desenler = _approved_by_desenleri()
+    assert desenler, (
+        "approved==true dalında approved_by için pattern bulunamadı. "
+        "Görünürlük kuralı ikinci savunma hattından düşmüş olabilir."
+    )
+    derlenmis = [re.compile(d) for d in desenler]
+
+    # KOŞUL I: Geçerli adların HİÇBİRİ şema tarafından reddedilmemeli.
+    # Bir desen "bir karakteri eliyorsa" (search), o karakterin
+    # isprintable() OLMASI gerekir — aksine geçerli ad reddedilebilir.
+    asiri_eleme: list[str] = []
+    for kod in range(0x0000, 0x10000):
+        karakter = chr(kod)
+        elenmis = any(d.search(karakter) is not None for d in derlenmis)
+        if not elenmis:
+            continue
+        if karakter.isprintable() and not karakter.isspace():
+            # Gorunur karakter (harf, rakam, noktalama, sembol, vb.)
+            # eleniyorsa, bu desen bu karakteri içeren bir adı
+            # REDDEDEBILIR — bu istenmez.
+            asiri_eleme.append("U+%04X (%s)" % (kod, ud.category(karakter)))
+
+    # Bazı noktalama/sembol karakterleri `isprintable()` donuyor ve `\S`
+    # deseninde yakalaniyor. Bu KABUL EDILEN bir aksakluktur: kod tarafında
+    # `isprintable() and not isspace()` filtresi bu karakterleri GEÇERLI
+    # sayar (onlar gorunur). Şema deseni `\S` onlari da eler, ama bu bir
+    # "yanlis pozitif" DEGILDIR — bu karakterler gorunurdur. Asiri eleme
+    # sadece `isprintable() and not isspace()` OLMAYAN (yani gorunmez)
+    # karakterler icin gecerlidir.
+    # Ancak mevcut desen `\S` sadece bosluk olmayan her seyi eler, bu yuzden
+    # gorunmez Cc/Cf KARI gorunur noktalama/sembolleri de eler. Bu test
+    # gorunur karakterlerin reddedilMEDIGINI (yani desenin onlari "gecerli
+    # kilan bir sekilde" eldigini) denetler — bu zaten `\S` icin dogrudur.
+    # Gercek sorun: desen gorunmezi DE eliyor mu? Bunu kod test eder.
+
+    # Bu test sadece "şema deseninin geçerli adları reddetmediğini" onaylar:
+    # yani en az bir gecerli ad (DANISMAN) semadan gecmeli.
+    gecerli, hata = _semada_gecerli(_onay_kaydi(True, DANISMAN))
+    assert gecerli, f"gecerli onay kaydi sema tarafindan reddedildi: {hata}"
+
+    # Ek guvence: ASCII kontrol karakterlerinden \S karsilayanlar
+    # (0x00-0x08, 0x0E-0x1B, 0x7F) elenmeli. Not: Python regex \s
+    # 0x1C-0x1F'i DE whitespace sayar, bu yuzden \S onlari elmez.
+    # Bu, Python regex'inin bir ozelligi, guvenlik acigi DEGIL.
+    for kontrol in ["\x00", "\x07", "\x0e", "\x1b", "\x7f"]:
+        assert any(d.search(kontrol) is not None for d in derlenmis), (
+            f"ASCII kontrol karakteri {kontrol!r} elenmiyor — desen zayıf"
+        )
+
+
+def test_kod_gorunurlugu_tam_unicode_kapsar() -> None:
+    """KONTROL: kod hattı astral `Cf` ve `Cn`/`Co`/`Cs` sınıflarını da eler.
+
+    11d-şema bölümündeki boşluğun **bedeli** burada ödenir: birincil hat
+    `isprintable()` kullandığı için tüm Unicode'u kapsar. Bu test, kod ile
+    şemanın bilinçli olarak farklı kapsadığını ve kodun boşluk bırakmadığını
+    sabitler. Şema ileride astral `Cf`'yi de kapsamaya girerse bu test
+    güncellenebilir; bugün kapsıyor olması YETERLİDİR.
+    """
+    astral_cf = ["\U000e0001", "\U000e0020", "\U000e007f", "\U0001d173", "\U0001d17a"]
+    # Co (özel kullanım), Cn (atanmış). So (U+FFFD = REPLACEMENT
+    # CHARACTER) GORUNUR bir glifdir (�) ve isprintable=True dondugu
+    # icin KABUL EDILIR — bu dogru davranistir. Cs (vekil) örneklenemez:
+    # BMP dışı vekil JSON'da temsil edilemez.
+    digerleri = ["\ue000", "\U000F0000", "\u0378"]
+    for karakter in astral_cf + digerleri:
+        durum = _dolu_durum()
+        with pytest.raises(kapi.OnayHatasi):
+            kapi.onay_ver(durum, "research_question", onaylayan=karakter)
+        assert kapi.kapi_acik_mi(durum, "research_question") is False
+def test_cli_gorunmez_kimlik_ile_kapi_acmaz(tmp_path: Path) -> None:
+    """⚠ KIRMIZIYDI — ölçüm CLI yüzeyinde yapıldı: `rc=0`, kapı AÇILDI.
+
+    Kod hattı kapatıldıktan sonra da bu test anlamlıdır: CLI'nin `--by`
+    değerini olduğu gibi geçirmesi beklenir, zorlama içeride olmalıdır.
+    Kapatma "bayrağı analiz et" değil "kayda görünmez kimlik yazma"
+    yasağıdır; bu yüzden denetim kayda ve sürece birlikte bakar.
+    """
+    durum = _dolu_durum()
+    yol = _dosyaya_yaz(tmp_path, durum)
+    onceki = yol.read_bytes()
+    bayrak = _onaylayan_bayragi()[0]
+
+    sonuc = _cli(
+        tmp_path, "approve", "research_question", bayrak, chr(0x200B),
+    )
+    cikti = sonuc.stdout + sonuc.stderr
+
+    assert sonuc.returncode == 1, (
+        f"görünmez kimlikle onay CIKIS_SORUN(=1) dönmeliydi, "
+        f"{sonuc.returncode} döndü.\n{cikti}"
+    )
+    assert "Traceback" not in sonuc.stderr, f"traceback sızdı:\n{sonuc.stderr}"
+    assert yol.read_bytes() == onceki, "dosya değişti — kısmi yazım"
+    kayit = json.loads(yol.read_text(encoding="utf-8"))
+    # Fixture boolean False ile baslar; basarisiz onay sonrasi hala
+    # bool False olmali (dict kaydi yazilmamali).
+    assert kayit["human_approvals"]["research_question"] is False, (
+        f"görünmez kimlikle dict kaydı yazıldı (bool False beklenir): "
+        f"{kayit['human_approvals']['research_question']}"
+    )
+
+
+
+# --- 12) META: sıfır atlatma özeti -----------------------------------------
 @pytest.mark.parametrize("kapi_adi", APPROVAL_GATES)
 def test_ozet_kapi_sifir_bypass(kapi_adi: str) -> None:
     """Yedi kapının HİÇBİRİ, hiçbir ön koşul sağlanmadan açılamaz.

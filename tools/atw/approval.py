@@ -76,6 +76,9 @@ def temizle(metin: Any, en_fazla: int) -> str | None:
       * ardisik bosluklar tek bosluga indirgenir, bastan/sondan kirpilir
       * `en_fazla` karakterden sonrasi kesilir
       * sonuc bos ise ``None`` doner
+      * **en az bir gorunur karakter** (isprintable() ve bosluk degil)
+        tasimiyorsa ``None`` doner — bu, `approved_by` icin anonim onay
+        engellemek icin gereklidir (bkz. `test_gorunmez_kimlik_kapiyi_acmaz`).
 
     Neden kirpma ucuz ama gerekli: durum dosyasi JSON'dur, kontrol
     karakterleri dosyayi bozmaz; ancak `status`/`approve --list` ciktisi
@@ -88,6 +91,11 @@ def temizle(metin: Any, en_fazla: int) -> str | None:
     metin = _KONTROL_KARAKTER.sub(" ", metin)
     metin = " ".join(metin.split()).strip()
     if not metin:
+        return None
+    # En az bir gorunur karakter (yazdirilabilir VE bosluk degil) sarti.
+    # `approved_by` icin bu, "sifir gorunur karakter" kimliklerini reddeder
+    # (ZWSP, ZWJ, RLO, BOM, SHY, 8-bit CSI, astral Cf, vb.).
+    if not any(ch.isprintable() and not ch.isspace() for ch in metin):
         return None
     if len(metin) > en_fazla:
         metin = metin[:en_fazla].rstrip()

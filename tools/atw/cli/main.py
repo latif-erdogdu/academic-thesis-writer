@@ -947,7 +947,11 @@ def cmd_approve(args, durum) -> int:
     if getattr(args, "reject", False):
         try:
             onay_reddet(durum, kapi, gerekce=gerekce or "", onaylayan=by, yorum=yorum)
-        except ValueError as hata:
+        except (ValueError, OnayHatasi) as hata:
+            # `OnayHatasi(RuntimeError)` `ValueError` DEĞİLDİR; yalnız
+            # `ValueError` yakalanırsa kimlik zorlaması (--by) kullanıcıya
+            # traceback olarak sızar ve stdout boş kalır. Bkz.
+            # `test_cli_ret_dalinda_kimlik_zorlamasi_yuzeye_cikar`.
             print(f"🚧 {hata}")
             print("   Örnek: approve methodology --reject --reason \"Arama kayıtları eksik\"")
             return CIKIS_SORUN

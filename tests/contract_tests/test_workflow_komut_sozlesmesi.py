@@ -210,49 +210,171 @@ KIMLIK_ISTEMEYENLER: dict[str, str] = {
     "--revoke": "kapiyi KAPATIR; geri alma muafiyeti bilincli (bkz. onay_geri_al)",
 }
 
-#: `thesis:approve` ve ardından gelen komut GOVDESI. Govde, satir sonuna
-#: kadar uzanir; yorum (`#`) ve boru (`|`) isaretlerinde kesilir, cunku
-#: onlar komutun parcasi degildir. Bayraklar kapi adindan SONRA da
-#: gelebilir (`thesis:approve findings --by "..."`), bu yuzden sabit bir
-#: "bayraklar kapi adindan once" duzeni varsayilmaz.
-_ONAY_CAGRISI = re.compile(r"thesis:approve(?P<govde>\s+[^#|]*)")
+#: `--by` istemeyen alt komutlar ve muafiyet gerekceleri. Gerekce
+#: sozlesmesi degil, kararin GEREKCESIDIR: yarin kapiyi kapatma
+#: yonu degisse muafiyet de birlikte dusunmelidir.
+KIMLIK_ISTEMEYENLER: dict[str, str] = {
+    "--list": "sorgudur, karar degildir, durumu degistirmez",
+    "--revoke": "kapiyi KAPATIR; geri alma muafiyeti bilincli (bkz. onay_geri_al)",
+}
 
-#: Govdeden `--` ile baslayan her belirteci dondurur (degerleri haric).
-_BAYRAK = re.compile(r"--[a-z][a-z-]*")
+#: Kabuk AYIRACLARI. Acik bir `thesis:approve a && thesis:approve b`
+#: yaziminda ikinci cagrinin `--by` degeri birincisine TASMAMALIDIR;
+#: bu yuzden belirtecler ilk ayiracida kesilir.
+_KABUK_AYIRACI = frozenset({"&&", "||", ";", "|", "&"})
+
+#: Ayristiricinin basladigi yer. Duz kelime degil, kapi adinin basinda
+#: biten bir `thesis:approve` gecerlilik sinifidir; `thesis:approvex`
+#: eslesmez. Yorum satirinda (`#` ile baslayan) `_cagrilari` icinde
+#: elenir.
+_CAGRI_BASI = re.compile(r"thesis:approve(?=\s|$)")
+
+
+def _ayikla(satir: str) -> list[tuple[str, bool]]:
+    """Satiri `(deger, tirnakli_mi)` ciftlerine boler.
+
+    Neden `shlex.split` DEGIL: shlex tirnagi SILER, boylece
+    `--comment "--by"` ile `--by "x"` ayni belirteclere duser. Bu
+    kuralin butun varlik sebebi kimligi baska bir bayragin degerinin
+    icine gizlemektir; ayristirici tirnagin var oldugunu BILMELIDIR.
+    Ikinci neden: shlex'in yorum kesme (`#`) bir degeri de keser
+    (`--by "Dr. #1"`).
+
+    Tirnak disinda kalan bir `#` yorumu baslatir ve satirin kalanini
+    komut saymaz. Tirkaclar kapatilmamissa satir sonuna kadar devam
+    edilir: yarim kalmis bir ornek sessizce gecmeye devam etsin
+    istemiyoruz, cagiran taraf zaten ayristirmada hata alacak.
+    """
+    cikti: list[tuple[str, bool]] = []
+    tampon: list[str] = []
+    tirnak: str | None = None
+    tirnakli = False
+
+    def kapat() -> None:
+        nonlocal tampon, tirnakli
+        if tampon or tirnakli:
+            cikti.append(("".join(tampon), tirnakli))
+        tampon = []
+        tirnakli = False
+
+    for karakter in satir:
+        if tirnak is not None:
+            if karakter == tirnak:
+                tirnak = None
+            else:
+                tampon.append(karakter)
+            continue
+        if karakter in "\"'":
+            tirnak = karakter
+            tirnakli = True
+            continue
+        if karakter == "#" and not tampon:
+            break
+        if karakter.isspace():
+            kapat()
+            continue
+        # `=` tirnak disinda bir ayiracdir: `--by=deger` -> `--by`, `deger`
+        if karakter == "=":
+            kapat()
+            continue
+        tampon.append(karakter)
+    kapat()
+    return cikti
+
+
+def _bayrak_degeri(
+    belirtecler: list[tuple[str, bool]], ad: str
+) -> str | None:
+    """`ad` bayraginin DEGERINI doner; yoksa/boşsa None.
+
+    TIRNAKLI bir belirtec ASLA bayrak sayilmaz. `--comment "--by"`
+    yaziminda `--by` bir degerdir; onu bayrak saymak, kurali sessizce
+    atlatmanin en kolay yoluydu.
+
+    `--by=value` soz dizimi de desteklenir (shlex bunu tek belirtec
+    yapar; bu ayristirici ayri boslukla yazimi destekler).
+    """
+    for i, (deger, tirnakli) in enumerate(belirtecler):
+        # Normal: `--by "deger"` -> iki ayri belirtec
+        if deger == ad and not tirnakli:
+            if i + 1 >= len(belirtecler):
+                return None
+            sonraki_deger, sonraki_tirnakli = belirtecler[i + 1]
+            if sonraki_deger == ad and not sonraki_tirnakli:
+                return None                 # `--by --by`: deger verilmemis
+            return sonraki_deger
+        # Eslesik: `--by="deger"` veya `--by=deger` -> tek belirtec
+        if not tirnakli and deger.startswith(ad + "="):
+            return deger[len(ad) + 1 :]
+    return None
+
+
+def _karar_mi(belirtecler: list[tuple[str, bool]]) -> bool:
+    """Bu cagri bir KARAR mi, yoksa sorgu/geri alma mi?
+
+    Kapi adi, `--` ile baslamayan ve tirnakli OLMAYAN ilk belirtecidir.
+    `thesis:approve --list` gibi yalniz bayrakli bir cagrida kapi
+    yoktur: bu bir sorgudur, durumu degistirmez.
+    """
+    for deger, tirnakli in belirtecler:
+        if tirnakli or deger.startswith("-"):
+            continue
+        if deger in _KABUK_AYIRACI:
+            return False
+        return True
+    return False
+
+
+def _cagrilari(satir: str) -> list[list[tuple[str, bool]]]:
+    """Bu satirdaki HER `thesis:approve` cagrisinin belirteclerini doner.
+
+    Satir basina birden fazla cagri desteklenir (`a && b`). Her cagri
+    kendi ayiracinda KESILIR, boylece bir cagrinin `--by` degeri
+    digerine tasmaz.
+    """
+    cagrilar: list[list[tuple[str, bool]]] = []
+    for es in _CAGRI_BASI.finditer(satir):
+        govde = _ayikla(satir[es.end():])
+        kesilmis: list[tuple[str, bool]] = []
+        for belirtec in govde:
+            deger, tirnakli = belirtec
+            if not tirnakli and deger in _KABUK_AYIRACI:
+                break
+            kesilmis.append(belirtec)
+        cagrilar.append(kesilmis)
+    return cagrilar
 
 
 def _kimliksiz_cagrilar(ad: str, metin: str) -> list[str]:
-    """Bu akista kimliksiz onay cagrilarini `dosya:satir: metin` doner.
+    """Bu akista kimliksiz onay KARARLARINI `dosya:satir: metin` doner.
 
     `akislar` fixture'i dosyayi ZATEN okunmus halde verir; ikinci kez
     okumak ayni dosyanin iki farkli surumunu denetlemek anlamina
     gelirdi. Bu yuzden burada yalniz metin uzerinde calisilir.
-
-    Govdede kapi adi aranir: `--` ile baslamayan ilk belirteci kapı
-    sayariz. Boylece `thesis:approve --list` gibi YALNIZ bayrakli bir
-    sorgunun kapisi yoktur ve zaten karar degildir; `--by` aranmaz.
     """
     bulunan: list[str] = []
     for n, satir in _kod_bloklari(metin):
-        es = _ONAY_CAGRISI.search(satir)
-        if es is None:
+        # Yorum satırını atla (bazında boşluk ile başlayabilir)
+        if satir.lstrip().startswith("#"):
             continue
-        govde = es.group("govde")
-        bayraklar = set(_BAYRAK.findall(govde))
-        if "--by" in bayraklar:
-            continue
-        belirtecler = govde.split()
-        kapi = next((t for t in belirtecler if not t.startswith("-")), None)
-        if kapi is None:
-            continue                       # yalniz bayrak: sorgu, karar degil
-        if bayraklar & set(KIMLIK_ISTEMEYENLER):
-            continue
-        bulunan.append("%s:%d: %s" % (ad, n, satir.strip()))
+        for belirtecler in _cagrilari(satir):
+            if not _karar_mi(belirtecler):
+                continue
+            if any(
+                not tirnakli and deger in KIMLIK_ISTEMEYENLER
+                for deger, tirnakli in belirtecler
+            ):
+                continue
+            deger = _bayrak_degeri(belirtecler, "--by")
+            if deger is not None and deger.strip():
+                continue
+            bulunan.append("%s:%d: %s" % (ad, n, satir.strip()))
+            break                       # satir basina tek kayit yeter
     return bulunan
 
 
 def test_akislarda_onay_cagrisi_kimlik_tasiyor(akislar: dict[str, str]) -> None:
-    """Kopyalanabilir her `thesis:approve` cagrisi `--by` tasimalidir.
+    """Kopyalanabilir her `thesis:approve` KARARI kimlik tasimalidir.
 
     Bu olmadan `onay_ver`in zorlamasi kullaniciya ilk hatayi CALISTIRMA
     aninda gosterir: akis dokumani calistirilamaz hale gelir ve hata
@@ -263,22 +385,79 @@ def test_akislarda_onay_cagrisi_kimlik_tasiyor(akislar: dict[str, str]) -> None:
         supheli.extend(_kimliksiz_cagrilar(ad, metin))
 
     assert not supheli, (
-        "Kod blogunda `--by` vermeyen onay cagrisi var. `onay_ver` onaylayan "
-        "zorunlu kiliyor; bu satirlar calistirildiginda hata verir:\n  "
-        + "\n  ".join(supheli)
+        "Kod blogunda bos `--by` vermeyen onay cagrisi var. `onay_ver` "
+        "onaylayan zorunlu kiliyor; bu satirlar calistirildiginda hata "
+        "verir:\n  " + "\n  ".join(supheli)
     )
     assert akislar, "akislar fixture'i bos — tarama anlamsizlasir"
 
 
-def test_kimlik_istemeyen_bayraklar_hazir(akislar: dict[str, str]) -> None:
-    """Kontrol: muafiyetler yalniz VAR OLMAYAN bayraklar icin gecerli.
+def test_denetleyici_ornekleri() -> None:
+    """Kâhin tablosu: dedetleyici EL YAZIMI beklenisler karsilastirir.
+
+    Neden ayri bir test gerekiyor
+    -----------------------------
+`test_akis_taramasi_bos_cikmaz` bir ALT DIZE ile olcuyordu; bu
+    ASIMETRIK bir korumadir (ayristirici bozulursa yakalamaz, blok
+    ayiklayici bozulursa yakalar). Uzerine "alt dize sayisi = cagri
+    sayisi" nöbetçisi kurulamaz: olculdu, **14 != 13** — fark `--list`
+    sorgusu, ki meşru olarak atlanir. Boyle bir nöbetci calisan kurali
+    kirmiziya dusururdu.
+
+    Buradaki beklenisler LITERAL'dir; dedetleyiciden hesaplanmaz. Bu
+    yuzden ayristirici ayni yonde bozulsa bile kirmizi olur. Her
+    satir `(girdi, kimliksiz_sayisi)` ciftidir: 1 = yakalanmali,
+    0 = gecmeli.
+    """
+    ORNEKLER: list[tuple[str, int]] = [
+        # --- kimliksiz KARAR: yakalanmali --------------------------------
+        ("thesis:approve findings", 1),
+        ("thesis:approve research_question", 1),
+        ('thesis:approve findings --comment "iyi"', 1),
+        ('thesis:approve findings --reject --reason "eksik"', 1),
+        # --- BOS deger de kimlik degildir (B7) ---------------------------
+        ('thesis:approve findings --by ""', 1),
+        ("thesis:approve findings --by ''", 1),
+        ('thesis:approve findings --by "   "', 1),
+        # --- tirlakli `--by` bir DEGERDIR, bayrak degil (B3) ------------
+        ('thesis:approve findings --comment "--by"', 1),
+        ('thesis:approve findings --reason "a && --by b"', 1),
+        # --- kimlikli: gecmeli ------------------------------------------
+        ('thesis:approve findings --by "Dr. Danışman Adı"', 0),
+        ('thesis:approve findings --by="Dr. A"', 0),
+        ('thesis:approve findings --comment "x" --by "Dr. A"', 0),
+        # --- muafiyetler -------------------------------------------------
+        ("thesis:approve --list", 0),
+        ("thesis:approve --list      # kapinin durumunu ogren", 0),
+        ("thesis:approve findings --revoke", 0),
+        ('thesis:approve findings --revoke --by "Dr. A"', 0),
+        # --- zincirleme: ikinci cagrinin --by degeri birinciye TASMAMALI
+        ('thesis:approve a && thesis:approve b --by "Dr. A"', 1),
+        ('thesis:approve a --by "Dr. A" && thesis:approve b', 1),
+        # --- ilgisiz yuzeyler: gecmeli -----------------------------------
+        ("thesis:record research_questions", 0),
+        ("thesis:approvex findings --by", 0),
+        ("# thesis:approve findings", 0),
+        ('thesis:approve findings --by "Dr. #1"', 0),
+    ]
+    kacar = [
+        "%-52s -> %d (beklenen %d)" % (girdi, len(_kimliksiz_cagrilar("x", f"```\n{girdi}\n```")), beklenen)
+        for girdi, beklenen in ORNEKLER
+        if len(_kimliksiz_cagrilar("x", f"```\n{girdi}\n```")) != beklenen
+    ]
+    assert not kacar, "dedetleyici beklenenden sapti:\n  " + "\n  ".join(kacar)
+
+
+def test_kimlik_istemeyen_bayraklar_hazir() -> None:
+    """Muafiyetler ve `--by` GERCEKTEN parser'da tanimli olmalidir.
 
     `KIMLIK_ISTEMEYENLER` bir istisna listesi; liste yanlislikla
-    genislerse sessizce gercek bir acik yolu kapatir. Bu test her
-    istisnanin `build_parser()` tarafindan GERCEKTEN tanindigini
-    dogrular — yani muafiyet, kodu okuyanin sandigi sey degil,
-    AYRISTIRICININ bildirdigi seydir. Bayrak yeniden adlandirilirsa
-    muafiyet sessizce olmaz olmaz.
+    genislerse sessizce gercek bir acik yolu kapatir. `--by` ise
+    listenin disinda ama kuralin dayandigi anahtardir: yeniden
+    adlandirilirsa dedetleyici hicbir seyi bulmaz ve tum akislar
+    sessizce denetimsiz kalir. Ikisi de parser'a baglanir — yani
+    muafiyet, kodu okuyanin sandigi sey degil, AYRISTIRICININ
+    bildirdigi seydir.
     """
     from tools.atw.cli.main import build_parser
 
@@ -299,23 +478,34 @@ def test_kimlik_istemeyen_bayraklar_hazir(akislar: dict[str, str]) -> None:
         f"KIMLIK_ISTEMEYENLER'de parser'da tanimli olmayan bayrak: {yabanci}. "
         f"approve alt komutunda bulunanlar: {sorted(bilinen)}"
     )
+    assert "--by" in bilinen, (
+        "`--by` artik approve alt komutunda degil. Bu kuralin dayandigi "
+        "anahtar budur; ad degistiyse `_bayrak_degeri` de guncellenmeli."
+    )
 
 
 def test_akis_taramasi_bos_cikmaz(akislar: dict[str, str]) -> None:
-    """Kontrol: tarama gercekten kod blogu OKUYOR.
+    """Kontrol: tarama BOS KALMIYOR (kapsam olcumu).
 
-    Yukaridaki test, hicbir akis dosyasi kod blogu icermeseydi de
-    yesil kalirdi: bos tarama hatasizdir. Bu test denetimin KAPSAMINI
-    olcer — en az bir akis dosyasinda `thesis:approve` gecsi KOD
-    BLOGUNDA bulunmali.
+    Yukaridaki kural, hicbir akis dosyasi kod blogu icermeseydi de
+    yesil kalirdi: bos tarama hatasizdir. Bu test DENETLEYICININ
+    KENDI cikti sayisini olcer — en az bir akis dosyasinda bir
+    `thesis:approve` cagrisi taninmali.
+
+    Alt dize degil, dedetleyici olculur: boylece bu nöbetci de
+    ayristiriciyla ayni yonde sessizlesmez. Iki testin isi FARKLIDIR:
+    `test_denetleyici_ornekleri` "dedetleyici dogru mu" diye sorar
+    (elle yazilmis beklenislerle), bu test "kapsam var mi" diye.
     """
     gecen = [
         ad
         for ad, metin in akislar.items()
-        if any("thesis:approve" in s for _, s in _kod_bloklari(metin))
+        if any(_cagrilari(satir) for _, satir in _kod_bloklari(metin))
     ]
     assert gecen, (
-        "Hicbir akis dosyasinda kod blogu icinde `thesis:approve` yok. "
-        "`test_akislarda_onay_cagrisi_kimlik_tasiyor` bos liste uzerinde "
-        "yesil kalir ve gercek bir belge ihlalini yakalayamaz."
+        "Hicbir akis dosyasinda kod blogu icinde `thesis:approve` cagrisi "
+        "TANINMADI. `test_akislarda_onay_cagrisi_kimlik_tasiyor` bos liste "
+        "uzerinde yesil kalir ve gercek bir belge ihlalini yakalayamaz. "
+        "Once `test_denetleyici_ornekleri`yi calistirin: ayristirici mi "
+        "koptu, kapsam mi kayboldu?"
     )
