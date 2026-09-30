@@ -80,7 +80,7 @@ Ayrıntı: `workflows/discussion.md`
 ## Kapıyı aç
 
 ```bash
-thesis:approve findings
+thesis:approve findings --by "Dr. Danışman Adı"
 ```
 
 Kapı hazırlığı: `findings_registry` ve `claims_registry` dolu olmalıdır.

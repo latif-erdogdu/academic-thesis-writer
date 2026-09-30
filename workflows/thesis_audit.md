@@ -92,7 +92,7 @@ Denetim tamamlandıktan sonra önceliklendirilmiş tabloyu
 ```bash
 thesis:audit --type all
 #   → 🔴 bulgu var mı? düzelt, sonra yine denetle
-thesis:approve final_thesis
+thesis:approve final_thesis --by "Dr. Danışman Adı"
 ```
 
 `final_thesis` en katı kapıdır: `approval.py` içinde bütünlük denetimi

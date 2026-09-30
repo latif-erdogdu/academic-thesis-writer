@@ -17,58 +17,60 @@ Kanonik sözleşme: ``references/approval_gates.md``
   §8 eşzamanlılık / atomik yazım
   §9 sınırlamalar
 
-Neden burada kırmızı testler var
---------------------------------
-Bu testler **spec'e göre** yazıldı, mevcut uygulamaya göre DEĞİL. Spec ile
-çelişen bir davranış varsa (``references/approval_gates.md``: "Kod ile bu
-doküman çelişirse **kod yanlıştır****) test kırmızı bırakılır ve ilgili
-testin başlığında hangi maddenin ihlal edildiği yazılıdır. Kırmızı olmak bir
-test hatası DEĞİL, kapatılmamış sızma yüzeyinin kanıtıdır.
+Kırmızı test yok — ve bu bir tesadüf değil
+--------------------------------------------
+Bu dosya başlangıçta **kırmızı yazıldı**: testler spec'e göre yazıldı,
+mevcut uygulamaya göre değil. Spec ile çelişen bir davranış varsa
+(``references/approval_gates.md``: "Kod ile bu doküman çelişirse **kod
+yanlıştır**") test kırmızı bırakılır ve ilgili testin başlığında hangi
+maddenin ihlal edildiği yazılıdır. Kırmızı olmak bir test hatası DEĞİL,
+kapatılmamış sızma yüzeyinin kanıtıydı.
 
-Bilinen kırmızı davranışlar ve dayandıkları maddeler:
+Aşağıdaki tablo o anda **kırmızı** olan testleri ve kapatılma yolunu
+gösterir. Bugün 66 senaryonun tamamı yeşildir; tablo bir "bilinen açık"
+listesi DEĞİL, bir **çözüm kaydıdır**.
 
-============================================  ==========================
-Kırmızı test                                 İhlal edilen madde
-============================================  ==========================
-``test_ozet_kapi_sifir_bypass[rq]``         §4 "on_kosul = önkoşul"
-``test_bos_registry_ile_*`` (5)              §4 aynı
-``test_eksik_alanli_kayit_ile_*``            §4.1 aynı
-``test_metni_olmayan_bolum_ile_*``            §4.7 aynı
-``test_ret_sonrasi_on_kosul_*``              §6 "önkoşul sağlanana kadar"
-``test_ret_baglantili_kapilari_kapatir``     §3 "geçerli onay"
-``test_onaydan_sonra_kritik_denetim_*``      §5 "denetim de tazeliğe dâhil"
-``test_cli_gerekesiz_ret_reddedilir``        §6 CLI yüzeyi eksik
-============================================  ==========================
+===========================================  ==========================  ==========================
+Kırmızı test                                 İhlal edilen madde         Kapatıldı
+===========================================  ==========================  ==========================
+``test_ozet_kapi_sifir_bypass[rq]``         §4 "on_kosul = önkoşul"    `onay_ver` hazırlığı
+                                                                    zorlar
+``test_bos_registry_ile_*`` (5)              §4 aynı                   `_registry_hazir`
+``test_eksik_alanli_kayit_ile_*``            §4.1 aynı                 kayıt düzeyi şema
+                                                                    doğrulaması (§4.8)
+``test_metni_olmayan_bolum_ile_*``            §4.7 aynı                 `_bolumler_hazir`
+``test_ret_sonrasi_on_kosul_*``              §6 "önkoşul sağlanana      `onay_ver` her
+                                             kadar"                    çağrıda yeniden
+                                                                    doğrular
+``test_ret_baglantili_kapilari_kapatir``     §3 "geçerli onay"          `_bagimli_kapilari_
+                                                                    kapat`
+``test_onaydan_sonra_kritik_denetim_*``      §5 "denetim de tazeliğe    `audit_registry`
+                                             dâhil"                     kapsama alındı
+``test_cli_gerekesiz_ret_reddedilir``        §6 CLI yüzeyi eksik         `gerekce` zorunlu
+===========================================  ==========================  ==========================
 
-Gerekçe: ``onay_ver`` hazırlık denetimini bilerek CLI'da soruyor
-(``approval.py`` docstring'i), yani **kütüphane düzeyinde** önkoşul denetimi
-yoktur. CLI korur; ``approval.onay_ver`` çağıran bir ajan/kod korunmaz.
+Kırmızıyı silmek yerine kapatmak tercih edildi: test adı, ihlal edilen
+maddeyi ve kapatma yolunu taşıdığı için başka biri aynı açığı ararken
+doğru dosyayı bulur.
 
-Kurallar
---------
-* ``pytest.skip(allow_module_level=True)`` YOK, ``xfail`` YOK. Eksik bir
-  özellik "test toplanmadı" diye sessizce atlanmaz: ``_api()`` yardımcısı
-  eksik sembolü okunabilir bir assertion'a çevirir, böylece test dosyası
-  DÜZGÜN TOPLANIR ve gerçek bir assertion ile kırmızı olur.
-* Modül yalnızca ``import tools.atw.approval`` ile yüklenir; yeni API
-  adları modül üzerinden ``_api()`` ile çözülür, böylece bir yeniden adlandırma
-  toplama hatası değil görünür bir test hatası üretir.
-* Testler birbirinden bağımsızdır: her biri tek bir davranışı sınar.
+Çözülen spec ↔ şema uyuşmazlıkları
+----------------------------------
+Spec'te **yanlış alan adları** vardı. Uyuşmazlık köprülenmedi; spec gerçek
+şemaya uyduruldu (`approval_gates.md` §4.1-§4.4):
 
-Bilinen spec <-> sema uyuşmazlıkları (testlerde kasıtlı olarak köprülenir)
--------------------------------------------------------------------------
-1. §4.1 "her sorunun ``id``, ``question`` ve ``type`` alanı doludur" diyor;
-   ``schemas/research_question.json`` alanı ``text`` tutuyor. Testler bu
-   alana BULAŞMAZ — eksik alan denetimi iki kaynağın da ortak bildirdiği
-   ``type`` üzerinden yapılır.
-2. §4.4 ``basis_source_ids`` diyor; ``schemas/research_gap.json`` ise
-   ``evidence_ids`` (EVD-*) tutuyor ve ``additionalProperties: false``.
-   Fixture İKİ alanı da taşır ki spec'i okuyan uygulama da şemayı okuyan
-   uygulama da kırılmasın.
-3. §4.2 "her kayıt hangi soruyu (``rq_id``) taradığını ... belirtir" diyor;
-   ``schemas/search_run.json`` ``additionalProperties: false`` ve ``rq_id``
-   alanı YOK. Aynı köprü: yalnızca bellekteki (şemasız) fixture'de ``rq_id``
-   bulunur, diske yazılan (şemaya uyumlu) fixture'de bulunmaz.
+1. §4.1 ``question`` diyordu, ``schemas/research_question.json`` ``text``
+   tutuyor → spec ``text`` oldu.
+2. §4.4 ``basis_source_ids`` diyordu, ``schemas/research_gap.json``
+   ``supporting_source_ids`` tutuyor ve ``additionalProperties: false``
+   → spec ``supporting_source_ids`` oldu.
+3. §4.2 ``search_runs[].rq_id`` diyordu, ``schemas/search_run.json``
+   ``additionalProperties: false`` ve ``rq_id`` alanı YOK → spec'ten
+   ``rq_id`` iddiası çıkarıldı; kayıt "hangi soruyu taradığını" değil,
+   ``search_run`` şemasının zorunlu kıldığı alanları taşır.
+
+İkisi birden doğru değildi: spec'i okuyan uygulama şemaya aykırı veri
+üretir, şemayı okuyan uygulama spec'te olmayan alanı arar. Kaynak
+doğruluğu ilkesi gereği şema kazanır, spec düzeltilir.
 """
 from __future__ import annotations
 
@@ -85,7 +87,7 @@ from typing import Any, Callable
 import pytest
 
 import tools.atw.approval as kapi
-from tools.atw.state import APPROVAL_GATES, empty_state
+from tools.atw.state import APPROVAL_GATES, empty_state, validate_state
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -1218,6 +1220,231 @@ def test_basarisiz_islem_durumu_kismi_degistirmez(ad: str, islem: Callable) -> N
     assert json.dumps(durum, ensure_ascii=False, sort_keys=True) == onceki, (
         f"{ad}: başarısız işlem durumu kısmen değiştirdi"
     )
+
+
+# --- 11b) onay kaydının kimliği: anonim onay engellenir ---------------------
+
+#: `onay_ver`/`onay_reddet` kaydı yazmadan önce reddetmesi gereken çağrılar.
+#: `None` = argüman hiç verilmemiş; kalanları boş veya yalnız boşluk.
+_ANONIM_GIRDILERI: tuple[Any, ...] = (None, "", "   ", "\t\n")
+
+
+@pytest.mark.parametrize("girdi", _ANONIM_GIRDILERI, ids=repr)
+def test_onay_ver_anonim_karar_yazmaz(girdi: Any) -> None:
+    """AJAN KENDİ ONAYINI YAZAMAZ — en temel sızma testi.
+
+    Onaylayan verilmeden kapı açılırsa "kim onayladı" sorusunun cevabı
+    `null` olur ve kayıt hiçbir insana atfedilemez. Onay zinciri böylece
+    denetimsiz kalır: sistem, kendi ürettiği içeriği kendi onaylar.
+
+    Bu test olmadan `approved_by` alanı isimsiz bir konfor alanıdır:
+    dolu görünür, ama karşılamadığı tek soru "bunu kim yaptı" sorusudur.
+    """
+    durum = _dolu_durum()
+    onceki = json.dumps(durum["human_approvals"], sort_keys=True)
+
+    with pytest.raises(kapi.OnayHatasi):
+        kapi.onay_ver(durum, "research_question", onaylayan=girdi)
+
+    assert json.dumps(durum["human_approvals"], sort_keys=True) == onceki, (
+        "başarısız onay durumu değiştirdi — kısmi yazım"
+    )
+    assert kapi.kapi_acik_mi(durum, "research_question") is False
+
+
+@pytest.mark.parametrize("girdi", _ANONIM_GIRDILERI, ids=repr)
+def test_onay_reddet_anonim_karar_yazmaz(girdi: Any) -> None:
+    """Ret de bir karardır ve kararı vereni taşır.
+
+    Ret kaydı kapı açmaz; ama gerekçesi "kimi dinlemedik" sorusunu
+    yanıtlar. Anonim ret, itirazın hangi tarafa yapıldığını yok eder.
+    """
+    durum = _dolu_durum()
+    onceki = json.dumps(durum["human_approvals"], sort_keys=True)
+
+    with pytest.raises(kapi.OnayHatasi):
+        kapi.onay_reddet(
+            durum, "research_question", gerekce="yetersiz", onaylayan=girdi
+        )
+
+    assert json.dumps(durum["human_approvals"], sort_keys=True) == onceki
+
+
+def test_basarili_kayitta_approved_by_asla_null_degildir() -> None:
+    """Regresyon: yazılan kaydın kendisi denetlenir.
+
+    Yukarıdaki testler "hata fırlatıldı" diye durur; burada **yazılan**
+    kayıt denetlenir. Şema `null`'a izin verse de doğrulanabilir bir onay
+    kaydı asla kimliksiz olmamalıdır.
+    """
+    durum = _dolu_durum()
+    kapi.onay_ver(durum, "research_question", onaylayan=DANISMAN)
+
+    kayit = kapi._kayit(durum, "research_question")
+    assert kayit["approved_by"] == DANISMAN
+    assert kayit["approved_by"] is not None
+
+
+def test_anonim_onay_denetim_kaydi_yse_de_reddedilir() -> None:
+    """Denetim temiz olmak onayı meşrulaştırmaz.
+
+    Spec §1'in "denetim geçmesi onay değildir" ilkesinin kimlik tarafındaki
+    karşılığıdır: denetim veriyi *doğrular*, kimliği yerine koyamaz.
+    """
+    durum = _dolu_durum()
+    durum["audit_registry"] = [
+        {
+            "id": "AUD-001",
+            "audit_type": "citation",
+            "status": "clean",
+            "findings": [],
+            "run_at": "2026-01-01T00:00:00+00:00",
+        }
+    ]
+    with pytest.raises(kapi.OnayHatasi):
+        kapi.onay_ver(durum, "research_question")
+
+
+def test_geri_almada_aktor_zorunlu_degil() -> None:
+    """Bilinçli muafiyet: geri almada aktör zorunlu DEĞİLDİR.
+
+    Gerekçe: geri alma kapıyı **kapatır**. Güvenlik yönü "daha az izin
+    ver" yönüdür; onay vermekten farklı olarak zorlama burada yalnızca
+    geri almayı zorlaştırır, kazancı yoktur. Olay günlüğü `aktör: null`
+    yazar, yani kaybolan bilgi teşhis zincirinde kalır.
+
+    Bu test muafiyeti sabitler. Kaldırmak isteyen biri önce "geri alma da
+    onay gibi bir karardır" argümanını çürütmek zorundadır.
+    """
+    durum = _dolu_durum()
+    kapi.onay_ver(durum, "research_question", onaylayan=DANISMAN)
+    assert kapi.kapi_acik_mi(durum, "research_question") is True
+
+    kapi.onay_geri_al(durum, "research_question")
+    assert kapi.kapi_acik_mi(durum, "research_question") is False
+
+
+# --- 11b-şema) ikinci savunma hattı: şema da kimliği zorlar ---------------
+
+def _onay_kaydi(gecerli: bool, kimlik: Any) -> dict:
+    """`approved_by` alanı kurcalanmış tek bir onay kaydı üretir."""
+    return {
+        "approved": gecerli,
+        "revision": 2,
+        "approved_by": kimlik,
+        "approved_at": "2026-01-02T00:00:00+00:00",
+        "content_hash": "sha256:" + "a" * 16,
+        "comment": None,
+        "rejection_reason": None,
+        "audit_refs": [],
+    }
+
+
+def _semada_gecerli(kayit: dict) -> tuple[bool, str]:
+    """Kayıt, üretimdeki `validate_state` üzerinden geçiyor mu?
+
+    Doğrudan `approval.json` yüklenmez: sözleşme, TEK doğrulayıcının
+    (`validate_state`) yaptığını kabul etmektir. `$ref` zinciri
+    (`thesis_state.json` → `$defs/kapi` → `approval.json`) elle
+    kurulamaz; test onu zincirin kendisi üzerinden dener.
+    """
+    durum = _dolu_durum()
+    durum["human_approvals"]["research_question"] = kayit
+    hatalar = validate_state(durum)
+    return (not hatalar), "; ".join(hatalar)
+
+
+#: `approved: true` iken reddedilmesi gereken kimlikler.
+_KIMLIKSIZ: tuple[Any, ...] = (None, "", "   ")
+
+
+@pytest.mark.parametrize("kimlik", _KIMLIKSIZ, ids=repr)
+def test_sema_kimliksiz_onayi_reddeder(kimlik: Any) -> None:
+    """RED: `approved: true` iken `approved_by` boş olamaz.
+
+    Bu, kod tarafındaki zorlamanın ŞEMA karşılığıdır. Kod yolu
+    (`onay_ver`) zaten reddediyor; bu test, dosya elle düzenlendiğinde
+    veya başka bir yazıcı ürettiğinde de reddedildiğini kanıtlar.
+    """
+    gecerli, hata = _semada_gecerli(_onay_kaydi(True, kimlik))
+    assert not gecerli, (
+        f"approved=true iken approved_by={kimlik!r} sema tarafindan "
+        f"kabul edildi. Kimliksiz onay kaydi dogrulanabilmemeli."
+    )
+    assert "approved_by" in hata, f"hata yanlis alani gosteriyor: {hata}"
+
+
+def test_sema_gecerli_onayi_kabul_eder() -> None:
+    """Kontrol: dolu kimlikli kayıt GEÇERLİ kalmalı.
+
+    Sıkılaştırma `minLength` ile sınırlıdır; uzun veya Türkçe karakterli
+    adlar reddedilmemelidir. Bu kontrol olmadan, `pattern` gibi aşırı bir
+    kısıtla geçerli onaylar da kırılabilirdi.
+    """
+    gecerli, hata = _semada_gecerli(_onay_kaydi(True, DANISMAN))
+    assert gecerli, f"gecerli onay kaydi reddedildi: {hata}"
+
+
+def test_sema_geri_alma_kaydini_kabul_eder() -> None:
+    """Kontrol (asiri zorlama yok): geri alma kaydı `null` taşıyabilir.
+
+    `onay_geri_al` `approved_by: None` yazar; kimlik onayla birlikte
+    silinir. Sema `null`'a genel olarak serbest kalmalıdır, yoksa geri
+    alma sessizce bozulur — ve iki hattın zıt yönlerde sıkılaştırılması
+    "her yerde zorunlu" hatası üretir.
+
+    Bu test 11b'deki muafiyetin ŞEMA karşılığıdır.
+    """
+    gecerli, hata = _semada_gecerli(_onay_kaydi(False, None))
+    assert gecerli, f"geri alma kaydi reddedildi: {hata}"
+
+
+# --- 11c) CLI yüzeyinde anonim onay ---------------------------------------
+
+def test_cli_onaylayan_bayragi_olmadan_kapi_acmaz(tmp_path: Path) -> None:
+    """CLI düzeyinde `--by` verilmeden kapı açılmaz.
+
+    `onay_ver`'in zorlaması tek başına yetmezdi — CLI hatayı yutup çıkış
+    kodu 0 döndürseydi, otomasyon kapının açıldığını sanırdı. Burada
+    **kullanıcıya anlaşılır hata** verilmesi ve dosyanın
+    DEĞİŞMEMEŞİ denetlenir.
+    """
+    durum = _dolu_durum()
+    yol = _dosyaya_yaz(tmp_path, durum)
+    onceki = yol.read_bytes()
+
+    sonuc = _cli(tmp_path, "approve", "research_question")
+    cikti = sonuc.stdout + sonuc.stderr
+
+    assert sonuc.returncode == 1, (
+        f"başarısız onay CIKIS_SORUN(=1) dönmeliydi, {sonuc.returncode} döndü.\n"
+        f"Kullanıcı hata mesajını görmeli.\n{cikti}"
+    )
+    assert _onaylayan_bayragi()[0].lstrip("-") in cikti.lower() or "by" in cikti.lower(), (
+        f"hata mesajı hangi bayrağın gerektiğini söylemiyor:\n{cikti}"
+    )
+    assert yol.read_bytes() == onceki, "dosya değişti — kısmi yazım"
+
+
+def test_cli_bos_onaylayan_yine_kapi_acmaz(tmp_path: Path) -> None:
+    """`--by "   "` verilmiş olması kimlik sayılmaz.
+
+    Bayrağı `required=True` yapmak bu yolu kapatmazdı; boş dize sözleşmeyi
+    tutardı. Asıl kapatma koddadır, dolayısıyla burada bayrağın ADI
+    `_onaylayan_bayragi()` ile keşfedilir — ad değişse test kırılmaz.
+    """
+    durum = _dolu_durum()
+    yol = _dosyaya_yaz(tmp_path, durum)
+    onceki = yol.read_bytes()
+
+    bayrak = _onaylayan_bayragi()[0]
+    sonuc = _cli(tmp_path, "approve", "research_question", bayrak, "   ")
+
+    assert sonuc.returncode == 1, (
+        f"boş onaylayan reddedilmeliydi, {sonuc.returncode} döndü.\n"
+        f"{sonuc.stdout}\n{sonuc.stderr}"
+    )
+    assert yol.read_bytes() == onceki, "dosya değişti — kısmi yazım"
 
 
 # --- 12) META: sıfır atlatma özeti -----------------------------------------

@@ -1539,8 +1539,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_approve.add_argument(
         "--by",
-        help="Kararı veren insanın adı. Onay kaydının `approved_by` "
-             "alanına yazılır; ajan kendi onayını yazamaz",
+        help=(
+            "Kararı veren insanın adı — onay ve ret için ZORUNLUDUR. "
+            "Onay kaydının `approved_by` alanına yazılır; ajan kendi "
+            "onayını yazamaz. Boş bırakılırsa kapı açılmaz. "
+            "`--revoke` ve `--list` kimlik istemez."
+        ),
     )
     p_approve.add_argument(
         "--comment",

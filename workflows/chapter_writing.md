@@ -113,6 +113,6 @@ komutta değil.
 
 ```bash
 thesis:audit --type all
-thesis:approve final_thesis
+thesis:approve final_thesis --by "Dr. Danışman Adı"
 thesis:export --format docx
 ```

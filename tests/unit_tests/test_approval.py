@@ -32,6 +32,11 @@ def _kapili_durum() -> dict:
 #: `final_thesis` kapısı beş denetim turunun da geçmiş olmasını ister
 #: (spec §1: "denetim geçmesi onay değildir, ikisi de sağlanmalıdır").
 #: Test fixture'ları gerçekçi olsun diye burada temiz kayıtlar bulunur.
+#: Kurgusal danisman adi. `onay_ver` onaylayan zorunlu kildigi icin
+#: testler de bir insan adi gecmek ZORUNDA; kimliksiz onay uretmek
+#: icin ozel bir yol birakilmaz (bkz. `test_kapi_guvenligi.py` 11b).
+DANISMAN = "Dr. Danışman Adı"
+
 _DENETIM_TURLERI = ("citation", "methodology", "consistency", "integrity", "evidence")
 
 
@@ -166,7 +171,7 @@ def test_kapi_acma_durumu_degistirir():
     durum = _akis_durumu()
     for kapi in APPROVAL_GATES:
         durum["human_approvals"][kapi] = False
-    onay_ver(durum, "research_question")
+    onay_ver(durum, "research_question", onaylayan=DANISMAN)
     assert acik_mi(durum, "research_question")
     assert kapali_olanlar(durum) == list(APPROVAL_GATES[1:])
 
@@ -177,6 +182,11 @@ def test_onceki_kapi_kapaliyken_sonraki_kapi_ilan_edilemez():
     durum = _akis_durumu()
     for kapi in APPROVAL_GATES:
         durum["human_approvals"][kapi] = False
+    # Onaylayan bilincli olarak VERILMEZ: bu test denetim SIRASINI
+    # sabitler. Kimlik denetimi bagimlilik denetiminden sonra gelir,
+    # dolayisiyla beklenen hata bagimlilik hatasi olmalidir; erken
+    # konulsaydi bu test 'sira atlandi' yerine 'kim onayladi' olardi
+    # ve gercek atlatma yolunu olcmeyi kaybederdi.
     with pytest.raises(OnayHatasi, match="research_question"):
         onay_ver(durum, "search_strategy")
 
@@ -187,7 +197,7 @@ def test_sirayla_acilabilir():
         if kapi == "final_thesis":
             # Teslim kapisi oncesinde bes denetim de calismis olmali.
             durum["audit_registry"] = _temiz_denetimler()
-        onay_ver(durum, kapi)
+        onay_ver(durum, kapi, onaylayan=DANISMAN)
     assert acik_olanlar(durum) == list(APPROVAL_GATES)
 
 

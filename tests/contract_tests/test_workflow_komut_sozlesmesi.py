@@ -27,6 +27,9 @@ bir akış dosyası eklendiğinde de aynı ölçüt geçerli olur:
      hariç: `<...>` yer tutucular ve `thesis_state.json`).
   4. Yedi kapının adı ve SIRASI `thesis_creation.md` içinde bulunur; akış
      zinciri tek yerden okunabilir olmalı.
+  5. Kod bloğundaki her `thesis:approve` çağrısı onaylayan taşır (`--by`);
+     yalnız sorgu (`--list`) ve geri alma (`--revoke`) muaftır. Kimliksiz
+     onay `onay_ver` tarafından reddedilir, yani bu satırlar çalışmaz.
 """
 from __future__ import annotations
 
@@ -175,4 +178,144 @@ def test_ana_akis_yedi_kapiyi_sirasiyla_belgiler() -> None:
     assert konumlar == sorted(konumlar), (
         "Kapılar yanlış sırada listelenmiş. Akış sırası şu: "
         + " -> ".join(APPROVAL_GATES)
+    )
+
+
+# --- 5. akislardaki onay cagrilari kimlik tasiyor mu ----------------------
+
+
+def _kod_bloklari(metin: str) -> list[tuple[int, str]]:
+    """Markdown kod bloklarindaki satirlari `(satir_no, metin)` dondurur.
+
+    Kapali uc backtick isaretleri arasini alir. Blok DILI (bash/sh/
+    console) ayrimi yapilmaz: bu testin konusu dil degil
+    kopyalanabilirlik.
+    """
+    kapali = False
+    cikti: list[tuple[int, str]] = []
+    for n, satir in enumerate(metin.splitlines(), 1):
+        if satir.lstrip().startswith("```"):
+            kapali = not kapali
+            continue
+        if kapali:
+            cikti.append((n, satir))
+    return cikti
+
+
+#: `--by` istemeyen alt komutlar ve muafiyet gerekceleri. Gerekce
+#: sozlesmesi degil, kararin GEREKCESIDIR: yarin kapiyi kapatma
+#: yonu degisse muafiyet de birlikte dusunmelidir.
+KIMLIK_ISTEMEYENLER: dict[str, str] = {
+    "--list": "sorgudur, karar degildir, durumu degistirmez",
+    "--revoke": "kapiyi KAPATIR; geri alma muafiyeti bilincli (bkz. onay_geri_al)",
+}
+
+#: `thesis:approve` ve ardından gelen komut GOVDESI. Govde, satir sonuna
+#: kadar uzanir; yorum (`#`) ve boru (`|`) isaretlerinde kesilir, cunku
+#: onlar komutun parcasi degildir. Bayraklar kapi adindan SONRA da
+#: gelebilir (`thesis:approve findings --by "..."`), bu yuzden sabit bir
+#: "bayraklar kapi adindan once" duzeni varsayilmaz.
+_ONAY_CAGRISI = re.compile(r"thesis:approve(?P<govde>\s+[^#|]*)")
+
+#: Govdeden `--` ile baslayan her belirteci dondurur (degerleri haric).
+_BAYRAK = re.compile(r"--[a-z][a-z-]*")
+
+
+def _kimliksiz_cagrilar(ad: str, metin: str) -> list[str]:
+    """Bu akista kimliksiz onay cagrilarini `dosya:satir: metin` doner.
+
+    `akislar` fixture'i dosyayi ZATEN okunmus halde verir; ikinci kez
+    okumak ayni dosyanin iki farkli surumunu denetlemek anlamina
+    gelirdi. Bu yuzden burada yalniz metin uzerinde calisilir.
+
+    Govdede kapi adi aranir: `--` ile baslamayan ilk belirteci kapı
+    sayariz. Boylece `thesis:approve --list` gibi YALNIZ bayrakli bir
+    sorgunun kapisi yoktur ve zaten karar degildir; `--by` aranmaz.
+    """
+    bulunan: list[str] = []
+    for n, satir in _kod_bloklari(metin):
+        es = _ONAY_CAGRISI.search(satir)
+        if es is None:
+            continue
+        govde = es.group("govde")
+        bayraklar = set(_BAYRAK.findall(govde))
+        if "--by" in bayraklar:
+            continue
+        belirtecler = govde.split()
+        kapi = next((t for t in belirtecler if not t.startswith("-")), None)
+        if kapi is None:
+            continue                       # yalniz bayrak: sorgu, karar degil
+        if bayraklar & set(KIMLIK_ISTEMEYENLER):
+            continue
+        bulunan.append("%s:%d: %s" % (ad, n, satir.strip()))
+    return bulunan
+
+
+def test_akislarda_onay_cagrisi_kimlik_tasiyor(akislar: dict[str, str]) -> None:
+    """Kopyalanabilir her `thesis:approve` cagrisi `--by` tasimalidir.
+
+    Bu olmadan `onay_ver`in zorlamasi kullaniciya ilk hatayi CALISTIRMA
+    aninda gosterir: akis dokumani calistirilamaz hale gelir ve hata
+    "belge hatasi" degil "yazilim hatasi" gibi gorunur.
+    """
+    supheli: list[str] = []
+    for ad, metin in akislar.items():
+        supheli.extend(_kimliksiz_cagrilar(ad, metin))
+
+    assert not supheli, (
+        "Kod blogunda `--by` vermeyen onay cagrisi var. `onay_ver` onaylayan "
+        "zorunlu kiliyor; bu satirlar calistirildiginda hata verir:\n  "
+        + "\n  ".join(supheli)
+    )
+    assert akislar, "akislar fixture'i bos — tarama anlamsizlasir"
+
+
+def test_kimlik_istemeyen_bayraklar_hazir(akislar: dict[str, str]) -> None:
+    """Kontrol: muafiyetler yalniz VAR OLMAYAN bayraklar icin gecerli.
+
+    `KIMLIK_ISTEMEYENLER` bir istisna listesi; liste yanlislikla
+    genislerse sessizce gercek bir acik yolu kapatir. Bu test her
+    istisnanin `build_parser()` tarafindan GERCEKTEN tanindigini
+    dogrular — yani muafiyet, kodu okuyanin sandigi sey degil,
+    AYRISTIRICININ bildirdigi seydir. Bayrak yeniden adlandirilirsa
+    muafiyet sessizce olmaz olmaz.
+    """
+    from tools.atw.cli.main import build_parser
+
+    alt = None
+    for aksiyon in build_parser()._actions:
+        secenekler = getattr(aksiyon, "choices", None)
+        if isinstance(secenekler, dict) and "approve" in secenekler:
+            alt = secenekler["approve"]
+            break
+    assert alt is not None, "build_parser() 'approve' alt komutunu uretmiyor"
+
+    bilinen: set[str] = set()
+    for aksiyon in alt._actions:
+        bilinen.update(aksiyon.option_strings)
+
+    yabanci = sorted(set(KIMLIK_ISTEMEYENLER) - bilinen)
+    assert not yabanci, (
+        f"KIMLIK_ISTEMEYENLER'de parser'da tanimli olmayan bayrak: {yabanci}. "
+        f"approve alt komutunda bulunanlar: {sorted(bilinen)}"
+    )
+
+
+def test_akis_taramasi_bos_cikmaz(akislar: dict[str, str]) -> None:
+    """Kontrol: tarama gercekten kod blogu OKUYOR.
+
+    Yukaridaki test, hicbir akis dosyasi kod blogu icermeseydi de
+    yesil kalirdi: bos tarama hatasizdir. Bu test denetimin KAPSAMINI
+    olcer — en az bir akis dosyasinda `thesis:approve` gecsi KOD
+    BLOGUNDA bulunmali.
+    """
+    gecen = [
+        ad
+        for ad, metin in akislar.items()
+        if any("thesis:approve" in s for _, s in _kod_bloklari(metin))
+    ]
+    assert gecen, (
+        "Hicbir akis dosyasinda kod blogu icinde `thesis:approve` yok. "
+        "`test_akislarda_onay_cagrisi_kimlik_tasiyor` bos liste uzerinde "
+        "yesil kalir ve gercek bir belge ihlalini yakalayamaz."
     )

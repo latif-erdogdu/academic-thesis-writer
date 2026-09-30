@@ -596,11 +596,12 @@ def onay_ver(
 ) -> dict[str, Any]:
     """Kapiyi acar ve durumu gunceller.
 
-    Uc kosulun HEPPSI burada zorlanir; kapiyi acmanin tek yolu budur:
+    Dort kosulun HEPPSI burada zorlanir; kapiyi acmanin tek yolu budur:
 
       1. bagimlilik -> dogrudan bagimli kapilar acik ve taze mi
       2. hazirlik   -> on kosul registry'leri dolu mu
       3. denetim    -> kapinin dayandigi denetim gecmis ve temiz mi
+      4. kimlik     -> karari veren kisi belli mi
 
     Neden CLI'da degil de burada
     --------------------------
@@ -614,9 +615,21 @@ def onay_ver(
     `final_thesis` YOKTUR, cunku bu iki kapinin ciktisi kendi
     arklarindaki komutla uretilir. Bkz. `GATE_HAZIRLIK` yorumu.
 
-    `onaylayan` verilmezse kayit `approved_by: null` ile yazilir. Bu,
-    gerekli degil ama izinlidir: dosya elle duzenlenmis olabilir ve
-    `kapi_detay` bunu `attested` alaninda gosterir.
+    KIMLIK ZORUNLUDUR
+    -----------------
+    `onaylayan` verilmezse kapI ACILMAZ. Aksi halde kayit
+    `approved_by: null` ile yazilir ve "bu onayi kim verdi" sorusunun
+    cevabi kaybolur; sistem kendi urettigi icerigi kendi onaylamis
+    sayilir. Bu, sozlesmenin merkezindeki ilkedir: **ajan kendi
+    onayini yazamaz.**
+
+    Bosluk ve yalnizca bosluk iceren degerler de kimlik sayilmaz;
+    `temizle()` kirpildigi icin denetleme kirpma SONRASI yapilir ve
+    kayda giren deger dogrulanan degerin kendisidir.
+
+    Muafiyet: `onay_geri_al` icin aktzor gerekli DEGILDIR. Geri alma
+    kapiyi kapatir, yani guvenlik yonu "daha az izin ver" yonudur.
+    Bkz. `onay_geri_al`.
     """
     if kapi not in GATE_KOSULLARI:
         raise ValueError(f"bilinmeyen onay kapisi: {kapi}")
@@ -639,6 +652,15 @@ def onay_ver(
             f"'{kapi}' kapisi acilamiyor: denetim gecmemiş -> "
             + "; ".join(denetim_engel)
         )
+    # Kimlik denetimi BILINCLI OLARAK en sona konur: yukaridaki
+    # kosullardan biri ihlal edildiyse o kosulun adi soylenmelidir.
+    temiz_onaylayan = temizle(onaylayan, UZUNLUK_SINIRI["approved_by"])
+    if not temiz_onaylayan:
+        raise OnayHatasi(
+            f"'{kapi}' kapisi icin onaylayan zorunludur: karari veren "
+            "kisinin adi yazilmali (CLI: --by \"Ad Soyad\"). Kim onayladi "
+            "bilinmeden onay kaydi onay zincirini denetimsiz birakir."
+        )
 
     onceki = _kayit(durum, kapi)
     an = saat or datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -648,7 +670,7 @@ def onay_ver(
     durum.setdefault("human_approvals", {})[kapi] = {
         "approved": True,
         "revision": int(onceki.get("revision") or 0) + 1,
-        "approved_by": temizle(onaylayan, UZUNLUK_SINIRI["approved_by"]),
+        "approved_by": temiz_onaylayan,
         "approved_at": an,
         "content_hash": ozet,
         "comment": temizle(yorum, UZUNLUK_SINIRI["comment"]),
@@ -687,6 +709,10 @@ def onay_reddet(
     `on_kosul` saglanana kadar yeniden acilamaz. Icerik ozeti yazilmaz
     (kapı acık degildi); ret gerekcesi neyin duzeltilmesi gerektigini
     soyler ve `references/approval_gates.md` ile ayni sorumluluktadir.
+
+    Ret de bir KARARDIR ve karari vereni tasir: gerekce "kimi dinlemedik"
+    sorusunu yanitlar, anonim ret bu zinciri koparir. Bu yuzden
+    `onaylayan` ret icin de zorunludur (bkz. `onay_ver`).
     """
     if kapi not in GATE_KOSULLARI:
         raise ValueError(f"bilinmeyen onay kapisi: {kapi}")
@@ -696,13 +722,20 @@ def onay_reddet(
             f"'{kapi}' kapisi icin ret gerekcesi zorunludur: "
             "hangi alanin duzeltilmesi gerektigi soylenmelidir."
         )
+    temiz_onaylayan = temizle(onaylayan, UZUNLUK_SINIRI["approved_by"])
+    if not temiz_onaylayan:
+        raise OnayHatasi(
+            f"'{kapi}' kapisi icin ret eden zorunludur: karari veren "
+            "kisinin adi yazilmali (CLI: --by \"Ad Soyad\"). Anonim ret, "
+            "itirazin kime yapildigini kaybetmektedir."
+        )
 
     onceki = _kayit(durum, kapi)
     an = saat or datetime.now(timezone.utc).isoformat(timespec="seconds")
     durum.setdefault("human_approvals", {})[kapi] = {
         "approved": False,
         "revision": int(onceki.get("revision") or 0) + 1,
-        "approved_by": temizle(onaylayan, UZUNLUK_SINIRI["approved_by"]),
+        "approved_by": temiz_onaylayan,
         "approved_at": an,
         "content_hash": None,
         "comment": temizle(yorum, UZUNLUK_SINIRI["comment"]),
@@ -729,6 +762,14 @@ def onay_geri_al(
     saat: str | None = None,
 ) -> dict[str, Any]:
     """Kapiyi kapatir ve ona bagli acik kapilari da kapatir.
+
+    NEDEN `onaylayan` PARAMETRESI YOK
+    -------------------------------
+    Geri alma kapiyi KAPATIR. Guvenlik yonu "daha az izin ver" yonudur;
+    onay vermekten farkli olarak burada zorlama yalnizca geri almayi
+    zorlastirir, kazanci yoktur. Kayit `approved_by: None` ile yazilir
+    cunku onaylayan kimligi onayla birlikte silinir. Bu BILINCLI bir
+    muafiyettir; `test_geri_almada_aktor_zorunlu_degil` onu sabitler.
 
     Bir onay geri alinirsa, ona dayanan onaylar da gecersizdir; aksi halde
     "methodology geri alindi ama final_thesis onayli" gibi durum olusur.

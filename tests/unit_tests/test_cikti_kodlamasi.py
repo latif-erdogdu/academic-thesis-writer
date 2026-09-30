@@ -211,7 +211,8 @@ def test_uctan_uca_cp1254_konsolunda_komutlar_calisir(tmp_path):
     assert "\u2705" in adimlar[1][2]
 
     # 3) Kapiyi ac.
-    calis("approve", "research_question")
+    # `--by` zorunludur: kim onayladi bilinmeden kapı acilmaz.
+    calis("approve", "research_question", "--by", "Danışma Kurulu Üyesi")
     assert "\u2705" in adimlar[2][2]
 
     # Depo kokune sizmis olmamali: `thesis new` asla orada calistirilmaz.

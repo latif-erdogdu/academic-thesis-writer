@@ -11,9 +11,10 @@ denetim** taşır. Bu bir eksik değil, tasarım: bölümleri dolduran
 `thesis:write` bu kapının arkasındadır; denetim `chapters`'a baksa ilk
 bölüm hiç yazılamazdı (dairesel bağımlılık).
 
-Bu yüzden metodoloji kayıtları **isteğe bağlı şema düzeyinde** durur ama
-tez inandırıcılığı için zorunludur. `thesis:audit --type methodology` boş
-metodolojiyi bulur.
+Bu yüzden metodoloji kayıtları **hazırlık denetimine tabi değildir**
+(kendi kapısının arkasındaki komutla yazıldıkları için), ama `thesis:record`
+yazarken şema denetiminden geçerler ve tez inandırıcılığı için zorunludur.
+`thesis:audit --type methodology` boş metodolojiyi bulur.
 
 ## Kayıtlar
 
@@ -24,7 +25,7 @@ thesis:record variables   --file <DEGISKENLER.json>
 thesis:record datasets    --file <VERI_KUMELERI.json>
 thesis:record analyses    --file <ANALIZLER.json>
 thesis:record statistics  --file <ISTATISTIKLER.json>
-thesis:approve methodology
+thesis:approve methodology --by "Dr. Danışman Adı"
 ```
 
 Şemalar: `schemas/variable.json`, `schemas/dataset.json`,

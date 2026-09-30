@@ -22,7 +22,7 @@
     "approved_by": {
       "type": ["string", "null"],
       "maxLength": 120,
-      "description": "Kararı veren insanın adı. Ajan kendi onayını yazamaz."
+      "description": "Kararı veren insanın adı. Ajan kendi onayını yazamaz. `null` yalnız `approved: false` iken (ret/geri alma) geçerlidir; olumlu kararda hem koda (`onay_ver`) hem aşağıdaki `allOf` dalına göre zorunludur."
     },
     "approved_at": {
       "type": ["string", "null"],
@@ -55,9 +55,23 @@
   },
   "allOf": [
     {
-      "comment": "Olumlu kararın üç alanı da bulunmalıdır. `null` olabilirler (kimlik bilinmiyorsa) ama KESİNLİKLE olmalıdırlar: eksik alan, kaydın elden geçirilerek yazıldığının işaretidir.",
+      "comment": "OLUMLU kararın üç alanı da bulunmalı ve KİMLİK boş olmamalıdır. `approved_by` yalnız olumlu kararda zorunludur; ret ve geri alma kaydında `null` kalabilir, çünkü kimlik onayla birlikte silinir. Kod tarafındaki karşılığı `tools/atw/approval.py:onay_ver` — şema yalnız YAZILMIŞ kaydı denetler, o kaydı yazan yolu denetlemez.",
       "if": { "properties": { "approved": { "const": true } }, "required": ["approved"] },
-      "then": { "required": ["approved_by", "approved_at", "content_hash"] }
+      "then": {
+        "required": ["approved_by", "approved_at", "content_hash"],
+        "properties": {
+          "approved_by": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Olumlu kararda zorunlu. `\\S` yalnız boşluk içeren adı eler; `onay_ver` de `temizle()` sonrası boş kalan adı reddeder."
+          },
+          "approved_at": {
+            "type": "string",
+            "description": "Olumlu kararda zorunlu: onayın anı bilinmeden kayıt, kararın ne zaman verildiğini söyleyemez."
+          }
+        }
+      }
     }
   ],
   "examples": [

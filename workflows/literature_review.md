@@ -57,7 +57,7 @@ kaynak hiçbir koşulda doğrulanmış sayılmaz.** Bu kaynaklar
 `tools/atw/write.py:haric_eden_kaynaklar` ile metinde kullanılamaz.
 
 ```bash
-thesis:approve source_set
+thesis:approve source_set --by "Dr. Danışman Adı"
 ```
 
 ## Adım 3 — Kanıt çıkarımı (isteğe bağlı ama önerilir)

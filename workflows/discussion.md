@@ -50,7 +50,7 @@ Zorunlu: `id`, `finding_ids`, `interpretation`.
 ## Kapı
 
 ```bash
-thesis:approve findings
+thesis:approve findings --by "Dr. Danışman Adı"
 ```
 
 Tartışma kayıtları `findings` kapısının **isteğe bağlı** girdisidir;

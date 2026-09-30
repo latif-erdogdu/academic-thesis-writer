@@ -99,15 +99,25 @@ def _onayli_oncekiler(depo: Path, kapi: str) -> dict:
     durum["findings_registry"] = [{"id": "FND-001", "rq_id": "RQ-001", "statement": "S",
                                    "evidence_ids": ["EVD-001"]}]
     for onceki in APPROVAL_GATES[: APPROVAL_GATES.index(kapi)]:
-        onay_ver(durum, onceki)
+        onay_ver(durum, onceki, onaylayan=DANISMAN)
     _yaz(depo, durum)
     return durum
 
 
+#: Kurgusal danisman adi; bkz. `test_approval.py` icin aciklama.
+DANISMAN = "Dr. Danışman Adı"
+
 # --- yardimcilar ------------------------------------------------------------
 
-def _ns(kapi=None, liste=False, geri_al=False) -> Namespace:
-    return Namespace(kapi=kapi, list=liste, revoke=geri_al)
+def _ns(kapi=None, liste=False, geri_al=False, by=DANISMAN) -> Namespace:
+    """`approve` komutunun argumanlarini taklit eder.
+
+    `by` varsayilandir CIFT AMACLI: hem CLI kullanimini taklit eder
+    hem de onaylayan zorunlulugunu butun testlere tek yerden yayar.
+    Kimliksiz onay uretebilmek icin `by=None` verilebilir, ancak bu
+    yalnizca kimligin REDDEDILMESINI konu alan testlerde yapilmalidir.
+    """
+    return Namespace(kapi=kapi, list=liste, revoke=geri_al, by=by)
 
 
 def _acik_mi(depo: Path, kapi: str) -> bool:

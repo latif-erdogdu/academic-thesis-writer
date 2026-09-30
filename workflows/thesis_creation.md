@@ -56,7 +56,7 @@ Soruları bir JSON dosyasına yazın ve kaydedin:
 
 ```bash
 thesis:record research_questions --file <SORULAR.json>
-thesis:approve research_question
+thesis:approve research_question --by "Dr. Danışman Adı"
 ```
 
 `chapter` alanını **boş bırakın**. `research_question.chapter → chapter`
@@ -70,7 +70,7 @@ Ayrıntı: `workflows/literature_review.md`
 
 ```bash
 thesis:search RQ-001 --pico "P: chukar I: reintroduction O: survival"
-thesis:approve search_strategy
+thesis:approve search_strategy --by "Dr. Danışman Adı"
 ```
 
 `thesis:search` `search_runs` registry'sini doldurur. Bilinmeyen bir RQ
@@ -82,7 +82,7 @@ verilirse **arama yapmaz ve reddeder**; sessizce boş sonuç üretmez.
 
 ```bash
 thesis:verify --all
-thesis:approve source_set
+thesis:approve source_set --by "Dr. Danışman Adı"
 ```
 
 `thesis:verify` her kaynağı Crossref + OpenAlex ile doğrular. Doğrulanmayan
@@ -103,7 +103,7 @@ doğrulanmış sayılmaz. `sources` dolmadan bu kapı açılmaz.
 
 ```bash
 thesis:record gap_registry --file <BOSLUKLAR.json>
-thesis:approve research_gap
+thesis:approve research_gap --by "Dr. Danışman Adı"
 ```
 
 `evidence_ids` en az bir kayıt içermelidir (`schemas/research_gap.json`).
@@ -118,7 +118,7 @@ thesis:record variables  --file <DEGISKENLER.json>
 thesis:record datasets   --file <VERI_KUMELERI.json>
 thesis:record analyses   --file <ANALIZLER.json>
 thesis:record statistics --file <ISTATISTIKLER.json>
-thesis:approve methodology
+thesis:approve methodology --by "Dr. Danışman Adı"
 ```
 
 ## Adım 6 — Bulgular ve iddialar (`findings`)
@@ -129,7 +129,7 @@ Ayrıntı: `workflows/findings.md`, `workflows/discussion.md`
 thesis:record findings_registry --file <BULGULAR.json>
 thesis:record claims_registry    --file <IDDIALAR.json>
 thesis:record discussion_registry --file <TARTISMA.json>
-thesis:approve findings
+thesis:approve findings --by "Dr. Danışman Adı"
 ```
 
 ## Adım 7 — Bölüm yazımı, denetim ve dışa aktarım (`final_thesis`)
@@ -140,7 +140,7 @@ Ayrıntı: `workflows/chapter_writing.md`, `workflows/thesis_audit.md`
 thesis:write CH-001 --rq RQ-001                      # brifing basar, durum değişmez
 thesis:write CH-001 --rq RQ-001 --file <BOLUM.json>  # ajanın yazdığı bölümü denetler
 thesis:audit --type all
-thesis:approve final_thesis
+thesis:approve final_thesis --by "Dr. Danışman Adı"
 thesis:export --format docx
 ```
 
@@ -148,13 +148,18 @@ thesis:export --format docx
 **değişmez**. Bu ayrım bilinçlidir: bölüm metnini `agents/writer.md` ajanı
 üretir, CLI yalnızca doğrular.
 
-`thesis:export` tek dosya üretir:
+`thesis:export` dosya üretir. `--format` verilmezse **iki** dosya yazılır:
 
 ```
-tez_<thesis_id>.md      (--format md)
-tez_<thesis_id>.docx    (--format docx)
-tez_<thesis_id>.pdf     (--format pdf)
+tez_<thesis_id>.md      (--format md)     ← varsayılan
+tez_<thesis_id>.docx    (--format docx)   ← varsayılan
+tez_<thesis_id>.pdf     (--format pdf)    ← ayrıca istenmeli
 ```
+
+Markdown, docx'ten önce yazılır: okunabilir metin kodla karşılaştırılabilir,
+Word çıktısı teslim edilebilir. PDF'in ayrıca istenmesi bilinçlidir —
+sistemde Unicode yazı tipi yoksa üretilemez ve bu durumda **hiçbir**
+dosya yazılmaz.
 
 Bölüm başına ayrı dosya **yoktur** ve `.bib` **üretilmez**; kaynakça
 belgenin içine gömülüdür. Ekler (appendix) bu sürümde dışa aktarılmaz:
